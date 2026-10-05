@@ -68,3 +68,13 @@ supabase/
 - **Datos del negocio**: dirección, teléfono, horario, redes y tarifas de envío están en `src/data/site.ts`. Textos legales en `src/pages/Info.tsx` son plantillas a revisar.
 - **SEO**: cada página define título, descripción, canonical y datos estructurados (Bakery, Product, FAQPage). Al ser una SPA, si el posicionamiento orgánico es prioritario conviene añadir prerender de las rutas públicas.
 - **Despliegue**: Vercel (`vercel.json`) o Netlify (`public/_redirects`) ya incluyen el *fallback* de rutas de la SPA.
+
+## GitHub Pages
+
+El workflow `.github/workflows/deploy-pages.yml` compila y publica el sitio en `https://<usuario>.github.io/<repo>/` en cada push a `main` (o manualmente desde la pestaña Actions).
+
+1. En el repositorio: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+2. Opcional: en **Settings → Secrets and variables → Actions** añade `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`. Sin ellos se publica en modo demo.
+3. En Supabase, añade `https://<usuario>.github.io/<repo>/account` como *redirect URL* de Auth.
+
+Detalles: la subruta se fija con `BASE_PATH` al compilar, y el workflow copia `index.html` a `404.html` para que los enlaces directos (p. ej. `/products/...`) funcionen. GitHub Pages devuelve esas páginas con estado 404, lo que no afecta a los visitantes pero sí a buscadores; para SEO serio conviene un dominio propio con hosting que admita *rewrites* (Vercel, Netlify, Cloudflare Pages).

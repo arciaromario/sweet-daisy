@@ -180,7 +180,7 @@ export async function sendMagicLink(email: string): Promise<void> {
   if (!supabase) throw new Error('Accounts are available once Supabase is connected.');
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: `${window.location.origin}/account` },
+    options: { emailRedirectTo: `${window.location.origin}${import.meta.env.BASE_URL}account` },
   });
   if (error) throw new Error(error.message);
 }

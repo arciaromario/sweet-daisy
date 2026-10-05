@@ -74,7 +74,7 @@ function CheckoutLayout() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "") || undefined}>
       <CatalogProvider>
         <CartProvider>
           <ScrollToTop />
