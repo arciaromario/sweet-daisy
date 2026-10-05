@@ -1,0 +1,28 @@
+{
+  "name": "sweet-daisy",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Sweet Daisy — Cakes and Treats. Boutique cake shop e-commerce (React + Vite + Supabase).",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "db:seed": "node --experimental-strip-types scripts/generate-seed.ts > supabase/seed.sql"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^7.18.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.2"
+  }
+}
