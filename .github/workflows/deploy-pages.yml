@@ -35,9 +35,10 @@ jobs:
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
           VITE_SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
-          # Optional. Without them the site runs in demo mode.
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          # Public project URL + publishable key (safe in the browser; data is protected by RLS).
+          # Repository secrets with the same names take precedence.
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://cpbshitnfvhnwhpkkguw.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'sb_publishable_tqMIhIZ9NNflqzejM63NoA_LsH_UFP8' }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

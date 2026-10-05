@@ -3,12 +3,13 @@ import { AvailabilityCalendar } from '../components/AvailabilityCalendar';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/PageHeader';
 import { Seo } from '../components/Seo';
-import { site } from '../data/site';
+import { useSite } from '../context/CatalogContext';
 import { sendContactMessage } from '../lib/api';
 
 const topics = ['General question', 'Existing order', 'Custom cake', 'Wedding enquiry', 'Corporate & events', 'Press & collaborations'];
 
 export default function Contact() {
+  const site = useSite();
   const [form, setForm] = useState({ name: '', email: '', topic: topics[0], message: '' });
   const [state, setState] = useState<'idle' | 'sending' | 'sent'>('idle');
   const [error, setError] = useState('');

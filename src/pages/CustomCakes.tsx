@@ -5,7 +5,8 @@ import { Icon } from '../components/Icon';
 import { Img } from '../components/Img';
 import { Reveal } from '../components/Reveal';
 import { Seo } from '../components/Seo';
-import { availability } from '../data/site';
+import { useSettings } from '../context/CatalogContext';
+import { weekdayNames } from '../data/settings';
 
 const designs = [
   { image: 'wedding', title: 'The Garden Wedding', note: 'Three tiers · pressed flowers' },
@@ -17,6 +18,8 @@ const designs = [
 ];
 
 export default function CustomCakes() {
+  const { custom, store } = useSettings();
+  const closedDays = store.closedWeekdays.map((d) => weekdayNames[d]);
   return (
     <>
       <Seo
@@ -110,7 +113,7 @@ export default function CustomCakes() {
             <h2 id="availability-title">Upcoming availability</h2>
             <p className="lead">
               We take a limited number of custom cakes each week so every one receives our full attention. Custom orders need at least{' '}
-              {availability.customLeadDays} days notice.
+              {custom.leadDays} days notice.
             </p>
             <ul className="availability__notes">
               <li>
@@ -119,13 +122,15 @@ export default function CustomCakes() {
               <li>
                 <Icon name="clock" /> Shop cakes: from 24–48 hours ahead
               </li>
-              <li>
-                <Icon name="store" /> Closed Mondays — our baking day
-              </li>
+              {closedDays.length > 0 && (
+                <li>
+                  <Icon name="store" /> Closed {closedDays.join(', ')}
+                </li>
+              )}
             </ul>
           </Reveal>
           <Reveal delay={120} className="availability__cal">
-            <AvailabilityCalendar leadDays={availability.customLeadDays} />
+            <AvailabilityCalendar leadDays={custom.leadDays} />
           </Reveal>
         </div>
       </section>

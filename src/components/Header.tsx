@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { Link, NavLink, useLocation } from 'react-router';
-import { mainNav, site } from '../data/site';
+import { mainNav } from '../data/site';
+import { useSite } from '../context/CatalogContext';
 import { useCart } from '../context/CartContext';
 import { Icon } from './Icon';
 import { Logo } from './Logo';
@@ -8,6 +9,7 @@ import { SearchOverlay } from './SearchOverlay';
 
 export function Header() {
   const { count, open } = useCart();
+  const site = useSite();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -39,7 +41,7 @@ export function Header() {
       <div className="announce">
         <p>
           Free local delivery on orders over ${site.delivery.freeOver}
-          <span className="announce__extra"> · Order 48 hours ahead for celebration cakes</span>
+          {site.announcement && <span className="announce__extra"> · {site.announcement}</span>}
         </p>
       </div>
 

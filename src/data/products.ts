@@ -1,6 +1,6 @@
-import type { PhotoKey } from './images.ts';
 
-export type CategoryId = 'cakes' | 'mini-cakes' | 'cupcakes' | 'treats' | 'seasonal';
+/** Category ids are managed from /admin; these are the defaults: cakes, mini-cakes, cupcakes, treats, seasonal. */
+export type CategoryId = string;
 
 export interface Category {
   id: CategoryId;
@@ -37,7 +37,8 @@ export interface Product {
   short: string;
   /** Long-form description for the product page. */
   description: string;
-  images: PhotoKey[];
+  /** Photo keys from images.ts, uploaded photo URLs or /images/ paths. */
+  images: string[];
   sizes: SizeOption[];
   flavors?: AddOn[];
   decorations?: AddOn[];
@@ -50,6 +51,9 @@ export interface Product {
   details: { label: string; value: string }[];
   /** Backdrop tint shown while the photo loads. */
   tint: string;
+  /** Hidden from the shop when false (managed from /admin). */
+  active?: boolean;
+  sort?: number;
 }
 
 const standardDecorations: AddOn[] = [

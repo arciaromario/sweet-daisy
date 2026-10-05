@@ -25,7 +25,8 @@ export function AvailabilityCalendar({
   onChange?: (iso: string) => void;
   label?: string;
 }) {
-  const { overrides, demo } = useCatalog();
+  const { overrides, settings } = useCatalog();
+  const closed = settings.store.closedWeekdays;
   const today = new Date();
   const [offset, setOffset] = useState(0);
   const month = new Date(today.getFullYear(), today.getMonth() + offset, 1);
@@ -38,10 +39,10 @@ export function AvailabilityCalendar({
     for (let d = 1; d <= total; d++) {
       const date = new Date(month.getFullYear(), month.getMonth(), d);
       const past = date < addDays(today, 0);
-      cells.push({ date, status: past ? 'too-soon' : dayStatus(date, overrides, leadDays, demo) });
+      cells.push({ date, status: past ? 'too-soon' : dayStatus(date, overrides, leadDays, closed) });
     }
     return cells;
-  }, [month.getTime(), overrides, leadDays, demo]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [month.getTime(), overrides, leadDays, closed]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const title = month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const selectable = Boolean(onChange);

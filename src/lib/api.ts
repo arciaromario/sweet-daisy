@@ -1,10 +1,15 @@
 import { supabase } from './supabase';
-import { categories as localCategories, products as localProducts, type Category, type Product } from '../data/products';
+import type { Category, Product } from '../data/products';
+import { mergeSettings, type Settings, type SettingsKey } from '../data/settings';
 import type { CartItem } from '../context/CartContext';
+import { readDb, uid, writeDb } from './localDb';
+import type { DayOverride, DayStatus, OrderItemRecord } from './types';
+
+export type { DayStatus } from './types';
 
 /* ------------------------------------------------------------------ catalogue */
 
-interface ProductRow {
+export interface ProductRow {
   slug: string;
   name: string;
   category: Product['category'];
@@ -20,9 +25,11 @@ interface ProductRow {
   bestseller: boolean;
   details: Product['details'];
   tint: string;
+  sort: number;
+  active: boolean;
 }
 
-const fromRow = (r: ProductRow): Product => ({
+export const fromRow = (r: ProductRow): Product => ({
   slug: r.slug,
   name: r.name,
   category: r.category,
@@ -38,31 +45,64 @@ const fromRow = (r: ProductRow): Product => ({
   bestseller: r.bestseller,
   details: r.details,
   tint: r.tint,
+  sort: r.sort,
+  active: r.active,
 });
 
-export async function fetchCatalog(): Promise<{ products: Product[]; categories: Category[] }> {
-  if (!supabase) return { products: localProducts, categories: localCategories };
-  const [p, c] = await Promise.all([
-    supabase.from('products').select('*').eq('active', true).order('sort'),
-    supabase.from('categories').select('id,name,blurb').order('sort'),
-  ]);
-  if (p.error) throw p.error;
-  if (c.error) throw c.error;
-  return { products: (p.data as ProductRow[]).map(fromRow), categories: c.data as Category[] };
+export const toRow = (p: Product): ProductRow => ({
+  slug: p.slug,
+  name: p.name,
+  category: p.category,
+  short: p.short,
+  description: p.description,
+  images: p.images,
+  sizes: p.sizes,
+  flavors: p.flavors ?? [],
+  decorations: p.decorations ?? [],
+  allow_message: !!p.message,
+  lead_days: p.leadDays,
+  badge: p.badge || null,
+  bestseller: !!p.bestseller,
+  details: p.details,
+  tint: p.tint,
+  sort: p.sort ?? 0,
+  active: p.active !== false,
+});
+
+export interface Catalog {
+  products: Product[];
+  categories: Category[];
+  overrides: Record<string, DayStatus>;
+  settings: Settings;
 }
 
-/* --------------------------------------------------------------- availability */
+export async function fetchCatalog(): Promise<Catalog> {
+  const today = new Date().toISOString().slice(0, 10);
 
-export type DayStatus = 'limited' | 'booked' | 'closed';
+  if (!supabase) {
+    const db = readDb();
+    return {
+      products: db.products.filter((p) => p.active !== false).sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0)),
+      categories: db.categories,
+      overrides: Object.fromEntries(db.overrides.filter((o) => o.day >= today).map((o) => [o.day, o.status])),
+      settings: mergeSettings(db.settings),
+    };
+  }
 
-export async function fetchAvailabilityOverrides(): Promise<Record<string, DayStatus>> {
-  if (!supabase) return {};
-  const { data, error } = await supabase
-    .from('availability_overrides')
-    .select('day,status')
-    .gte('day', new Date().toISOString().slice(0, 10));
-  if (error) throw error;
-  return Object.fromEntries((data ?? []).map((d: { day: string; status: DayStatus }) => [d.day, d.status]));
+  const [p, c, a, s] = await Promise.all([
+    supabase.from('products').select('*').eq('active', true).order('sort'),
+    supabase.from('categories').select('id,name,blurb').order('sort'),
+    supabase.from('availability_overrides').select('day,status').gte('day', today),
+    supabase.from('settings').select('key,value'),
+  ]);
+  for (const r of [p, c, a, s]) if (r.error) throw r.error;
+
+  return {
+    products: (p.data as ProductRow[]).map(fromRow),
+    categories: c.data as Category[],
+    overrides: Object.fromEntries((a.data as DayOverride[]).map((d) => [d.day, d.status])),
+    settings: mergeSettings(Object.fromEntries((s.data as { key: SettingsKey; value: unknown }[]).map((r) => [r.key, r.value]))),
+  };
 }
 
 /* --------------------------------------------------------------------- orders */
@@ -85,7 +125,9 @@ export interface PlacedOrder {
   total: number;
 }
 
-export async function placeOrder(order: OrderPayload, localTotal: number): Promise<PlacedOrder> {
+export async function placeOrder(order: OrderPayload, settings: Settings): Promise<PlacedOrder> {
+  if (!supabase) return placeDemoOrder(order, settings);
+
   const items = order.items.map((i) => ({
     slug: i.slug,
     size_id: i.sizeId,
@@ -95,16 +137,64 @@ export async function placeOrder(order: OrderPayload, localTotal: number): Promi
     notes: i.notes ?? '',
     quantity: i.quantity,
   }));
-
-  if (!supabase) {
-    await wait(700);
-    return { orderNumber: `SD-${Math.floor(10000 + Math.random() * 89999)}`, total: localTotal };
-  }
-
   const { data, error } = await supabase.rpc('place_order', { payload: { ...order, items } });
   if (error) throw new Error(error.message);
   const row = Array.isArray(data) ? data[0] : data;
   return { orderNumber: row.order_number, total: Number(row.total) };
+}
+
+/** Demo mode: price the bag from the local catalogue and store the order in this browser. */
+async function placeDemoOrder(order: OrderPayload, settings: Settings): Promise<PlacedOrder> {
+  await wait(600);
+  const db = readDb();
+  const items: OrderItemRecord[] = order.items.map((i) => {
+    const p = db.products.find((x) => x.slug === i.slug);
+    const size = p?.sizes.find((s) => s.id === i.sizeId);
+    if (!p || p.active === false || !size) throw new Error('A product in your bag is no longer available.');
+    const flavor = p.flavors?.find((f) => f.label === i.flavor);
+    const deco = p.decorations?.find((d) => d.id === i.decorationId);
+    const unit = size.price + (flavor?.price ?? 0) + (deco?.price ?? 0);
+    return {
+      product_slug: p.slug,
+      product_name: p.name,
+      size_label: size.label,
+      flavor: i.flavor ?? null,
+      decoration: deco?.label ?? null,
+      message: i.message ?? null,
+      notes: i.notes ?? null,
+      quantity: i.quantity,
+      unit_price: unit,
+      line_total: unit * i.quantity,
+    };
+  });
+  const subtotal = items.reduce((n, i) => n + i.line_total, 0);
+  const fee = order.fulfillment === 'delivery' && subtotal < settings.store.freeDeliveryOver ? settings.store.deliveryFee : 0;
+  let number = '';
+  writeDb((d) => {
+    number = `SD-${d.nextOrderNumber++}`;
+    d.orders.unshift({
+      id: uid(),
+      order_number: number,
+      status: 'received',
+      payment_status: 'pending',
+      payment_method: order.payment_method,
+      customer_name: order.customer_name,
+      email: order.email.toLowerCase(),
+      phone: order.phone,
+      fulfillment: order.fulfillment,
+      address: order.address ?? null,
+      fulfillment_date: order.fulfillment_date,
+      time_slot: order.time_slot,
+      instructions: order.instructions ?? null,
+      admin_notes: null,
+      subtotal,
+      delivery_fee: fee,
+      total: subtotal + fee,
+      created_at: new Date().toISOString(),
+      order_items: items,
+    });
+  });
+  return { orderNumber: number, total: subtotal + fee };
 }
 
 export interface OrderSummary {
@@ -119,9 +209,14 @@ export interface OrderSummary {
 
 export async function fetchMyOrders(): Promise<OrderSummary[]> {
   if (!supabase) return [];
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
   const { data, error } = await supabase
     .from('orders')
     .select('order_number,status,fulfillment,fulfillment_date,total,created_at,order_items(product_name,size_label,quantity)')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data as OrderSummary[];
@@ -144,7 +239,24 @@ export interface CustomCakeRequest {
 }
 
 export async function submitCustomCakeRequest(req: CustomCakeRequest, files: File[]): Promise<void> {
-  if (!supabase) return wait(800);
+  if (!supabase) {
+    await wait(700);
+    writeDb((d) => {
+      d.requests.unshift({
+        id: uid(),
+        ...req,
+        occasion: req.occasion ?? null,
+        instructions: req.instructions ?? null,
+        phone: req.phone ?? null,
+        inspiration_paths: files.map((f) => f.name),
+        status: 'new',
+        quote_amount: null,
+        admin_notes: null,
+        created_at: new Date().toISOString(),
+      });
+    });
+    return;
+  }
 
   const paths: string[] = [];
   for (const file of files) {
@@ -162,14 +274,27 @@ export async function submitCustomCakeRequest(req: CustomCakeRequest, files: Fil
 /* ------------------------------------------------------- newsletter & contact */
 
 export async function joinNewsletter(email: string): Promise<void> {
-  if (!supabase) return wait(500);
-  const { error } = await supabase.from('newsletter_subscribers').insert({ email: email.trim().toLowerCase() });
+  const clean = email.trim().toLowerCase();
+  if (!supabase) {
+    await wait(400);
+    writeDb((d) => {
+      if (!d.subscribers.some((s) => s.email === clean)) d.subscribers.unshift({ email: clean, created_at: new Date().toISOString() });
+    });
+    return;
+  }
+  const { error } = await supabase.from('newsletter_subscribers').insert({ email: clean });
   // 23505 = already subscribed; treat as success.
   if (error && error.code !== '23505') throw new Error(error.message);
 }
 
 export async function sendContactMessage(msg: { name: string; email: string; topic: string; message: string }) {
-  if (!supabase) return wait(600);
+  if (!supabase) {
+    await wait(500);
+    writeDb((d) => {
+      d.messages.unshift({ id: uid(), ...msg, created_at: new Date().toISOString() });
+    });
+    return;
+  }
   const { error } = await supabase.from('contact_messages').insert(msg);
   if (error) throw new Error(error.message);
 }
@@ -185,4 +310,4 @@ export async function sendMagicLink(email: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
-const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+export const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));

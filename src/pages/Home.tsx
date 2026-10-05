@@ -9,7 +9,7 @@ import { Reveal } from '../components/Reveal';
 import { Seo } from '../components/Seo';
 import { useCatalog } from '../context/CatalogContext';
 import { pickBestsellers, type Product } from '../data/products';
-import { site } from '../data/site';
+import { useSite } from '../context/CatalogContext';
 import { firstAvailable, formatDate } from '../lib/availability';
 
 const collections = [
@@ -56,10 +56,11 @@ const testimonials = [
 ];
 
 export default function Home() {
-  const { products, overrides, demo } = useCatalog();
+  const { products, overrides, settings } = useCatalog();
+  const site = useSite();
   const [quick, setQuick] = useState<Product | null>(null);
   const bestsellers = pickBestsellers(products);
-  const nextDate = firstAvailable(overrides, 2, demo);
+  const nextDate = firstAvailable(overrides, 2, settings.store.closedWeekdays);
 
   return (
     <>

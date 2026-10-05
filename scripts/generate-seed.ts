@@ -1,6 +1,7 @@
 // Generates supabase/seed.sql from the local catalogue in src/data/products.ts.
-// Usage: npm run db:seed
+// Usage: npm run db:seed  (or npm run db:setup to also rebuild supabase/setup.sql)
 import { categories, products } from '../src/data/products.ts';
+import { defaultSettings } from '../src/data/settings.ts';
 
 const q = (v: string | null | undefined) => (v == null ? 'null' : `'${v.replace(/'/g, "''")}'`);
 const j = (v: unknown) => `${q(JSON.stringify(v ?? []))}::jsonb`;
@@ -29,6 +30,14 @@ lines.push(
   decorations = excluded.decorations, allow_message = excluded.allow_message, lead_days = excluded.lead_days,
   badge = excluded.badge, bestseller = excluded.bestseller, details = excluded.details, tint = excluded.tint,
   sort = excluded.sort, updated_at = now();`,
+);
+
+lines.push(
+  '',
+  'insert into public.settings (key, value) values',
+  Object.entries(defaultSettings)
+    .map(([k, v]) => `  (${q(k)}, ${j(v)})`)
+    .join(',\n') + '\non conflict (key) do nothing;',
 );
 
 console.log(lines.join('\n'));

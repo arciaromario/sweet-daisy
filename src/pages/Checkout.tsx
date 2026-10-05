@@ -6,9 +6,8 @@ import { Img } from '../components/Img';
 import { Logo } from '../components/Logo';
 import { Seo } from '../components/Seo';
 import { deliveryFee, useCart } from '../context/CartContext';
-import { useCatalog } from '../context/CatalogContext';
+import { useCatalog, useSite } from '../context/CatalogContext';
 import { formatPrice } from '../data/products';
-import { availability, site } from '../data/site';
 import { placeOrder, type PlacedOrder } from '../lib/api';
 import { firstAvailable, formatDate } from '../lib/availability';
 import { supabase } from '../lib/supabase';
@@ -17,7 +16,9 @@ type Method = 'pickup' | 'delivery';
 
 export default function Checkout() {
   const cart = useCart();
-  const { overrides, demo } = useCatalog();
+  const { overrides, demo, settings } = useCatalog();
+  const site = useSite();
+  const closed = settings.store.closedWeekdays;
   const [method, setMethod] = useState<Method>('pickup');
   const [date, setDate] = useState('');
   const [slot, setSlot] = useState('');
@@ -36,12 +37,12 @@ export default function Checkout() {
   }, []);
 
   useEffect(() => {
-    if (!date) setDate(firstAvailable(overrides, cart.maxLeadDays, demo));
-  }, [overrides, cart.maxLeadDays, demo, date]);
+    if (!date) setDate(firstAvailable(overrides, cart.maxLeadDays, closed));
+  }, [overrides, cart.maxLeadDays, closed, date]);
 
-  const fee = deliveryFee(cart.subtotal, method);
+  const fee = deliveryFee(cart.subtotal, method, settings.store);
   const total = cart.subtotal + fee;
-  const slots = method === 'pickup' ? availability.pickupSlots : availability.deliverySlots;
+  const slots = method === 'pickup' ? settings.store.pickupSlots : settings.store.deliverySlots;
   const set = (k: keyof typeof form) => (e: { target: { value: string } }) => {
     setForm((f) => ({ ...f, [k]: e.target.value }));
     if (errors[k]) setErrors(({ [k]: _, ...rest }) => rest);
@@ -95,7 +96,7 @@ export default function Checkout() {
           payment_method: payment,
           items: cart.items,
         },
-        total,
+        settings,
       );
       setPlaced({ ...result, date, slot, method, email: form.email.trim() });
       cart.clear();
