@@ -9,7 +9,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "db:seed": "node --experimental-strip-types scripts/generate-seed.ts > supabase/seed.sql"
+    "db:seed": "node --experimental-strip-types scripts/generate-seed.ts > supabase/seed.sql",
+    "db:setup": "npm run db:seed && node scripts/build-setup-sql.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

@@ -1,10 +1,12 @@
 import { Link } from 'react-router';
-import { footerNav, site } from '../data/site';
+import { footerNav } from '../data/site';
+import { useSite } from '../context/CatalogContext';
 import { Icon } from './Icon';
 import { DaisyMark } from './Logo';
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const site = useSite();
   return (
     <footer className="footer">
       <div className="container">

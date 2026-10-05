@@ -1,7 +1,8 @@
-import { site } from '../data/site';
+import { useSite } from '../context/CatalogContext';
 import { formatPrice } from '../data/products';
 
 export function FreeDeliveryMeter({ subtotal }: { subtotal: number }) {
+  const site = useSite();
   const goal = site.delivery.freeOver;
   const pct = Math.min(100, (subtotal / goal) * 100);
   return (

@@ -6,11 +6,12 @@ import { PageHeader } from '../components/PageHeader';
 import { Seo } from '../components/Seo';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../data/products';
-import { site } from '../data/site';
+import { useSite } from '../context/CatalogContext';
 
 export default function Cart() {
   const { items, subtotal, count, maxLeadDays } = useCart();
   const navigate = useNavigate();
+  const site = useSite();
 
   return (
     <>

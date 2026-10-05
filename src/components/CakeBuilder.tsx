@@ -1,40 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useCatalog } from '../context/CatalogContext';
 import { formatPrice } from '../data/products';
-import { availability } from '../data/site';
 import { submitCustomCakeRequest } from '../lib/api';
 import { formatDate } from '../lib/availability';
 import { AvailabilityCalendar } from './AvailabilityCalendar';
 import { Icon } from './Icon';
 import { Img } from './Img';
 import { OptionGroup } from './OptionGroup';
-
-const sizes = [
-  { value: '6" round', title: '6" round', meta: '8–10 servings', price: 95 },
-  { value: '8" round', title: '8" round', meta: '14–18 servings', price: 135 },
-  { value: '10" round', title: '10" round', meta: '24–30 servings', price: 185 },
-  { value: 'Two tiers', title: 'Two tiers', meta: '30–45 servings', price: 320 },
-  { value: 'Three tiers', title: 'Three tiers', meta: '60–90 servings', price: 520 },
-];
-
-const flavors = ['Vanilla bean', 'Dark chocolate', 'Lemon chiffon', 'Red velvet', 'Pistachio', 'Spiced carrot', 'Almond & orange', 'Gluten-free vanilla'];
-const fillings = ['Fresh strawberries & cream', 'Raspberry compote', 'Lemon curd', 'Salted caramel', 'Chocolate ganache', 'Passion fruit curd', 'Cream cheese', 'Buttercream only'];
-const frostings = [
-  { value: 'Swiss meringue buttercream', meta: 'Silky, light, not too sweet' },
-  { value: 'Cream cheese frosting', meta: 'Tangy and rich' },
-  { value: 'Whipped mascarpone', meta: 'Soft and creamy' },
-  { value: 'Chocolate ganache', meta: 'Glossy and decadent' },
-  { value: 'Semi-naked', meta: 'Rustic, layers peek through' },
-];
-const styles = [
-  { value: 'Minimal & textured', image: 'vanilla', extra: 0 },
-  { value: 'Fresh florals', image: 'floral', extra: 35 },
-  { value: 'Vintage piping', image: 'birthday', extra: 25 },
-  { value: 'Fruit crown', image: 'strawberry', extra: 20 },
-  { value: 'Gold & hand-painted', image: 'wedding', extra: 45 },
-  { value: 'Sculptural & modern', image: 'pistachio', extra: 40 },
-];
-const occasions = ['Birthday', 'Wedding', 'Anniversary', 'Baby shower', 'Engagement', 'Corporate event', 'Just because', 'Other'];
 
 const steps = ['Size', 'Flavour', 'Filling', 'Frosting', 'Decoration', 'Inspiration', 'Event date', 'Instructions', 'Contact', 'Review'];
 
@@ -56,7 +28,12 @@ interface State {
 const initial: State = { size: '', flavor: '', filling: '', frosting: '', style: '', files: [], date: '', occasion: '', instructions: '', name: '', email: '', phone: '' };
 
 export function CakeBuilder() {
-  const { demo } = useCatalog();
+  const { demo, settings } = useCatalog();
+  const cfg = settings.custom;
+  const sizes = cfg.sizes.map((x) => ({ value: x.label, title: x.label, meta: x.servings, price: x.price }));
+  const frostings = cfg.frostings.map((f) => ({ value: f.label, meta: f.note }));
+  const styles = cfg.styles.map((st) => ({ value: st.label, image: st.image, extra: st.extra }));
+  const { flavors, fillings, occasions } = cfg;
   const [step, setStep] = useState(0);
   const [s, setS] = useState<State>(initial);
   const [error, setError] = useState('');
@@ -248,10 +225,10 @@ export function CakeBuilder() {
           {step === 5 && <InspirationUpload files={s.files} onChange={(f) => set('files', f)} />}
           {step === 6 && (
             <div className="builder__date">
-              <AvailabilityCalendar leadDays={availability.customLeadDays} value={s.date} onChange={(d) => set('date', d)} label="Choose your event date" />
+              <AvailabilityCalendar leadDays={cfg.leadDays} value={s.date} onChange={(d) => set('date', d)} label="Choose your event date" />
               <div className="stack">
                 <p className="small muted">
-                  Custom cakes need at least {availability.customLeadDays} days notice. Weddings and tiered cakes are best booked 4–8 weeks ahead.
+                  Custom cakes need at least {cfg.leadDays} days notice. Weddings and tiered cakes are best booked 4–8 weeks ahead.
                 </p>
                 {s.date && (
                   <p className="builder__picked">
@@ -336,7 +313,7 @@ export function CakeBuilder() {
               </dl>
               <p className="small muted">
                 Submitting is free and doesn’t commit you to anything. We’ll reply with a quote and a design sketch; your date is reserved once you approve
-                and pay the deposit.
+                and pay the {cfg.depositPercent}% deposit.
               </p>
             </div>
           )}

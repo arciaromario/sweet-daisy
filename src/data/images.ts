@@ -46,12 +46,17 @@ export type PhotoKey = keyof typeof photo;
 /** Build a responsive, cropped image URL. Accepts a photo key, a raw Unsplash id or a local path. */
 export function img(src: string, width = 1200, height?: number): string {
   const id = (photo as Record<string, string>)[src] ?? src;
-  if (id.startsWith('/') || id.startsWith('http')) return id;
+  if (isDirect(id)) return id.startsWith('/') && !id.startsWith('//') ? `${import.meta.env.BASE_URL.replace(/\/$/, '')}${id}` : id;
   const h = height ? `&h=${height}` : '';
   return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${width}${h}&q=78`;
 }
 
-export function srcset(src: string, widths: number[], ratio?: number): string {
+/** Uploaded photos, data URLs and site paths are used as-is (no Unsplash resizing). */
+const isDirect = (id: string) => /^(\/|https?:|data:|blob:)/.test(id);
+
+export function srcset(src: string, widths: number[], ratio?: number): string | undefined {
+  const id = (photo as Record<string, string>)[src] ?? src;
+  if (isDirect(id)) return undefined;
   return widths
     .map((w) => `${img(src, w, ratio ? Math.round(w * ratio) : undefined)} ${w}w`)
     .join(', ');

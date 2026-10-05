@@ -8,10 +8,9 @@ import { QuantityStepper } from '../components/QuantityStepper';
 import { Reveal } from '../components/Reveal';
 import { Seo } from '../components/Seo';
 import { useCart } from '../context/CartContext';
-import { useCatalog } from '../context/CatalogContext';
+import { useCatalog, useSite } from '../context/CatalogContext';
 import { img } from '../data/images';
 import { categoryName, formatPrice, relatedProducts } from '../data/products';
-import { site } from '../data/site';
 import { firstAvailable, formatDate } from '../lib/availability';
 import NotFound from './NotFound';
 
@@ -19,7 +18,8 @@ const MESSAGE_MAX = 40;
 
 export default function ProductPage() {
   const { slug = '' } = useParams();
-  const { getProduct, products, overrides, demo } = useCatalog();
+  const { getProduct, products, overrides, settings, ready } = useCatalog();
+  const site = useSite();
   const { add } = useCart();
   const product = getProduct(slug);
 
@@ -43,11 +43,11 @@ export default function ProductPage() {
     setQty(1);
   }, [product]);
 
-  if (!product) return <NotFound />;
+  if (!product) return ready ? <NotFound /> : <div className="page-loading" aria-busy="true" />;
 
   const item = toCartItem(product, { sizeId, flavor, decorationId, message, notes, quantity: qty });
   const size = product.sizes.find((s) => s.id === item.sizeId)!;
-  const earliest = firstAvailable(overrides, product.leadDays, demo);
+  const earliest = firstAvailable(overrides, product.leadDays, settings.store.closedWeekdays);
   const related = relatedProducts(product, products);
 
   const onAdd = () => {

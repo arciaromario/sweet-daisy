@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { site } from '../data/site';
+import type { StoreSettings } from '../data/settings';
 
 export interface CartItem {
   key: string;
@@ -106,5 +106,5 @@ export function useCart() {
   return ctx;
 }
 
-export const deliveryFee = (subtotal: number, method: 'pickup' | 'delivery') =>
-  method === 'pickup' || subtotal >= site.delivery.freeOver ? 0 : site.delivery.fee;
+export const deliveryFee = (subtotal: number, method: 'pickup' | 'delivery', store: StoreSettings) =>
+  method === 'pickup' || subtotal >= store.freeDeliveryOver ? 0 : store.deliveryFee;

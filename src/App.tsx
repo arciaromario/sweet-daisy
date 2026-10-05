@@ -17,6 +17,7 @@ const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Account = lazy(() => import('./pages/Account'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const AdminApp = lazy(() => import('./admin/AdminApp'));
 const Faq = lazy(() => import('./pages/Info').then((m) => ({ default: m.Faq })));
 const ShippingDelivery = lazy(() => import('./pages/Info').then((m) => ({ default: m.ShippingDelivery })));
 const Terms = lazy(() => import('./pages/Info').then((m) => ({ default: m.Terms })));
@@ -99,6 +100,14 @@ export default function App() {
             <Route element={<CheckoutLayout />}>
               <Route path="checkout" element={<Checkout />} />
             </Route>
+            <Route
+              path="admin/*"
+              element={
+                <Suspense fallback={<div className="page-loading" aria-busy="true" />}>
+                  <AdminApp />
+                </Suspense>
+              }
+            />
           </Routes>
         </CartProvider>
       </CatalogProvider>

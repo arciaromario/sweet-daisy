@@ -3,23 +3,28 @@ import { Link } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
 import { Seo } from '../components/Seo';
 import { formatPrice } from '../data/products';
-import { availability, site } from '../data/site';
+import { useSettings, useSite } from '../context/CatalogContext';
 
 function Prose({ children }: { children: ReactNode }) {
   return <div className="container container--text prose">{children}</div>;
 }
 
-const faqs: { q: string; a: ReactNode }[] = [
-  { q: 'How far in advance should I order?', a: 'Most shop cakes need 24–48 hours notice; cookies are baked daily. Custom cakes need at least 7 days, and weddings or tiered cakes are best booked 4–8 weeks ahead.' },
+function useFaqs(): { q: string; a: ReactNode }[] {
+  const site = useSite();
+  const { custom } = useSettings();
+  return [
+  { q: 'How far in advance should I order?', a: `Most shop cakes need 24–48 hours notice; cookies are baked daily. Custom cakes need at least ${custom.leadDays} days, and weddings or tiered cakes are best booked 4–8 weeks ahead.` },
   { q: 'Do you offer gluten-free or vegan options?', a: 'We offer gluten-free sponges for most cakes (look for the gluten-free flavour option). Vegan cakes are available on request as custom orders. Our kitchen handles nuts, gluten, dairy and eggs, so we cannot guarantee an allergen-free environment.' },
   { q: 'How should I store my cake?', a: 'Keep your cake refrigerated and bring it to room temperature for about an hour before serving — buttercream is at its silkiest when not too cold.' },
   { q: 'Can I add a message to my cake?', a: 'Yes. Most cakes include an optional custom message of up to 40 characters, piped by hand or written on a plaque.' },
-  { q: 'Do you deliver?', a: <>We deliver {site.delivery.radius}, Tuesday to Sunday. Delivery is {formatPrice(site.delivery.fee)}, or free on orders over {formatPrice(site.delivery.freeOver)}. See <Link to="/shipping-delivery">Shipping & Delivery</Link>.</> },
+  { q: 'Do you deliver?', a: <>We deliver {site.delivery.radius}. Delivery is {formatPrice(site.delivery.fee)}, or free on orders over {formatPrice(site.delivery.freeOver)}. See <Link to="/shipping-delivery">Shipping & Delivery</Link>.</> },
   { q: 'Can I change or cancel my order?', a: 'Changes and cancellations are free up to 48 hours before your pickup or delivery time. Custom cake deposits are non-refundable within 14 days of the event.' },
-  { q: 'How does the custom cake process work?', a: <>Submit a request through our <Link to="/custom-cakes">custom cake builder</Link>. We reply within 48 hours with a quote and design notes. Your date is reserved once you approve the design and pay a 30% deposit.</> },
-];
+  { q: 'How does the custom cake process work?', a: <>Submit a request through our <Link to="/custom-cakes">custom cake builder</Link>. We reply within 48 hours with a quote and design notes. Your date is reserved once you approve the design and pay a {custom.depositPercent}% deposit.</> },
+  ];
+}
 
 export function Faq() {
+  const faqs = useFaqs();
   return (
     <>
       <Seo title="FAQ" description="Answers to common questions about ordering, delivery, allergens and custom cakes at Sweet Daisy." path="/faq" />
@@ -55,6 +60,8 @@ export function Faq() {
 }
 
 export function ShippingDelivery() {
+  const site = useSite();
+  const { store, custom } = useSettings();
   return (
     <>
       <Seo title="Shipping & Delivery" path="/shipping-delivery" />
@@ -62,13 +69,13 @@ export function ShippingDelivery() {
       <Prose>
         <h2>Studio pickup</h2>
         <p>
-          Pickup is always free from {site.address.street}, {site.address.city}. Choose a pickup window at checkout: {availability.pickupSlots.join(', ')}.
+          Pickup is always free from {site.address.street}, {site.address.city}. Choose a pickup window at checkout: {store.pickupSlots.join(', ')}.
           Please bring your order number and allow a flat, level surface in your car.
         </p>
         <h2>Local delivery</h2>
         <p>
-          We hand-deliver {site.delivery.radius}, Tuesday to Sunday, in temperature-controlled vehicles. Delivery costs {formatPrice(site.delivery.fee)} and is
-          free on orders over {formatPrice(site.delivery.freeOver)}. Delivery windows: {availability.deliverySlots.join(', ')}.
+          We hand-deliver {site.delivery.radius}, in temperature-controlled vehicles. Delivery costs {formatPrice(site.delivery.fee)} and is
+          free on orders over {formatPrice(site.delivery.freeOver)}. Delivery windows: {store.deliverySlots.join(', ')}.
         </p>
         <h2>Shipping</h2>
         <p>Because our cakes are fresh and delicate, we don’t ship cakes. Cookies and macarons can be shipped nationwide on request — contact us for details.</p>
@@ -77,7 +84,7 @@ export function ShippingDelivery() {
           <li>Cookies & daily bakes: same day</li>
           <li>Mini cakes, cupcakes & tartlets: 24 hours</li>
           <li>Celebration cakes: 48 hours</li>
-          <li>Custom cakes: from {availability.customLeadDays} days</li>
+          <li>Custom cakes: from {custom.leadDays} days</li>
         </ul>
       </Prose>
     </>
@@ -85,6 +92,7 @@ export function ShippingDelivery() {
 }
 
 export function Terms() {
+  const { custom } = useSettings();
   return (
     <>
       <Seo title="Terms & Conditions" path="/terms" />
@@ -96,7 +104,7 @@ export function Terms() {
         <h2>Changes & cancellations</h2>
         <p>Orders can be changed or cancelled free of charge up to 48 hours before the pickup or delivery time. Within 48 hours, orders are non-refundable as baking has begun.</p>
         <h2>Custom cakes</h2>
-        <p>Custom cakes are reserved with a 30% non-refundable deposit. The balance is due 7 days before the event. Designs are interpreted by hand and may vary slightly from inspiration images.</p>
+        <p>Custom cakes are reserved with a {custom.depositPercent}% non-refundable deposit. The balance is due 7 days before the event. Designs are interpreted by hand and may vary slightly from inspiration images.</p>
         <h2>Allergens</h2>
         <p>Our kitchen handles wheat, eggs, dairy, soy and nuts. While we take great care, we cannot guarantee any product is free from allergens.</p>
         <h2>Collection & delivery</h2>
@@ -107,6 +115,7 @@ export function Terms() {
 }
 
 export function Privacy() {
+  const site = useSite();
   return (
     <>
       <Seo title="Privacy Policy" path="/privacy" />
