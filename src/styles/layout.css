@@ -185,8 +185,48 @@
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  color: var(--ink);
+  color: var(--olive-deep);
+}
+
+/* Wordmark — mirrors the logo: heavy soft serif in lowercase, spaced sans tagline. */
+.wordmark {
+  display: inline-grid;
+  justify-items: center;
+  line-height: 1;
+}
+
+.wordmark__name {
+  font-family: var(--serif);
+  font-size: 1.7rem;
+  font-weight: 800;
+  font-variation-settings: 'SOFT' 100, 'WONK' 0;
+  letter-spacing: -0.015em;
+  text-transform: lowercase;
+  color: var(--olive-deep);
+}
+
+.wordmark__desc {
+  margin-top: 5px;
+  padding-left: 0.42em;
+  font-family: var(--sans);
+  font-size: 0.55rem;
+  font-weight: 400;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--rose);
+}
+
+.wordmark--footer .wordmark__name {
+  font-size: clamp(3rem, 9vw, 6.2rem);
+  color: var(--cream);
+}
+
+.wordmark--footer .wordmark__desc {
+  margin-top: clamp(12px, 1.6vw, 22px);
+  font-size: clamp(0.7rem, 1.2vw, 0.95rem);
+  letter-spacing: 0.5em;
+  padding-left: 0.5em;
+  color: var(--blush);
 }
 
 .daisy-mark {
@@ -197,37 +237,9 @@
   transition: transform 1.2s var(--ease-out);
 }
 
-.logo:hover .daisy-mark {
-  transform: rotate(45deg);
-}
-
-.logo__text {
-  display: grid;
-  line-height: 1;
-}
-
-.logo__name {
-  font-family: var(--serif);
-  font-size: 1.32rem;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-.logo__desc {
-  margin-top: 5px;
-  font-size: 0.56rem;
-  letter-spacing: 0.42em;
-  text-transform: uppercase;
-  color: var(--olive);
-}
-
 @media (max-width: 420px) {
-  .logo .daisy-mark {
-    display: none;
-  }
-  .logo__name {
-    font-size: 1.15rem;
+  .wordmark__name {
+    font-size: 1.45rem;
   }
 }
 
@@ -718,32 +730,6 @@
   text-align: center;
   padding-bottom: clamp(40px, 6vw, 72px);
   border-bottom: 1px solid rgba(251, 248, 242, 0.14);
-}
-
-.footer__mark {
-  width: 44px;
-  height: 44px;
-  color: var(--blush);
-  margin-bottom: 18px;
-}
-
-.footer__name {
-  font-family: var(--serif);
-  font-size: clamp(2.6rem, 8vw, 5.2rem);
-  line-height: 1;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--cream);
-  padding-left: 0.18em;
-}
-
-.footer__desc {
-  margin-top: 12px;
-  font-size: 0.72rem;
-  letter-spacing: 0.5em;
-  text-transform: uppercase;
-  color: var(--blush);
-  padding-left: 0.5em;
 }
 
 .footer__grid {

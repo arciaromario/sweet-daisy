@@ -36,6 +36,14 @@ export const fmtDate = (iso: string, opts: Intl.DateTimeFormatOptions = { weekda
 export const fmtDateTime = (iso: string) =>
   new Date(iso).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
+/** Spanish label for an average preparation time in hours, e.g. "6 h", "1 día", "2,5 días". */
+export function prepLabel(hours?: number | null): string {
+  if (hours == null || !(hours > 0)) return 'sin indicar';
+  if (hours < 24) return `${String(Math.round(hours * 2) / 2).replace('.', ',')} h`;
+  const days = Math.round((hours / 24) * 2) / 2;
+  return `${String(days).replace('.', ',')} ${days === 1 ? 'día' : 'días'}`;
+}
+
 export const slugify = (s: string) =>
   s
     .normalize('NFD')

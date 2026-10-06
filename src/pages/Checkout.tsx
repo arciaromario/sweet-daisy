@@ -7,7 +7,7 @@ import { Logo } from '../components/Logo';
 import { Seo } from '../components/Seo';
 import { deliveryFee, useCart } from '../context/CartContext';
 import { useCatalog, useSite } from '../context/CatalogContext';
-import { formatPrice } from '../data/products';
+import { formatPrep, formatPrice } from '../data/products';
 import { placeOrder, type PlacedOrder } from '../lib/api';
 import { firstAvailable, formatDate } from '../lib/availability';
 import { supabase } from '../lib/supabase';
@@ -391,6 +391,12 @@ export default function Checkout() {
               <span>{method === 'pickup' ? 'Pickup' : 'Delivery'}</span>
               <span>{fee ? formatPrice(fee) : 'Free'}</span>
             </div>
+            {formatPrep(cart.maxPrepHours) && (
+              <div className="summary-row">
+                <span>Preparation time</span>
+                <span>{formatPrep(cart.maxPrepHours)}</span>
+              </div>
+            )}
             <div className="summary-row summary-row--total">
               <span>Total</span>
               <span className="price">{formatPrice(total)}</span>

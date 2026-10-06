@@ -18,6 +18,8 @@ export interface CartItem {
   unitPrice: number;
   quantity: number;
   leadDays: number;
+  /** Average preparation time in hours (informational). */
+  prepHours?: number;
 }
 
 interface CartState {
@@ -25,6 +27,8 @@ interface CartState {
   count: number;
   subtotal: number;
   maxLeadDays: number;
+  /** Longest average preparation time in the bag, in hours. */
+  maxPrepHours: number;
   add: (item: Omit<CartItem, 'key'>) => void;
   setQuantity: (key: string, quantity: number) => void;
   remove: (key: string) => void;
@@ -86,6 +90,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       count: items.reduce((n, i) => n + i.quantity, 0),
       subtotal: items.reduce((n, i) => n + i.unitPrice * i.quantity, 0),
       maxLeadDays: items.reduce((n, i) => Math.max(n, i.leadDays), 0),
+      maxPrepHours: items.reduce((n, i) => Math.max(n, i.prepHours ?? 0), 0),
       add,
       setQuantity,
       remove: (key) => setItems((prev) => prev.filter((i) => i.key !== key)),

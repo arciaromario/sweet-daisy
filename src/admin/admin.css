@@ -1582,3 +1582,21 @@
   color: var(--ivory);
   text-decoration: line-through;
 }
+
+.adm-inline {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.adm-inline .select {
+  width: auto;
+}
+
+.adm-warn {
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: #f8e3df;
+  color: #7a4038;
+  font-size: 0.8rem;
+}
