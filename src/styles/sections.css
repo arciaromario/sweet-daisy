@@ -378,20 +378,20 @@
   top: -180px;
   width: 520px;
   height: 520px;
-  border: 1px solid rgba(228, 205, 148, 0.18);
+  border: 1px solid rgba(226, 173, 165, 0.18);
   border-radius: 50%;
 }
 
 .custom-feature h2 {
-  color: var(--ivory);
+  color: var(--cream);
 }
 
 .custom-feature h2 em {
-  color: var(--gold-soft);
+  color: var(--blush);
 }
 
 .custom-feature .eyebrow {
-  color: var(--gold-soft);
+  color: var(--blush);
 }
 
 .custom-feature .lead {
@@ -430,14 +430,14 @@
 .custom-feature__steps .serif {
   font-size: 1.5rem;
   font-style: italic;
-  color: var(--gold-soft);
+  color: var(--blush);
   line-height: 1;
 }
 
 .custom-feature__steps strong {
   display: block;
   font-weight: 400;
-  color: var(--ivory);
+  color: var(--cream);
   letter-spacing: 0.02em;
 }
 
@@ -504,8 +504,8 @@
   width: 124px;
   height: 124px;
   border-radius: 50%;
-  background: var(--gold);
-  color: #fff;
+  background: var(--blush);
+  color: var(--olive-deep);
   font-size: 1.3rem;
   font-style: italic;
   line-height: 1;
@@ -579,7 +579,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  background: rgba(67, 75, 54, 0.4);
+  background: rgba(98, 96, 71, 0.4);
   color: var(--ivory);
   opacity: 0;
   transition: opacity var(--t) var(--ease);
@@ -650,7 +650,7 @@
 .quote__stars {
   display: flex;
   gap: 3px;
-  color: var(--gold);
+  color: var(--rose);
 }
 
 .quote__stars .icon {
@@ -860,7 +860,7 @@
 .process__n {
   font-size: 1.6rem;
   font-style: italic;
-  color: var(--gold);
+  color: var(--rose);
   line-height: 1;
 }
 
@@ -1026,7 +1026,7 @@
 }
 
 .cal__day.is-limited::after {
-  background: var(--gold);
+  background: var(--rose);
 }
 
 .cal__day.is-booked {
@@ -1036,7 +1036,7 @@
 }
 
 .cal__day.is-booked::after {
-  background: #c9a59b;
+  background: var(--danger);
 }
 
 .cal__day.is-closed,
@@ -1070,7 +1070,7 @@
 }
 
 .cal__day.is-selected::after {
-  background: var(--gold-soft);
+  background: var(--blush);
 }
 
 .cal__legend {
@@ -1101,10 +1101,10 @@
   background: var(--sage);
 }
 .dot--limited {
-  background: var(--gold);
+  background: var(--rose);
 }
 .dot--booked {
-  background: #c9a59b;
+  background: var(--danger);
 }
 
 /* Prose, accordion, misc ---------------------------------------------------- */

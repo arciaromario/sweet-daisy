@@ -6,7 +6,7 @@ export function DaisyMark({ className = '' }: { className?: string }) {
       {[0, 45, 90, 135, 180, 225, 270, 315].map((r) => (
         <ellipse key={r} rx="5" ry="12.5" cy="-14" transform={`rotate(${r})`} />
       ))}
-      <circle r="4.5" fill="var(--gold)" stroke="none" />
+      <circle r="4.5" fill="var(--rose)" stroke="none" />
     </svg>
   );
 }

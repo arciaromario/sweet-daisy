@@ -100,8 +100,8 @@
   height: 17px;
   padding: 0 4px;
   border-radius: 999px;
-  background: var(--gold);
-  color: #fff;
+  background: var(--blush);
+  color: var(--ink);
   font-size: 0.62rem;
   font-weight: 500;
   animation: pop 400ms var(--ease-out);
@@ -171,7 +171,7 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--gold);
+  background: var(--rose);
   transform: translateX(-50%) scale(0);
   transition: transform var(--t) var(--ease);
 }
@@ -723,7 +723,7 @@
 .footer__mark {
   width: 44px;
   height: 44px;
-  color: var(--gold-soft);
+  color: var(--blush);
   margin-bottom: 18px;
 }
 
@@ -733,7 +733,7 @@
   line-height: 1;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--ivory);
+  color: var(--cream);
   padding-left: 0.18em;
 }
 
@@ -742,7 +742,7 @@
   font-size: 0.72rem;
   letter-spacing: 0.5em;
   text-transform: uppercase;
-  color: var(--gold-soft);
+  color: var(--blush);
   padding-left: 0.5em;
 }
 
@@ -771,7 +771,7 @@
   font-weight: 500;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--gold-soft);
+  color: var(--blush);
 }
 
 .footer__col ul {

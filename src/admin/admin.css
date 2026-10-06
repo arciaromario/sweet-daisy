@@ -113,7 +113,7 @@
 .adm-side__brand .daisy-mark {
   width: 32px;
   height: 32px;
-  color: var(--gold-soft);
+  color: var(--blush);
 }
 
 .adm-side__brand strong {
@@ -129,7 +129,7 @@
 .adm-side__brand span {
   font-size: 0.72rem;
   letter-spacing: 0.08em;
-  color: var(--gold-soft);
+  color: var(--blush);
 }
 
 .adm-side nav {
@@ -223,10 +223,10 @@
   align-items: center;
   gap: 10px 14px;
   padding: 12px clamp(14px, 3vw, 40px);
-  background: #fbf1d8;
-  border-bottom: 1px solid #efdcaa;
+  background: #f8e3df;
+  border-bottom: 1px solid #ecc6bf;
   font-size: 0.85rem;
-  color: #6b5320;
+  color: #7a4038;
 }
 
 .adm-demo p {
@@ -441,9 +441,9 @@
   white-space: nowrap;
 }
 
-.adm-badge--gold {
-  background: #f7e7bd;
-  color: #6b5320;
+.adm-badge--blush {
+  background: #f6dcd7;
+  color: #7a4038;
 }
 
 .adm-badge--sage {
@@ -1103,7 +1103,7 @@
   padding: 14px;
   border-radius: var(--r-sm);
   background: var(--ink);
-  color: var(--gold-soft);
+  color: var(--blush);
   font-size: 0.78rem;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -1423,7 +1423,7 @@
 }
 
 .adm-day.is-limited {
-  background: #fbf1d8;
+  background: #f8e0db;
 }
 
 .adm-day.is-booked {
@@ -1481,7 +1481,7 @@
 
 .adm-day__counts i.ev,
 .adm-dot.ev {
-  background: var(--gold);
+  background: var(--rose);
 }
 
 .adm-dot {
@@ -1518,7 +1518,7 @@
 }
 
 .adm-swatch.is-limited {
-  background: #fbf1d8;
+  background: #f8e0db;
 }
 .adm-swatch.is-booked {
   background: #f6e2dd;
@@ -1547,8 +1547,9 @@
 }
 
 .adm-status-btn.is-limited.is-active {
-  border-color: var(--gold);
-  background: var(--gold);
+  border-color: var(--blush);
+  background: var(--blush);
+  color: var(--ink);
 }
 
 .adm-status-btn.is-booked.is-active {

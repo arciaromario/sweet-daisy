@@ -1,26 +1,26 @@
 /* ==========================================================================
    Sweet Daisy — design tokens
-   Warm ivory & cream, muted sage/olive, soft beige and a quiet mustard-gold accent.
+   Taken from the Sweet Daisy logo: olive #626047, cream #F9E6C8 and blush #E2ADA5.
    ========================================================================== */
 
 :root {
-  /* Colour */
-  --ivory: #fbf8f2;
-  --paper: #fffdf9;
-  --cream: #f4ede1;
-  --beige: #eadfce;
-  --sand: #d8c7ae;
-  --sage-100: #e7e9dc;
-  --sage: #a3ab8f;
-  --olive: #6b7556;
-  --olive-deep: #434b36;
-  --gold: #b8913f;
-  --gold-soft: #e4cd94;
-  --ink: #2b2722;
-  --ink-soft: #5e574d;
-  --muted: #8a8274;
-  --line: #e6ddcf;
-  --line-strong: #d4c8b5;
+  /* Colour — brand: olive #626047, cream #F9E6C8, blush #E2ADA5 */
+  --ivory: #fdf7ec;
+  --paper: #fffcf6;
+  --cream: #f9e6c8;
+  --beige: #f0dcbd;
+  --sand: #dcc6a3;
+  --sage-100: #ebe9db;
+  --sage: #a9a78e;
+  --olive: #6e6b52;
+  --olive-deep: #626047;
+  --blush: #e2ada5;
+  --rose: #c4867b;
+  --ink: #2e2b22;
+  --ink-soft: #5c584a;
+  --muted: #878271;
+  --line: #ecdfc8;
+  --line-strong: #dbc9aa;
   --danger: #a4493d;
   --success: #5d7450;
 
@@ -30,7 +30,7 @@
   --text: var(--ink);
   --text-soft: var(--ink-soft);
   --accent: var(--olive-deep);
-  --focus: 0 0 0 3px rgba(184, 145, 63, 0.35);
+  --focus: 0 0 0 3px rgba(226, 173, 165, 0.6);
 
   /* Type */
   --serif: 'Cormorant Garamond', 'Cormorant', 'Times New Roman', Georgia, serif;

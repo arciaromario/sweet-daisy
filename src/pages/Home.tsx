@@ -229,13 +229,13 @@ export default function Home() {
 
           <div className="custom-feature__gallery">
             <Reveal delay={0} className="cf-img cf-img--1">
-              <Img src="wedding" alt="Tiered custom wedding cake" ratio="3 / 4" width={900} sizes="(min-width: 900px) 26vw, 50vw" tint="#59614a" />
+              <Img src="wedding" alt="Tiered custom wedding cake" ratio="3 / 4" width={900} sizes="(min-width: 900px) 26vw, 50vw" tint="#6d6a52" />
             </Reveal>
             <Reveal delay={120} className="cf-img cf-img--2">
-              <Img src="floral" alt="Custom floral birthday cake" ratio="1 / 1" width={700} sizes="(min-width: 900px) 20vw, 45vw" tint="#59614a" />
+              <Img src="floral" alt="Custom floral birthday cake" ratio="1 / 1" width={700} sizes="(min-width: 900px) 20vw, 45vw" tint="#6d6a52" />
             </Reveal>
             <Reveal delay={240} className="cf-img cf-img--3">
-              <Img src="pistachio" alt="Custom pistachio and rose cake" ratio="4 / 5" width={700} sizes="(min-width: 900px) 20vw, 45vw" tint="#59614a" />
+              <Img src="pistachio" alt="Custom pistachio and rose cake" ratio="4 / 5" width={700} sizes="(min-width: 900px) 20vw, 45vw" tint="#6d6a52" />
             </Reveal>
           </div>
         </div>

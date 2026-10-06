@@ -14,7 +14,7 @@ const views: { id: View; label: string }[] = [
   { id: 'all', label: 'Todos' },
 ];
 
-const statusTone = (s: OrderStatus) => (s === 'received' ? 'gold' : s === 'cancelled' ? 'danger' : s === 'completed' ? 'neutral' : 'sage');
+const statusTone = (s: OrderStatus) => (s === 'received' ? 'blush' : s === 'cancelled' ? 'danger' : s === 'completed' ? 'neutral' : 'sage');
 
 export default function Orders() {
   const { data, setData, error, loading, reload } = useLoad(listOrders);

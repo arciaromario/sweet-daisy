@@ -53,7 +53,7 @@ export function ProductCard({
             <Img src={product.images[1]} alt="" ratio="4 / 5" width={800} sizes="(min-width: 1100px) 30vw, 45vw" tint={product.tint} className="pcard__alt" />
           )}
         </Link>
-        {product.badge && <span className={`badge pcard__badge${product.badge === 'Limited' ? ' badge--gold' : ''}`}>{product.badge}</span>}
+        {product.badge && <span className={`badge pcard__badge${product.badge === 'Limited' ? ' badge--blush' : ''}`}>{product.badge}</span>}
         {onQuickView && (
           <button type="button" className="pcard__quick" onClick={() => onQuickView(product)}>
             <Icon name="eye" /> <span>Quick view</span>
