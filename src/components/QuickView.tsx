@@ -7,6 +7,7 @@ import { Img } from './Img';
 import { OptionGroup } from './OptionGroup';
 import { toCartItem } from './ProductCard';
 import { QuantityStepper } from './QuantityStepper';
+import { useScrollLock } from '../lib/scrollLock';
 
 export function QuickView({ product, onClose }: { product: Product | null; onClose: () => void }) {
   const { add } = useCart();
@@ -17,18 +18,18 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
 
+  useScrollLock(Boolean(product));
+
   useEffect(() => {
     if (!product) return;
     setSizeId(product.sizes[0].id);
     setFlavor(product.flavors?.[0]?.label ?? '');
     setQty(1);
-    document.body.classList.add('is-locked');
     const prev = document.activeElement as HTMLElement | null;
     dialogRef.current?.focus();
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeRef.current();
     window.addEventListener('keydown', onKey);
     return () => {
-      document.body.classList.remove('is-locked');
       window.removeEventListener('keydown', onKey);
       prev?.focus?.();
     };
