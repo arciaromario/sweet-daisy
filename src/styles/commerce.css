@@ -441,10 +441,14 @@
 /* Quick view ---------------------------------------------------------------- */
 .quickview {
   display: grid;
+  /* minmax(0, …) keeps long option rows from widening the dialog past the screen. */
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .quickview__img {
-  max-height: 46vh;
+  /* A fixed height instead of ratio + max-height, which collapsed the image row on phones. */
+  aspect-ratio: auto;
+  height: min(42vh, 360px);
 }
 
 .quickview__img img {
@@ -453,7 +457,9 @@
 
 .quickview__body {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
+  min-width: 0;
   align-content: start;
   padding: clamp(24px, 4vw, 44px);
 }
@@ -468,19 +474,20 @@
 
 .quickview__actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
+/* Sits beside the quantity stepper, or drops below it on narrow phones. */
 .quickview__add {
-  flex: 1;
+  flex: 1 1 180px;
 }
 
 @media (min-width: 800px) {
   .quickview {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
   .quickview__img {
-    max-height: none;
     height: 100%;
     --ratio: auto !important;
   }
