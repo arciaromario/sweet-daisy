@@ -120,7 +120,7 @@ export default function Home() {
             <div className="hero__inset" aria-hidden="true">
               <Img src="mini" alt="" ratio="1 / 1" width={400} sizes="200px" tint="#EFEEE6" />
             </div>
-            <Link to="/custom-cakes#availability" className="hero__card">
+            <Link to="/availability" className="hero__card">
               <span className="hero__card-label">
                 <Icon name="calendar" /> Next available
               </span>

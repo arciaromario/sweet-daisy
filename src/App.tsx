@@ -11,6 +11,7 @@ import Home from './pages/Home';
 const Shop = lazy(() => import('./pages/Shop'));
 const ProductPage = lazy(() => import('./pages/ProductPage'));
 const CustomCakes = lazy(() => import('./pages/CustomCakes'));
+const Availability = lazy(() => import('./pages/Availability'));
 const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const About = lazy(() => import('./pages/About'));
@@ -87,6 +88,7 @@ export default function App() {
               <Route path="treats" element={<Shop scope="treats" />} />
               <Route path="products/:slug" element={<ProductPage />} />
               <Route path="custom-cakes" element={<CustomCakes />} />
+              <Route path="availability" element={<Availability />} />
               <Route path="cart" element={<Cart />} />
               <Route path="about" element={<About />} />
               <Route path="contact" element={<Contact />} />

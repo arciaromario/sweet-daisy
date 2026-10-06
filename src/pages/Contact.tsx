@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { AvailabilityCalendar } from '../components/AvailabilityCalendar';
+import { Link } from 'react-router';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/PageHeader';
 import { Seo } from '../components/Seo';
@@ -63,7 +63,12 @@ export default function Contact() {
           </div>
           <div className="contact__block">
             <h2 className="contact__title">Upcoming availability</h2>
-            <AvailabilityCalendar />
+            <p className="muted">
+              See the next available dates for treats, celebration cakes and custom cakes.{' '}
+              <Link to="/availability" className="link-inline">
+                View availability
+              </Link>
+            </p>
           </div>
         </div>
 

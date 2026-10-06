@@ -11,6 +11,7 @@ export const mainNav = [
   { label: 'Cakes', href: '/cakes' },
   { label: 'Treats', href: '/treats' },
   { label: 'Custom Cakes', href: '/custom-cakes' },
+  { label: 'Availability', href: '/availability' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
 ];
@@ -18,6 +19,7 @@ export const mainNav = [
 export const footerNav = [
   { label: 'Shop', href: '/shop' },
   { label: 'Custom Cakes', href: '/custom-cakes' },
+  { label: 'Availability', href: '/availability' },
   { label: 'About', href: '/about' },
   { label: 'FAQ', href: '/faq' },
   { label: 'Contact', href: '/contact' },
