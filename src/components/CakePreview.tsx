@@ -114,6 +114,16 @@ function layout(widths: number[]): Tier[] {
   });
 }
 
+/** How far a horizontal line on the tier's side dips at x, seen from slightly above. */
+const sag = (t: Tier, x: number) => t.ry * Math.sqrt(Math.max(0, 1 - ((x - CX) / (t.w / 2)) ** 2));
+
+/** A band wrapping around the tier between y and y + h, curved like the tier's bottom edge. */
+const bandPath = (t: Tier, y: number, h: number) =>
+  `M${t.x} ${y} A${t.w / 2} ${t.ry} 0 0 0 ${t.x + t.w} ${y} L${t.x + t.w} ${y + h} A${t.w / 2} ${t.ry} 0 0 1 ${t.x} ${y + h} Z`;
+
+/** A line wrapping around the tier at height y. */
+const ringPath = (t: Tier, y: number, inset = 0) => `M${t.x + inset} ${y} A${t.w / 2 - inset} ${t.ry} 0 0 0 ${t.x + t.w - inset} ${y}`;
+
 const sidePath = (t: Tier) => `M${t.x} ${t.top} L${t.x} ${t.bottom} A${t.w / 2} ${t.ry} 0 0 0 ${t.x + t.w} ${t.bottom} L${t.x + t.w} ${t.top} Z`;
 const delay = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties;
 
@@ -211,17 +221,15 @@ function TierBody({ t, i, clip, sponge, fill, coat }: { t: Tier; i: number; clip
       <g clipPath={`url(#${clip})`}>
         <rect x={t.x} y={t.top - 2} width={t.w} height={t.h + t.ry + 4} className="cp-sponge" style={{ fill: sponge }} />
         {fill &&
-          [1, 2].map((n) => (
-            <rect
-              key={`${fill}-${n}`}
-              x={t.x}
-              y={t.top + (t.h * n) / 3 - stripe / 2}
-              width={t.w}
-              height={stripe}
-              className="cp-stripe"
-              style={{ fill, ...delay(n * 120) }}
-            />
-          ))}
+          [1, 2].map((n) => {
+            const y = t.top + (t.h * n) / 3 - stripe / 2;
+            return (
+              <g key={`${fill}-${n}`} className="cp-stripe" style={delay(n * 120)}>
+                <path d={bandPath(t, y, stripe)} style={{ fill }} />
+                <path d={ringPath(t, y + stripe)} stroke="#000" strokeOpacity="0.12" strokeWidth="1" fill="none" />
+              </g>
+            );
+          })}
         {coat && (
           <g key={`coat-${coat.color}-${coat.kind}`} className="cp-coat" style={delay(i * 160)}>
             <rect x={t.x - 2} y={t.top - 2} width={t.w + 4} height={t.h + t.ry + 4} fill={coat.color} opacity={coat.kind === 'semi' ? 0.58 : 1} />
@@ -282,7 +290,7 @@ function Decoration({ kind, tiers, coat }: { kind: Deco; tiers: Tier[]; coat: Co
         items.push(
           <path
             key={`${i}-${y}`}
-            d={`M${t.x + 3} ${y} Q${CX} ${y + t.ry * 0.9} ${t.x + t.w - 3} ${y}`}
+            d={ringPath(t, y, 3)}
             stroke={dark ? '#6d4535' : '#e8ddd2'}
             strokeWidth="1.6"
             fill="none"
@@ -298,12 +306,16 @@ function Decoration({ kind, tiers, coat }: { kind: Deco; tiers: Tier[]; coat: Co
   if (kind === 'piping') {
     const ink = dark ? '#f3e2d0' : '#d79b91';
     tiers.forEach((t, i) => {
-      const seg = t.w / Math.max(4, Math.round(t.w / 30));
-      let d = `M${t.x + 2} ${t.top + t.h * 0.28}`;
-      for (let x = t.x + 2; x < t.x + t.w - seg / 2; x += seg) d += ` Q${x + seg / 2} ${t.top + t.h * 0.28 + 12} ${x + seg} ${t.top + t.h * 0.28}`;
+      const seg = (t.w - 4) / Math.max(4, Math.round(t.w / 30));
+      const line = t.top + t.h * 0.28;
+      let d = `M${t.x + 2} ${line + sag(t, t.x + 2)}`;
+      for (let x = t.x + 2; x < t.x + t.w - seg / 2; x += seg) {
+        const mid = x + seg / 2;
+        d += ` Q${mid} ${line + sag(t, mid) + 12} ${x + seg} ${line + sag(t, x + seg)}`;
+      }
       items.push(<path key={`swag-${i}`} d={d} stroke={ink} strokeWidth="2.2" fill="none" pathLength={1} className="cp-draw" style={delay(i * 200)} />);
       for (let x = t.x + 5; x <= t.x + t.w - 5; x += 8) {
-        const dy = t.ry * Math.sqrt(Math.max(0, 1 - ((x - CX) / (t.w / 2)) ** 2));
+        const dy = sag(t, x);
         items.push(<circle key={`bead-${i}-${x}`} cx={x} cy={t.bottom + dy - 3} r="2.6" fill={dark ? '#f3e2d0' : '#fff'} stroke={ink} strokeWidth="0.8" className="cp-pop" style={delay(300 + i * 200 + (x - t.x) * 3)} />);
       }
     });
