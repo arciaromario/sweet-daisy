@@ -27,7 +27,7 @@ export default function About() {
           </p>
         </div>
         <div className="container">
-          <Img src="studio" alt="The Sweet Daisy studio" ratio="21 / 9" width={1800} sizes="100vw" priority tint="#EADFCE" className="about-hero__img" />
+          <Img src="studio" alt="The Sweet Daisy studio" ratio="21 / 9" width={1800} sizes="100vw" priority tint="#F6E7E3" className="about-hero__img" />
         </div>
       </section>
 
@@ -46,7 +46,7 @@ export default function About() {
             </p>
           </Reveal>
           <Reveal delay={120} className="story__media">
-            <Img src="hands" alt="Piping buttercream by hand" ratio="4 / 5" width={1000} sizes="(min-width: 900px) 45vw, 100vw" tint="#EADFCE" />
+            <Img src="hands" alt="Piping buttercream by hand" ratio="4 / 5" width={1000} sizes="(min-width: 900px) 45vw, 100vw" tint="#F6E7E3" />
           </Reveal>
         </div>
       </section>
@@ -74,7 +74,7 @@ export default function About() {
       <section className="section">
         <div className="container story__grid">
           <Reveal className="story__media">
-            <Img src="packaging" alt="Sweet Daisy signature box" ratio="4 / 5" width={1000} sizes="(min-width: 900px) 45vw, 100vw" tint="#EFE5D3" />
+            <Img src="packaging" alt="Sweet Daisy signature box" ratio="4 / 5" width={1000} sizes="(min-width: 900px) 45vw, 100vw" tint="#F6E7E3" />
           </Reveal>
           <Reveal delay={120} className="story__copy">
             <span className="eyebrow">Presentation</span>

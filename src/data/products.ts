@@ -95,7 +95,7 @@ export const products: Product[] = [
     badge: 'Bestseller',
     bestseller: true,
     details: cakeDetails,
-    tint: '#F2E3DC',
+    tint: '#F6E7E3',
   },
   {
     slug: 'vanilla-daisy-cake',
@@ -114,7 +114,7 @@ export const products: Product[] = [
     badge: 'Signature',
     bestseller: true,
     details: cakeDetails,
-    tint: '#F4EDE1',
+    tint: '#EFEEE6',
   },
   {
     slug: 'chocolate-velvet-cake',
@@ -132,7 +132,7 @@ export const products: Product[] = [
     prepHours: 24,
     bestseller: true,
     details: cakeDetails,
-    tint: '#E6D8CA',
+    tint: '#F6E7E3',
   },
   {
     slug: 'lemon-cream-cake',
@@ -150,7 +150,7 @@ export const products: Product[] = [
     prepHours: 24,
     bestseller: true,
     details: cakeDetails,
-    tint: '#F3EBCF',
+    tint: '#EFEEE6',
   },
   {
     slug: 'pistachio-rose-cake',
@@ -168,7 +168,7 @@ export const products: Product[] = [
     prepHours: 30,
     badge: 'New',
     details: [...cakeDetails.slice(0, 1).map((d) => ({ ...d, value: 'Contains pistachio, wheat, eggs, dairy.' })), ...cakeDetails.slice(1)],
-    tint: '#E3E5D3',
+    tint: '#F6E7E3',
   },
   {
     slug: 'carrot-walnut-cake',
@@ -185,7 +185,7 @@ export const products: Product[] = [
     leadDays: 2,
     prepHours: 24,
     details: [{ label: 'Allergens', value: 'Contains walnuts, wheat, eggs, dairy.' }, ...cakeDetails.slice(1)],
-    tint: '#EBDCC6',
+    tint: '#EFEEE6',
   },
   {
     slug: 'mini-celebration-cake',
@@ -207,7 +207,7 @@ export const products: Product[] = [
     badge: 'Bestseller',
     bestseller: true,
     details: cakeDetails,
-    tint: '#F2E6DA',
+    tint: '#F6E7E3',
   },
   {
     slug: 'bento-heart-cake',
@@ -223,7 +223,7 @@ export const products: Product[] = [
     leadDays: 1,
     prepHours: 4,
     details: cakeDetails,
-    tint: '#F3E4DE',
+    tint: '#EFEEE6',
   },
   {
     slug: 'signature-cupcake-box',
@@ -244,7 +244,7 @@ export const products: Product[] = [
     prepHours: 5,
     bestseller: true,
     details: cakeDetails,
-    tint: '#F1E7DA',
+    tint: '#F6E7E3',
   },
   {
     slug: 'vanilla-bean-cupcakes',
@@ -261,7 +261,7 @@ export const products: Product[] = [
     leadDays: 1,
     prepHours: 4,
     details: cakeDetails,
-    tint: '#F5EEE2',
+    tint: '#EFEEE6',
   },
   {
     slug: 'macaron-gift-box',
@@ -279,7 +279,7 @@ export const products: Product[] = [
     leadDays: 1,
     prepHours: 24,
     details: [{ label: 'Allergens', value: 'Contains almonds, eggs, dairy. Naturally gluten-free.' }, ...cakeDetails.slice(1)],
-    tint: '#EEE6D6',
+    tint: '#F6E7E3',
   },
   {
     slug: 'sweet-daisy-dessert-box',
@@ -298,7 +298,7 @@ export const products: Product[] = [
     prepHours: 8,
     badge: 'Gift favourite',
     details: cakeDetails,
-    tint: '#EFE5D3',
+    tint: '#EFEEE6',
   },
   {
     slug: 'brown-butter-cookies',
@@ -315,7 +315,7 @@ export const products: Product[] = [
     leadDays: 0,
     prepHours: 2,
     details: cakeDetails,
-    tint: '#E9DCC8',
+    tint: '#F6E7E3',
   },
   {
     slug: 'berry-tartlets',
@@ -332,7 +332,7 @@ export const products: Product[] = [
     leadDays: 1,
     prepHours: 5,
     details: cakeDetails,
-    tint: '#F1E2DA',
+    tint: '#EFEEE6',
   },
   {
     slug: 'autumn-spice-cake',
@@ -350,7 +350,7 @@ export const products: Product[] = [
     prepHours: 24,
     badge: 'Limited',
     details: [{ label: 'Allergens', value: 'Contains pecans, wheat, eggs, dairy.' }, ...cakeDetails.slice(1)],
-    tint: '#EADBC2',
+    tint: '#F6E7E3',
   },
   {
     slug: 'seasonal-treat-box',
@@ -366,7 +366,7 @@ export const products: Product[] = [
     prepHours: 10,
     badge: 'Limited',
     details: cakeDetails,
-    tint: '#ECE1CB',
+    tint: '#EFEEE6',
   },
 ];
 

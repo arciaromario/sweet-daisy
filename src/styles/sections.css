@@ -119,7 +119,7 @@
   min-width: 210px;
   padding: 16px 20px;
   border-radius: var(--r-md);
-  background: rgba(251, 248, 242, 0.94);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(10px);
   box-shadow: var(--shadow-md);
   transition: transform var(--t) var(--ease);
@@ -265,7 +265,7 @@
   place-items: center;
   width: 42px;
   height: 42px;
-  border: 1px solid rgba(251, 248, 242, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 50%;
   flex: none;
   transition:
@@ -367,7 +367,7 @@
   position: relative;
   padding-block: var(--section);
   background: var(--olive-deep);
-  color: rgba(251, 248, 242, 0.82);
+  color: rgba(255, 255, 255, 0.82);
   overflow: hidden;
 }
 
@@ -383,7 +383,7 @@
 }
 
 .custom-feature h2 {
-  color: var(--cream);
+  color: #fff;
 }
 
 .custom-feature h2 em {
@@ -395,7 +395,7 @@
 }
 
 .custom-feature .lead {
-  color: rgba(251, 248, 242, 0.78);
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .custom-feature__grid {
@@ -424,7 +424,7 @@
   display: flex;
   gap: 20px;
   padding-top: 18px;
-  border-top: 1px solid rgba(251, 248, 242, 0.14);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .custom-feature__steps .serif {
@@ -437,7 +437,7 @@
 .custom-feature__steps strong {
   display: block;
   font-weight: 400;
-  color: var(--cream);
+  color: #fff;
   letter-spacing: 0.02em;
 }
 

@@ -26,7 +26,7 @@ const blank = (category: string): Product => ({
     { label: 'Allergens', value: 'Contains wheat, eggs, dairy. Made in a kitchen that handles nuts.' },
     { label: 'Storage', value: 'Keep refrigerated. Serve at room temperature.' },
   ],
-  tint: '#F4EDE1',
+  tint: '#F6E7E3',
   active: true,
 });
 
