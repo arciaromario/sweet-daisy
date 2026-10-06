@@ -4,6 +4,7 @@ import { useCatalog } from '../context/CatalogContext';
 import { categoryName, formatPrice, fromPrice } from '../data/products';
 import { Icon } from './Icon';
 import { Img } from './Img';
+import { useScrollLock } from '../lib/scrollLock';
 
 const suggestions = ['Strawberry', 'Chocolate', 'Mini cakes', 'Cupcakes', 'Macarons', 'Gluten-free'];
 
@@ -14,15 +15,15 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
 
+  useScrollLock(open);
+
   useEffect(() => {
     if (!open) return;
     setTimeout(() => inputRef.current?.focus(), 60);
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeRef.current();
     window.addEventListener('keydown', onKey);
-    document.body.classList.add('is-locked');
     return () => {
       window.removeEventListener('keydown', onKey);
-      document.body.classList.remove('is-locked');
     };
   }, [open]);
 

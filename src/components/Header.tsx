@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import { Icon } from './Icon';
 import { Logo } from './Logo';
 import { SearchOverlay } from './SearchOverlay';
+import { useScrollLock } from '../lib/scrollLock';
 
 export function Header() {
   const { count, open } = useCart();
@@ -28,8 +29,9 @@ export function Header() {
     setSearchOpen(false);
   }, [pathname]);
 
+  useScrollLock(menuOpen);
+
   useEffect(() => {
-    document.body.classList.toggle('is-locked', menuOpen);
     if (!menuOpen) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenuOpen(false);
     window.addEventListener('keydown', onKey);

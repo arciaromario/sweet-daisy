@@ -5,6 +5,7 @@ import { formatPrep, formatPrice } from '../data/products';
 import { CartLine } from './CartLine';
 import { FreeDeliveryMeter } from './FreeDeliveryMeter';
 import { Icon } from './Icon';
+import { useScrollLock } from '../lib/scrollLock';
 
 export function CartDrawer() {
   const { items, isOpen, close, subtotal, count, maxPrepHours } = useCart();
@@ -13,9 +14,9 @@ export function CartDrawer() {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => close(), [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  useScrollLock(isOpen);
 
   useEffect(() => {
-    document.body.classList.toggle('is-locked', isOpen);
     if (!isOpen) return;
     const prev = document.activeElement as HTMLElement | null;
     panelRef.current?.focus();
@@ -71,7 +72,10 @@ export function CartDrawer() {
                   <Icon name="clock" className="inline-icon" /> Average preparation time: {formatPrep(maxPrepHours)}.
                 </p>
               )}
-              <button className="btn btn--block" onClick={() => navigate('/checkout')}>
+              <button className="btn btn--block" onClick={() => {
+                  close();
+                  navigate('/checkout');
+                }}>
                 Continue to Checkout
               </button>
               <Link to="/cart" className="link drawer__view" onClick={close}>
