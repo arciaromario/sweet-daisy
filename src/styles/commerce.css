@@ -1180,6 +1180,11 @@
   color: var(--ivory);
 }
 
+.builder__done-icon--wait {
+  background: var(--blush);
+  color: var(--ink);
+}
+
 .builder__done-icon .icon {
   width: 28px;
   height: 28px;
@@ -1611,6 +1616,12 @@
 
 .confirm .lead {
   max-width: 600px;
+}
+
+.confirm__pay {
+  display: grid;
+  gap: 12px;
+  width: min(480px, 100%);
 }
 
 .confirm__card {

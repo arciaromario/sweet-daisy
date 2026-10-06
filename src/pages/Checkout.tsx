@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { AvailabilityCalendar } from '../components/AvailabilityCalendar';
 import { Icon } from '../components/Icon';
 import { Img } from '../components/Img';
@@ -8,11 +8,40 @@ import { Seo } from '../components/Seo';
 import { deliveryFee, useCart } from '../context/CartContext';
 import { useCatalog, useSite } from '../context/CatalogContext';
 import { formatPrep, formatPrice } from '../data/products';
-import { placeOrder, type PlacedOrder } from '../lib/api';
+import { placeOrder, startCardPayment, type PlacedOrder } from '../lib/api';
 import { dayStatus, firstAvailable, formatDate, isBookable, parseISO } from '../lib/availability';
 import { supabase } from '../lib/supabase';
 
 type Method = 'pickup' | 'delivery';
+type Payment = 'card' | 'in_person';
+type Placed = PlacedOrder & {
+  date: string;
+  slot: string;
+  method: Method;
+  email: string;
+  payment: Payment;
+  /** Card orders only: where the Stripe payment stands. */
+  pay?: 'paid' | 'unpaid';
+  payError?: string;
+};
+
+// The order survives the round trip to Stripe in this tab.
+const PENDING_KEY = 'sweetdaisy.pending-order';
+const savePending = (p: Placed) => {
+  try {
+    sessionStorage.setItem(PENDING_KEY, JSON.stringify(p));
+  } catch {
+    // Private mode: the return page falls back to the order number alone.
+  }
+};
+const readPending = (orderNumber: string): Placed | null => {
+  try {
+    const p = JSON.parse(sessionStorage.getItem(PENDING_KEY) ?? 'null') as Placed | null;
+    return p?.orderNumber === orderNumber ? p : null;
+  } catch {
+    return null;
+  }
+};
 type Form = { name: string; email: string; phone: string; line1: string; line2: string; city: string; postal: string; instructions: string };
 
 const fieldIds: Record<keyof Form, string> = {
@@ -43,12 +72,47 @@ export default function Checkout() {
   const [method, setMethod] = useState<Method>('pickup');
   const [date, setDate] = useState('');
   const [slot, setSlot] = useState('');
-  const [payment, setPayment] = useState<'card' | 'in_person'>('card');
+  const [payment, setPayment] = useState<Payment>('card');
   const [state, setForm] = useState<Form>({ name: '', email: '', phone: '', line1: '', line2: '', city: site.address.city, postal: '', instructions: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState('');
   const [sending, setSending] = useState(false);
-  const [placed, setPlaced] = useState<(PlacedOrder & { date: string; slot: string; method: Method; email: string }) | null>(null);
+  const [placed, setPlaced] = useState<Placed | null>(null);
+  const [params, setParams] = useSearchParams();
+  const [paying, setPaying] = useState(false);
+
+  // Back from Stripe: ?paid=SD-… or ?unpaid=SD-… (cancelled).
+  useEffect(() => {
+    const paid = params.get('paid');
+    const unpaid = params.get('unpaid');
+    const number = paid ?? unpaid;
+    if (!number) return;
+    const pending = readPending(number);
+    setPlaced(
+      pending
+        ? { ...pending, pay: paid ? 'paid' : 'unpaid' }
+        : { orderNumber: number, total: NaN, date: '', slot: '', method: 'pickup', email: '', payment: 'card', pay: paid ? 'paid' : 'unpaid' },
+    );
+    if (paid) {
+      try {
+        sessionStorage.removeItem(PENDING_KEY);
+      } catch {
+        // Ignore.
+      }
+    }
+    setParams({}, { replace: true });
+  }, [params, setParams]);
+
+  async function payNow(order: Placed) {
+    setPaying(true);
+    try {
+      savePending(order);
+      window.location.assign(await startCardPayment(order.orderNumber, order.email));
+    } catch (e) {
+      setPlaced({ ...order, pay: 'unpaid', payError: e instanceof Error ? e.message : 'The payment page could not be opened.' });
+      setPaying(false);
+    }
+  }
 
   // Prefill the email for signed-in customers.
   useEffect(() => {
@@ -116,6 +180,7 @@ export default function Checkout() {
       return;
     }
     setSending(true);
+    let leaving = false;
     try {
       const result = await placeOrder(
         {
@@ -132,46 +197,93 @@ export default function Checkout() {
         },
         settings,
       );
-      setPlaced({ ...result, date, slot, method, email: form.email.trim() });
+      const order: Placed = { ...result, date, slot, method, email: form.email.trim(), payment };
       cart.clear();
+      if (payment === 'card' && !demo) {
+        savePending(order);
+        try {
+          window.location.assign(await startCardPayment(order.orderNumber, order.email));
+          leaving = true; // Keep the button busy while the browser leaves for Stripe.
+          return;
+        } catch (e) {
+          setPlaced({ ...order, pay: 'unpaid', payError: e instanceof Error ? e.message : undefined });
+        }
+      } else {
+        setPlaced(order);
+      }
       window.scrollTo({ top: 0 });
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : 'We couldn’t place your order. Please try again.');
     } finally {
-      setSending(false);
+      if (!leaving) setSending(false);
     }
   }
 
   if (placed) {
+    const unpaid = placed.pay === 'unpaid';
+    const known = Boolean(placed.date);
     return (
       <div className="checkout-shell">
-        <Seo title="Order confirmed" path="/checkout" />
+        <Seo title={unpaid ? 'Complete your payment' : 'Order confirmed'} path="/checkout" />
         <CheckoutHeader />
         <section className="container container--narrow confirm" role="status">
-          <span className="builder__done-icon">
-            <Icon name="check" />
+          <span className={`builder__done-icon${unpaid ? ' builder__done-icon--wait' : ''}`}>
+            <Icon name={unpaid ? 'card' : 'check'} />
           </span>
           <span className="eyebrow eyebrow--plain">Order {placed.orderNumber}</span>
-          <h1>Thank you — your order is in the oven.</h1>
-          <p className="lead">
-            We’ve sent a confirmation to <strong>{placed.email}</strong>. Your treats will be ready for {placed.method} on{' '}
-            <strong>{formatDate(placed.date)}</strong>, {placed.slot}.
-          </p>
-          <div className="confirm__card">
-            <div className="summary-row">
-              <span>{placed.method === 'pickup' ? 'Pickup from' : 'Delivery'}</span>
-              <span>{placed.method === 'pickup' ? `${site.address.street}, ${site.address.city}` : 'To your address'}</span>
-            </div>
-            <div className="summary-row summary-row--total">
-              <span>Total</span>
-              <span className="price">{formatPrice(placed.total)}</span>
-            </div>
-            <p className="small muted">
-              {payment === 'card'
-                ? 'A secure payment link will follow by email to complete your order.'
-                : `Payment is due at ${placed.method}. We accept card and contactless.`}
+          <h1>{unpaid ? 'Your order is saved — payment is still pending.' : 'Thank you — your order is in the oven.'}</h1>
+          {known ? (
+            <p className="lead">
+              {unpaid ? 'We’ve reserved your order' : 'Your treats will be ready'} for {placed.method} on <strong>{formatDate(placed.date)}</strong>, {placed.slot}.{' '}
+              {!unpaid && (
+                <>
+                  We’ll be in touch at <strong>{placed.email}</strong>.
+                </>
+              )}
             </p>
-          </div>
+          ) : (
+            !unpaid && <p className="lead">Your payment was received. We’ll be in touch by email with the details.</p>
+          )}
+
+          {unpaid && (
+            <div className="confirm__pay">
+              {placed.payError && (
+                <p className="notice notice--error" role="alert">
+                  <Icon name="info" /> {placed.payError}
+                </p>
+              )}
+              {known && !demo ? (
+                <button className="btn btn--block" disabled={paying} onClick={() => payNow(placed)}>
+                  {paying ? <span className="spinner" aria-label="Opening secure payment" /> : <>Pay securely · {formatPrice(placed.total)}</>}
+                </button>
+              ) : null}
+              <p className="small muted">
+                Prefer not to pay online? Call us on <a href={site.phoneHref}>{site.phone}</a> or email <a href={`mailto:${site.email}`}>{site.email}</a> and you can pay at {placed.method || 'pickup'} instead.
+              </p>
+            </div>
+          )}
+
+          {known && (
+            <div className="confirm__card">
+              <div className="summary-row">
+                <span>{placed.method === 'pickup' ? 'Pickup from' : 'Delivery'}</span>
+                <span>{placed.method === 'pickup' ? `${site.address.street}, ${site.address.city}` : 'To your address'}</span>
+              </div>
+              <div className="summary-row summary-row--total">
+                <span>Total</span>
+                <span className="price">{formatPrice(placed.total)}</span>
+              </div>
+              <p className="small muted">
+                {placed.payment === 'in_person'
+                  ? `Payment is due at ${placed.method}. We accept card and contactless.`
+                  : placed.pay === 'paid'
+                    ? 'Paid securely by card through Stripe.'
+                    : demo
+                      ? 'A secure payment link will follow by email to complete your order.'
+                      : 'Card payment not completed yet.'}
+              </p>
+            </div>
+          )}
           {demo && <p className="small muted">Demo mode — this order was not saved. Connect Supabase to receive real orders.</p>}
           <div className="hero__ctas">
             <Link to="/shop" className="btn">
