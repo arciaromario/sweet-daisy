@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router';
 import { useCart } from '../context/CartContext';
 import { categoryName, formatPrep, formatPrice, type Product } from '../data/products';
@@ -38,7 +39,9 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
   if (!product) return null;
   const item = toCartItem(product, { sizeId, flavor, quantity: qty });
 
-  return (
+  // Rendered into <body>: inside the page wrapper its entry animation creates a stacking
+  // context, which would keep the dialog under the sticky header.
+  return createPortal(
     <div className="modal is-open">
       <div className="modal__backdrop" onClick={onClose} />
       <div className="modal__dialog quickview" role="dialog" aria-modal="true" aria-labelledby="qv-title" tabIndex={-1} ref={dialogRef}>
@@ -99,6 +102,7 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
           </Link>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
