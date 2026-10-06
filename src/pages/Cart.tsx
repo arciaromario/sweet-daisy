@@ -5,11 +5,11 @@ import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/PageHeader';
 import { Seo } from '../components/Seo';
 import { useCart } from '../context/CartContext';
-import { formatPrice } from '../data/products';
+import { formatPrep, formatPrice } from '../data/products';
 import { useSite } from '../context/CatalogContext';
 
 export default function Cart() {
-  const { items, subtotal, count, maxLeadDays } = useCart();
+  const { items, subtotal, count, maxLeadDays, maxPrepHours } = useCart();
   const navigate = useNavigate();
   const site = useSite();
 
@@ -70,6 +70,11 @@ export default function Cart() {
                 Continue to Checkout
               </button>
               <ul className="summary-card__info">
+                {formatPrep(maxPrepHours) && (
+                  <li>
+                    <Icon name="clock" /> Average preparation time: {formatPrep(maxPrepHours)}
+                  </li>
+                )}
                 <li>
                   <Icon name="calendar" />
                   {maxLeadDays > 0 ? `Your bag needs ${maxLeadDays} ${maxLeadDays === 1 ? 'day' : 'days'} notice — choose your date at checkout.` : 'Ready as soon as today.'}

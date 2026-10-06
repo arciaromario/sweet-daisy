@@ -21,6 +21,7 @@ export interface ProductRow {
   decorations: NonNullable<Product['decorations']>;
   allow_message: boolean;
   lead_days: number;
+  prep_hours: number | null;
   badge: string | null;
   bestseller: boolean;
   details: Product['details'];
@@ -41,6 +42,7 @@ export const fromRow = (r: ProductRow): Product => ({
   decorations: r.decorations?.length ? r.decorations : undefined,
   message: r.allow_message,
   leadDays: r.lead_days,
+  prepHours: r.prep_hours == null ? undefined : Number(r.prep_hours),
   badge: r.badge ?? undefined,
   bestseller: r.bestseller,
   details: r.details,
@@ -61,6 +63,7 @@ export const toRow = (p: Product): ProductRow => ({
   decorations: p.decorations ?? [],
   allow_message: !!p.message,
   lead_days: p.leadDays,
+  prep_hours: p.prepHours ?? null,
   badge: p.badge || null,
   bestseller: !!p.bestseller,
   details: p.details,

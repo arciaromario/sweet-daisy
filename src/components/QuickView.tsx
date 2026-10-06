@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { useCart } from '../context/CartContext';
-import { categoryName, formatPrice, type Product } from '../data/products';
+import { categoryName, formatPrep, formatPrice, type Product } from '../data/products';
 import { Icon } from './Icon';
 import { Img } from './Img';
 import { OptionGroup } from './OptionGroup';
@@ -52,6 +52,11 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
           </h2>
           <p className="price quickview__price">{formatPrice(item.unitPrice)}</p>
           <p className="muted">{product.short}</p>
+          {formatPrep(product.prepHours) && (
+            <p className="prep-note">
+              <Icon name="clock" /> Average preparation time: <strong>{formatPrep(product.prepHours)}</strong>
+            </p>
+          )}
 
           <OptionGroup
             name="qv-size"

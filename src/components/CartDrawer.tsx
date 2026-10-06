@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { useCart } from '../context/CartContext';
-import { formatPrice } from '../data/products';
+import { formatPrep, formatPrice } from '../data/products';
 import { CartLine } from './CartLine';
 import { FreeDeliveryMeter } from './FreeDeliveryMeter';
 import { Icon } from './Icon';
 
 export function CartDrawer() {
-  const { items, isOpen, close, subtotal, count } = useCart();
+  const { items, isOpen, close, subtotal, count, maxPrepHours } = useCart();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -66,6 +66,11 @@ export function CartDrawer() {
               <p className="small muted">
                 <Icon name="store" className="inline-icon" /> Pickup is free. Delivery and date are chosen at checkout.
               </p>
+              {formatPrep(maxPrepHours) && (
+                <p className="small muted">
+                  <Icon name="clock" className="inline-icon" /> Average preparation time: {formatPrep(maxPrepHours)}.
+                </p>
+              )}
               <button className="btn btn--block" onClick={() => navigate('/checkout')}>
                 Continue to Checkout
               </button>

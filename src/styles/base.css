@@ -9,6 +9,8 @@
 }
 
 html {
+  /* Fraunces' soft, rounded terminals echo the logo. Ignored by Montserrat. */
+  font-variation-settings: 'SOFT' 100, 'WONK' 0;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-behavior: smooth;
@@ -95,8 +97,8 @@ h5 {
   margin: 0;
   font-family: var(--serif);
   font-weight: 400;
-  line-height: 1.08;
-  letter-spacing: -0.012em;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   color: var(--ink);
   text-wrap: balance;
 }

@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { footerNav } from '../data/site';
 import { useSite } from '../context/CatalogContext';
 import { Icon } from './Icon';
-import { DaisyMark } from './Logo';
+import { Wordmark } from './Logo';
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -11,9 +11,7 @@ export function Footer() {
     <footer className="footer">
       <div className="container">
         <div className="footer__brand">
-          <DaisyMark className="footer__mark" />
-          <p className="footer__name">Sweet Daisy</p>
-          <p className="footer__desc">Cakes and Treats</p>
+          <Wordmark className="wordmark--footer" />
         </div>
 
         <div className="footer__grid">

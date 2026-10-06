@@ -5,7 +5,7 @@ import { Img } from '../../components/Img';
 import { useCatalog } from '../../context/CatalogContext';
 import { fromPrice, type Product } from '../../data/products';
 import { listCategories, listProducts, reorderProducts, saveProduct } from '../../lib/adminApi';
-import { Badge, Empty, ErrorNote, Loading, money, MoveButtons, move, PageTitle, Toggle, useLoad, useToast } from '../ui';
+import { Badge, Empty, ErrorNote, Loading, money, MoveButtons, move, PageTitle, prepLabel, Toggle, useLoad, useToast } from '../ui';
 
 export default function Products() {
   const { data, setData, error, loading, reload } = useLoad(async () => {
@@ -93,7 +93,7 @@ export default function Products() {
                   <span>
                     <strong>{p.name}</strong>
                     <span className="adm-muted adm-small">
-                      {catName(p.category)} · desde {money(fromPrice(p))} · {p.sizes.length} tamaño(s)
+                      {catName(p.category)} · desde {money(fromPrice(p))} · elaboración {prepLabel(p.prepHours)}
                     </span>
                     <span className="adm-badges">
                       {p.bestseller && <Badge tone="blush">Destacado</Badge>}

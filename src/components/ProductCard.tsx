@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { useCart } from '../context/CartContext';
-import { formatPrice, fromPrice, type Product } from '../data/products';
+import { formatPrep, formatPrice, fromPrice, type Product } from '../data/products';
 import { Icon } from './Icon';
 import { Img } from './Img';
 
@@ -25,6 +25,7 @@ export function toCartItem(p: Product, opts: { sizeId?: string; flavor?: string;
     unitPrice: size.price + (flavor?.price ?? 0) + (deco?.price ?? 0),
     quantity: opts.quantity ?? 1,
     leadDays: p.leadDays,
+    prepHours: p.prepHours,
   };
 }
 
@@ -69,6 +70,11 @@ export function ProductCard({
           <span className="price pcard__price">{showOptions ? formatPrice(size.price) : `From ${formatPrice(fromPrice(product))}`}</span>
         </div>
         <p className="pcard__desc">{product.short}</p>
+        {formatPrep(product.prepHours, 'short') && (
+          <p className="pcard__prep">
+            <Icon name="clock" /> Prep time {formatPrep(product.prepHours, 'short')}
+          </p>
+        )}
 
         {showOptions ? (
           <>

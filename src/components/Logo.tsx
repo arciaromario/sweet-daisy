@@ -11,14 +11,20 @@ export function DaisyMark({ className = '' }: { className?: string }) {
   );
 }
 
+/** Text wordmark matching the brand logo: "sweet daisy" over "CAKES & TREATS". */
+export function Wordmark({ compact = false, className = '' }: { compact?: boolean; className?: string }) {
+  return (
+    <span className={`wordmark ${className}`}>
+      <span className="wordmark__name">sweet daisy</span>
+      {!compact && <span className="wordmark__desc">Cakes &amp; Treats</span>}
+    </span>
+  );
+}
+
 export function Logo({ compact = false, light = false }: { compact?: boolean; light?: boolean }) {
   return (
-    <Link to="/" className={`logo${light ? ' logo--light' : ''}`} aria-label="Sweet Daisy — Cakes and Treats, home">
-      <DaisyMark />
-      <span className="logo__text">
-        <span className="logo__name">Sweet Daisy</span>
-        {!compact && <span className="logo__desc">Cakes and Treats</span>}
-      </span>
+    <Link to="/" className={`logo${light ? ' logo--light' : ''}`} aria-label="Sweet Daisy — Cakes & Treats, home">
+      <Wordmark compact={compact} />
     </Link>
   );
 }

@@ -6,7 +6,7 @@ import { useCatalog } from '../../context/CatalogContext';
 import { photo } from '../../data/images';
 import type { Category, Product } from '../../data/products';
 import { deleteProduct, listCategories, listProducts, saveProduct, uploadProductImage } from '../../lib/adminApi';
-import { Card, ErrorNote, Field, Loading, PageTitle, RowsEditor, SaveBar, slugify, Toggle, useToast } from '../ui';
+import { Card, ErrorNote, Field, Loading, PageTitle, prepLabel, RowsEditor, SaveBar, slugify, Toggle, useToast } from '../ui';
 
 const blank = (category: string): Product => ({
   slug: '',
@@ -20,6 +20,7 @@ const blank = (category: string): Product => ({
   decorations: [],
   message: true,
   leadDays: 2,
+  prepHours: 24,
   bestseller: false,
   details: [
     { label: 'Allergens', value: 'Contains wheat, eggs, dairy. Made in a kitchen that handles nuts.' },
@@ -243,9 +244,16 @@ export default function ProductEditor() {
           </Card>
           <Card title="Pedido">
             <div className="stack">
-              <Field label="Días de antelación" hint="0 = se puede pedir para hoy.">
+              <PrepTimeField hours={p.prepHours} onChange={(prepHours) => set({ prepHours })} />
+              <Field label="Días de antelación mínima" hint="Con cuántos días de aviso se puede pedir. 0 = para hoy.">
                 <input className="input" type="number" min={0} max={60} value={p.leadDays} onChange={(e) => set({ leadDays: Math.max(0, Number(e.target.value)) })} />
               </Field>
+              {(p.prepHours ?? 0) > p.leadDays * 24 && (
+                <p className="adm-warn">
+                  La elaboración ({prepLabel(p.prepHours)}) tarda más que la antelación mínima ({p.leadDays} {p.leadDays === 1 ? 'día' : 'días'}). Los clientes podrían
+                  pedir con menos tiempo del necesario: sube los días de antelación.
+                </p>
+              )}
               <Field label="Etiqueta" hint="Se muestra sobre la foto. Déjala vacía si no quieres ninguna.">
                 <input className="input" list="badge-presets" value={p.badge ?? ''} onChange={(e) => set({ badge: e.target.value })} />
                 <datalist id="badge-presets">
@@ -269,6 +277,34 @@ export default function ProductEditor() {
 
       <SaveBar dirty={dirty} saving={saving} onSave={save} onReset={() => setP(original)} />
     </>
+  );
+}
+
+/** Average preparation time, entered in hours or days and stored in hours. */
+function PrepTimeField({ hours, onChange }: { hours?: number; onChange: (h: number | undefined) => void }) {
+  const [unit, setUnit] = useState<'hours' | 'days'>(hours != null && hours >= 24 && hours % 12 === 0 ? 'days' : 'hours');
+  const value = hours == null ? '' : unit === 'days' ? String(hours / 24) : String(hours);
+  return (
+    <Field label="Tiempo promedio de elaboración" hint={`Lo ven tus clientes en la tienda (${prepLabel(hours)}).`}>
+      <div className="adm-inline">
+        <input
+          className="input"
+          type="number"
+          min={0}
+          step={unit === 'days' ? 0.5 : 1}
+          value={value}
+          placeholder="Ej. 24"
+          onChange={(e) => {
+            const n = e.target.value === '' ? undefined : Math.max(0, Number(e.target.value));
+            onChange(n == null ? undefined : unit === 'days' ? n * 24 : n);
+          }}
+        />
+        <select className="select" value={unit} onChange={(e) => setUnit(e.target.value as 'hours' | 'days')} aria-label="Unidad">
+          <option value="hours">horas</option>
+          <option value="days">días</option>
+        </select>
+      </div>
+    </Field>
   );
 }
 

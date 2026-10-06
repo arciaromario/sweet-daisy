@@ -46,6 +46,8 @@ export interface Product {
   message?: boolean;
   /** Minimum notice in days before the order can be collected/delivered. */
   leadDays: number;
+  /** Average preparation time in hours, set by the owner and shown to customers. */
+  prepHours?: number;
   badge?: string;
   bestseller?: boolean;
   details: { label: string; value: string }[];
@@ -89,6 +91,7 @@ export const products: Product[] = [
     decorations: standardDecorations,
     message: true,
     leadDays: 2,
+    prepHours: 24,
     badge: 'Bestseller',
     bestseller: true,
     details: cakeDetails,
@@ -107,6 +110,7 @@ export const products: Product[] = [
     decorations: standardDecorations,
     message: true,
     leadDays: 2,
+    prepHours: 24,
     badge: 'Signature',
     bestseller: true,
     details: cakeDetails,
@@ -125,6 +129,7 @@ export const products: Product[] = [
     decorations: standardDecorations,
     message: true,
     leadDays: 2,
+    prepHours: 24,
     bestseller: true,
     details: cakeDetails,
     tint: '#E6D8CA',
@@ -142,6 +147,7 @@ export const products: Product[] = [
     decorations: standardDecorations,
     message: true,
     leadDays: 2,
+    prepHours: 24,
     bestseller: true,
     details: cakeDetails,
     tint: '#F3EBCF',
@@ -159,6 +165,7 @@ export const products: Product[] = [
     decorations: standardDecorations,
     message: true,
     leadDays: 3,
+    prepHours: 30,
     badge: 'New',
     details: [...cakeDetails.slice(0, 1).map((d) => ({ ...d, value: 'Contains pistachio, wheat, eggs, dairy.' })), ...cakeDetails.slice(1)],
     tint: '#E3E5D3',
@@ -176,6 +183,7 @@ export const products: Product[] = [
     decorations: standardDecorations,
     message: true,
     leadDays: 2,
+    prepHours: 24,
     details: [{ label: 'Allergens', value: 'Contains walnuts, wheat, eggs, dairy.' }, ...cakeDetails.slice(1)],
     tint: '#EBDCC6',
   },
@@ -195,6 +203,7 @@ export const products: Product[] = [
     decorations: standardDecorations.slice(0, 3),
     message: true,
     leadDays: 1,
+    prepHours: 6,
     badge: 'Bestseller',
     bestseller: true,
     details: cakeDetails,
@@ -212,6 +221,7 @@ export const products: Product[] = [
     flavors: [{ label: 'Vanilla & raspberry', price: 0 }, { label: 'Chocolate velvet', price: 0 }],
     message: true,
     leadDays: 1,
+    prepHours: 4,
     details: cakeDetails,
     tint: '#F3E4DE',
   },
@@ -231,6 +241,7 @@ export const products: Product[] = [
     flavors: [{ label: 'Signature assortment', price: 0 }, { label: 'All vanilla daisy', price: 0 }, { label: 'All chocolate velvet', price: 0 }],
     message: true,
     leadDays: 1,
+    prepHours: 5,
     bestseller: true,
     details: cakeDetails,
     tint: '#F1E7DA',
@@ -248,6 +259,7 @@ export const products: Product[] = [
       { id: 'box12', label: 'Box of 12', servings: '12 cupcakes', price: 60 },
     ],
     leadDays: 1,
+    prepHours: 4,
     details: cakeDetails,
     tint: '#F5EEE2',
   },
@@ -265,6 +277,7 @@ export const products: Product[] = [
     ],
     message: true,
     leadDays: 1,
+    prepHours: 24,
     details: [{ label: 'Allergens', value: 'Contains almonds, eggs, dairy. Naturally gluten-free.' }, ...cakeDetails.slice(1)],
     tint: '#EEE6D6',
   },
@@ -282,6 +295,7 @@ export const products: Product[] = [
     ],
     message: true,
     leadDays: 2,
+    prepHours: 8,
     badge: 'Gift favourite',
     details: cakeDetails,
     tint: '#EFE5D3',
@@ -299,6 +313,7 @@ export const products: Product[] = [
       { id: 'box12', label: 'Box of 12', servings: '12 cookies', price: 34 },
     ],
     leadDays: 0,
+    prepHours: 2,
     details: cakeDetails,
     tint: '#E9DCC8',
   },
@@ -315,6 +330,7 @@ export const products: Product[] = [
       { id: 'box8', label: 'Box of 8', servings: '8 tartlets', price: 48 },
     ],
     leadDays: 1,
+    prepHours: 5,
     details: cakeDetails,
     tint: '#F1E2DA',
   },
@@ -331,6 +347,7 @@ export const products: Product[] = [
     decorations: standardDecorations,
     message: true,
     leadDays: 2,
+    prepHours: 24,
     badge: 'Limited',
     details: [{ label: 'Allergens', value: 'Contains pecans, wheat, eggs, dairy.' }, ...cakeDetails.slice(1)],
     tint: '#EADBC2',
@@ -346,6 +363,7 @@ export const products: Product[] = [
     sizes: [{ id: 'box', label: 'Seasonal box', servings: 'Serves 4–6', price: 54 }],
     message: true,
     leadDays: 2,
+    prepHours: 10,
     badge: 'Limited',
     details: cakeDetails,
     tint: '#ECE1CB',
@@ -372,6 +390,18 @@ export function relatedProducts(product: Product, list: Product[] = products, co
   const same = list.filter((p) => p.slug !== product.slug && p.category === product.category);
   const others = list.filter((p) => p.slug !== product.slug && p.category !== product.category && p.bestseller);
   return [...same, ...others].slice(0, count);
+}
+
+/** "about 6 hours", "about 1 day", "about 2½ days" — for showing average preparation time. */
+export function formatPrep(hours: number | undefined, style: 'long' | 'short' = 'long'): string | null {
+  if (hours == null || !(hours > 0)) return null;
+  if (hours < 24) {
+    const h = Math.round(hours * 2) / 2;
+    return style === 'short' ? `~${h} h` : `about ${h} ${h === 1 ? 'hour' : 'hours'}`;
+  }
+  const days = Math.round((hours / 24) * 2) / 2;
+  const label = Number.isInteger(days) ? String(days) : `${Math.floor(days)}½`;
+  return style === 'short' ? `~${label} ${days === 1 ? 'day' : 'days'}` : `about ${label} ${days === 1 ? 'day' : 'days'}`;
 }
 
 export const formatPrice = (n: number) =>

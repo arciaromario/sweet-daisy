@@ -1,16 +1,18 @@
 /* ==========================================================================
    Sweet Daisy — design tokens
-   Taken from the Sweet Daisy logo: olive #626047, cream #F9E6C8 and blush #E2ADA5.
+   Taken from the Sweet Daisy logo: olive #626047, cream #F9E6C8 and blush #E2ADA5,
+   on a clean white background.
    ========================================================================== */
 
 :root {
   /* Colour — brand: olive #626047, cream #F9E6C8, blush #E2ADA5 */
-  --ivory: #fdf7ec;
-  --paper: #fffcf6;
+  --ivory: #ffffff;
+  --paper: #ffffff;
   --cream: #f9e6c8;
+  --cream-soft: #fdf4e6;
   --beige: #f0dcbd;
   --sand: #dcc6a3;
-  --sage-100: #ebe9db;
+  --sage-100: #efeee6;
   --sage: #a9a78e;
   --olive: #6e6b52;
   --olive-deep: #626047;
@@ -19,8 +21,8 @@
   --ink: #2e2b22;
   --ink-soft: #5c584a;
   --muted: #878271;
-  --line: #ecdfc8;
-  --line-strong: #dbc9aa;
+  --line: #eee6d8;
+  --line-strong: #ddd1bc;
   --danger: #a4493d;
   --success: #5d7450;
 
@@ -33,17 +35,17 @@
   --focus: 0 0 0 3px rgba(226, 173, 165, 0.6);
 
   /* Type */
-  --serif: 'Cormorant Garamond', 'Cormorant', 'Times New Roman', Georgia, serif;
-  --sans: 'Jost', 'Avenir Next', 'Helvetica Neue', system-ui, -apple-system, sans-serif;
+  --serif: 'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif;
+  --sans: 'Montserrat Variable', 'Montserrat', 'Helvetica Neue', system-ui, -apple-system, sans-serif;
 
-  --fs-display: clamp(2.9rem, 1.6rem + 5.4vw, 6rem);
-  --fs-h1: clamp(2.5rem, 1.7rem + 3.4vw, 4.4rem);
-  --fs-h2: clamp(2.1rem, 1.5rem + 2.6vw, 3.6rem);
-  --fs-h3: clamp(1.5rem, 1.25rem + 0.9vw, 2rem);
-  --fs-h4: 1.35rem;
-  --fs-lead: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
-  --fs-body: 1rem;
-  --fs-small: 0.875rem;
+  --fs-display: clamp(2.6rem, 1.5rem + 4.6vw, 5.2rem);
+  --fs-h1: clamp(2.2rem, 1.5rem + 3vw, 3.8rem);
+  --fs-h2: clamp(1.9rem, 1.4rem + 2.2vw, 3.1rem);
+  --fs-h3: clamp(1.35rem, 1.15rem + 0.8vw, 1.75rem);
+  --fs-h4: 1.2rem;
+  --fs-lead: clamp(1rem, 0.96rem + 0.25vw, 1.12rem);
+  --fs-body: 0.95rem;
+  --fs-small: 0.84rem;
   --fs-xs: 0.75rem;
   --fs-eyebrow: 0.72rem;
 

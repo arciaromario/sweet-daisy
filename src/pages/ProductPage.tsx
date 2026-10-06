@@ -10,7 +10,7 @@ import { Seo } from '../components/Seo';
 import { useCart } from '../context/CartContext';
 import { useCatalog, useSite } from '../context/CatalogContext';
 import { img } from '../data/images';
-import { categoryName, formatPrice, relatedProducts } from '../data/products';
+import { categoryName, formatPrep, formatPrice, relatedProducts } from '../data/products';
 import { firstAvailable, formatDate } from '../lib/availability';
 import NotFound from './NotFound';
 
@@ -146,13 +146,24 @@ export default function ProductPage() {
             <p className="pdp__lead">{product.description}</p>
 
             <div className="pdp__availability">
-              <Icon name="calendar" />
+              {formatPrep(product.prepHours) && (
+                <p>
+                  <Icon name="clock" />
+                  <span>
+                    <strong>Average preparation time: {formatPrep(product.prepHours)}</strong>
+                    <span className="muted"> · Each order is made fresh by hand.</span>
+                  </span>
+                </p>
+              )}
               <p>
-                <strong>Available from {formatDate(earliest, { weekday: 'short', month: 'short', day: 'numeric' })}</strong>
-                <span className="muted">
-                  {product.leadDays === 0
-                    ? ' · Baked fresh daily, ready same day.'
-                    : ` · Needs ${product.leadDays} ${product.leadDays === 1 ? 'day' : 'days'} notice. Choose your date at checkout.`}
+                <Icon name="calendar" />
+                <span>
+                  <strong>Available from {formatDate(earliest, { weekday: 'short', month: 'short', day: 'numeric' })}</strong>
+                  <span className="muted">
+                    {product.leadDays === 0
+                      ? ' · Baked fresh daily, ready same day.'
+                      : ` · Needs ${product.leadDays} ${product.leadDays === 1 ? 'day' : 'days'} notice. Choose your date at checkout.`}
+                  </span>
                 </span>
               </p>
             </div>
