@@ -3,6 +3,7 @@ import type { Category, Product } from '../data/products';
 import { mergeSettings, type Settings, type SettingsKey } from '../data/settings';
 import type { CartItem } from '../context/CartContext';
 import { readDb, uid, writeDb } from './localDb';
+import { toISO } from './availability';
 import type { DayOverride, DayStatus, OrderItemRecord } from './types';
 
 export type { DayStatus } from './types';
@@ -80,7 +81,7 @@ export interface Catalog {
 }
 
 export async function fetchCatalog(): Promise<Catalog> {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toISO(new Date());
 
   if (!supabase) {
     const db = readDb();
