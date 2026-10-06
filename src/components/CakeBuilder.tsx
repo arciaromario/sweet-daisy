@@ -4,6 +4,7 @@ import { formatPrice } from '../data/products';
 import { submitCustomCakeRequest } from '../lib/api';
 import { formatDate } from '../lib/availability';
 import { AvailabilityCalendar } from './AvailabilityCalendar';
+import { CakePreview } from './CakePreview';
 import { Icon } from './Icon';
 import { Img } from './Img';
 import { OptionGroup } from './OptionGroup';
@@ -40,6 +41,12 @@ export function CakeBuilder() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
   const headingRef = useRef<HTMLHeadingElement>(null);
   const first = useRef(true);
+  // Direction of the last step change, so the next panel slides in from the right side.
+  const prevStep = useRef(0);
+  const dir = step >= prevStep.current ? 'forward' : 'back';
+  useEffect(() => {
+    prevStep.current = step;
+  }, [step]);
 
   const set = <K extends keyof State>(k: K, v: State[K]) => {
     setS((prev) => ({ ...prev, [k]: v }));
@@ -57,6 +64,17 @@ export function CakeBuilder() {
 
   const estimate =
     (sizes.find((x) => x.value === s.size)?.price ?? 0) + (styles.find((x) => x.value === s.style)?.extra ?? 0);
+  const shownEstimate = useCountUp(estimate);
+
+  const preview = {
+    size: s.size,
+    sizeIndex: sizes.findIndex((x) => x.value === s.size),
+    flavor: s.flavor,
+    filling: s.filling,
+    frosting: s.frosting,
+    style: s.style,
+    topper: s.date ? formatDate(s.date, { day: 'numeric', month: 'short' }) : undefined,
+  };
 
   function validate(i: number): string {
     switch (i) {
@@ -127,9 +145,7 @@ export function CakeBuilder() {
   if (status === 'sent') {
     return (
       <div className="builder builder--done" role="status">
-        <span className="builder__done-icon">
-          <Icon name="check" />
-        </span>
+        <CakePreview {...preview} celebrate className="builder__done-cake" />
         <h3>Thank you, {s.name.split(' ')[0]}.</h3>
         <p className="lead">
           Your custom cake request is with our team. We’ll be in touch at <strong>{s.email}</strong> within 48 hours with a personal quote and design
@@ -175,148 +191,151 @@ export function CakeBuilder() {
 
       <div className="builder__layout">
         <div className="builder__panel">
-          <h3 ref={headingRef} tabIndex={-1} className="builder__title">
-            {stepTitle(step)}
-          </h3>
+          <div key={step} className="builder__step" data-dir={dir}>
+            <h3 ref={headingRef} tabIndex={-1} className="builder__title">
+              {stepTitle(step)}
+            </h3>
 
-          {step === 0 && (
-            <OptionGroup
-              name="b-size"
-              legend="Cake size"
-              value={s.size}
-              onChange={(v) => set('size', v)}
-              min={150}
-              choices={sizes.map((x) => ({ value: x.value, title: x.title, meta: x.meta, price: x.price, priceMode: 'absolute' }))}
-            />
-          )}
-          {step === 1 && (
-            <OptionGroup name="b-flavor" legend="Sponge flavour" value={s.flavor} onChange={(v) => set('flavor', v)} min={170} choices={flavors.map((f) => ({ value: f, title: f }))} />
-          )}
-          {step === 2 && (
-            <OptionGroup name="b-filling" legend="Filling" value={s.filling} onChange={(v) => set('filling', v)} min={190} choices={fillings.map((f) => ({ value: f, title: f }))} />
-          )}
-          {step === 3 && (
-            <OptionGroup
-              name="b-frosting"
-              legend="Frosting"
-              value={s.frosting}
-              onChange={(v) => set('frosting', v)}
-              min={200}
-              choices={frostings.map((f) => ({ value: f.value, title: f.value, meta: f.meta }))}
-            />
-          )}
-          {step === 4 && (
-            <fieldset className="opt-group">
-              <legend className="field__label">Decoration style</legend>
-              <div className="style-grid">
-                {styles.map((st) => (
-                  <label key={st.value} className="style-card">
-                    <input type="radio" name="b-style" value={st.value} checked={s.style === st.value} onChange={() => set('style', st.value)} />
-                    <Img src={st.image} alt="" ratio="1 / 1" width={400} sizes="(min-width: 900px) 180px, 45vw" />
-                    <span className="style-card__label">
-                      {st.value}
-                      <span className="option__price">{st.extra ? `from + ${formatPrice(st.extra)}` : 'Included'}</span>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          )}
-          {step === 5 && <InspirationUpload files={s.files} onChange={(f) => set('files', f)} />}
-          {step === 6 && (
-            <div className="builder__date">
-              <AvailabilityCalendar leadDays={cfg.leadDays} value={s.date} onChange={(d) => set('date', d)} label="Choose your event date" />
-              <div className="stack">
-                <p className="small muted">
-                  Custom cakes need at least {cfg.leadDays} days notice. Weddings and tiered cakes are best booked 4–8 weeks ahead.
-                </p>
-                {s.date && (
-                  <p className="builder__picked">
-                    <Icon name="calendar" /> {formatDate(s.date)}
+            {step === 0 && (
+              <OptionGroup
+                name="b-size"
+                legend="Cake size"
+                value={s.size}
+                onChange={(v) => set('size', v)}
+                min={150}
+                choices={sizes.map((x) => ({ value: x.value, title: x.title, meta: x.meta, price: x.price, priceMode: 'absolute' }))}
+              />
+            )}
+            {step === 1 && (
+              <OptionGroup name="b-flavor" legend="Sponge flavour" value={s.flavor} onChange={(v) => set('flavor', v)} min={170} choices={flavors.map((f) => ({ value: f, title: f }))} />
+            )}
+            {step === 2 && (
+              <OptionGroup name="b-filling" legend="Filling" value={s.filling} onChange={(v) => set('filling', v)} min={190} choices={fillings.map((f) => ({ value: f, title: f }))} />
+            )}
+            {step === 3 && (
+              <OptionGroup
+                name="b-frosting"
+                legend="Frosting"
+                value={s.frosting}
+                onChange={(v) => set('frosting', v)}
+                min={200}
+                choices={frostings.map((f) => ({ value: f.value, title: f.value, meta: f.meta }))}
+              />
+            )}
+            {step === 4 && (
+              <fieldset className="opt-group">
+                <legend className="field__label">Decoration style</legend>
+                <div className="style-grid">
+                  {styles.map((st) => (
+                    <label key={st.value} className="style-card">
+                      <input type="radio" name="b-style" value={st.value} checked={s.style === st.value} onChange={() => set('style', st.value)} />
+                      <Img src={st.image} alt="" ratio="1 / 1" width={400} sizes="(min-width: 900px) 180px, 45vw" />
+                      <span className="style-card__label">
+                        {st.value}
+                        <span className="option__price">{st.extra ? `from + ${formatPrice(st.extra)}` : 'Included'}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            )}
+            {step === 5 && <InspirationUpload files={s.files} onChange={(f) => set('files', f)} />}
+            {step === 6 && (
+              <div className="builder__date">
+                <AvailabilityCalendar leadDays={cfg.leadDays} value={s.date} onChange={(d) => set('date', d)} label="Choose your event date" />
+                <div className="stack">
+                  <p className="small muted">
+                    Custom cakes need at least {cfg.leadDays} days notice. Weddings and tiered cakes are best booked 4–8 weeks ahead.
                   </p>
-                )}
-                <div className="field">
-                  <label className="field__label" htmlFor="b-occasion">
-                    Occasion
-                  </label>
-                  <select id="b-occasion" className="select" value={s.occasion} onChange={(e) => set('occasion', e.target.value)}>
-                    <option value="">Select an occasion</option>
-                    {occasions.map((o) => (
-                      <option key={o}>{o}</option>
-                    ))}
-                  </select>
+                  {s.date && (
+                    <p className="builder__picked">
+                      <Icon name="calendar" /> {formatDate(s.date)}
+                    </p>
+                  )}
+                  <div className="field">
+                    <label className="field__label" htmlFor="b-occasion">
+                      Occasion
+                    </label>
+                    <select id="b-occasion" className="select" value={s.occasion} onChange={(e) => set('occasion', e.target.value)}>
+                      <option value="">Select an occasion</option>
+                      {occasions.map((o) => (
+                        <option key={o}>{o}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-          {step === 7 && (
-            <div className="field">
-              <label className="field__label" htmlFor="b-instructions">
-                Special instructions
-              </label>
-              <textarea
-                id="b-instructions"
-                className="textarea"
-                rows={6}
-                maxLength={1500}
-                placeholder="Colours, theme, message on the cake, number of guests, dietary needs…"
-                value={s.instructions}
-                onChange={(e) => set('instructions', e.target.value)}
-              />
-              <span className="field__hint">The more you share, the closer our first sketch will be.</span>
-            </div>
-          )}
-          {step === 8 && (
-            <div className="form-grid form-grid--2">
-              <div className="field span-2">
-                <label className="field__label" htmlFor="b-name">
-                  Full name
-                </label>
-                <input id="b-name" className="input" autoComplete="name" value={s.name} onChange={(e) => set('name', e.target.value)} required />
-              </div>
+            )}
+            {step === 7 && (
               <div className="field">
-                <label className="field__label" htmlFor="b-email">
-                  Email
+                <label className="field__label" htmlFor="b-instructions">
+                  Special instructions
                 </label>
-                <input id="b-email" className="input" type="email" autoComplete="email" value={s.email} onChange={(e) => set('email', e.target.value)} required />
+                <textarea
+                  id="b-instructions"
+                  className="textarea"
+                  rows={6}
+                  maxLength={1500}
+                  placeholder="Colours, theme, message on the cake, number of guests, dietary needs…"
+                  value={s.instructions}
+                  onChange={(e) => set('instructions', e.target.value)}
+                />
+                <span className="field__hint">The more you share, the closer our first sketch will be.</span>
               </div>
-              <div className="field">
-                <label className="field__label" htmlFor="b-phone">
-                  Phone <span className="opt-group__hint">Optional</span>
-                </label>
-                <input id="b-phone" className="input" type="tel" autoComplete="tel" value={s.phone} onChange={(e) => set('phone', e.target.value)} />
+            )}
+            {step === 8 && (
+              <div className="form-grid form-grid--2">
+                <div className="field span-2">
+                  <label className="field__label" htmlFor="b-name">
+                    Full name
+                  </label>
+                  <input id="b-name" className="input" autoComplete="name" value={s.name} onChange={(e) => set('name', e.target.value)} required />
+                </div>
+                <div className="field">
+                  <label className="field__label" htmlFor="b-email">
+                    Email
+                  </label>
+                  <input id="b-email" className="input" type="email" autoComplete="email" value={s.email} onChange={(e) => set('email', e.target.value)} required />
+                </div>
+                <div className="field">
+                  <label className="field__label" htmlFor="b-phone">
+                    Phone <span className="opt-group__hint">Optional</span>
+                  </label>
+                  <input id="b-phone" className="input" type="tel" autoComplete="tel" value={s.phone} onChange={(e) => set('phone', e.target.value)} />
+                </div>
               </div>
-            </div>
-          )}
-          {step === 9 && (
-            <div className="builder__review">
-              <dl className="review-list">
-                {[
-                  ['Size', s.size, 0],
-                  ['Flavour', s.flavor, 1],
-                  ['Filling', s.filling, 2],
-                  ['Frosting', s.frosting, 3],
-                  ['Decoration', s.style, 4],
-                  ['Inspiration', s.files.length ? `${s.files.length} image${s.files.length > 1 ? 's' : ''}` : 'None added', 5],
-                  ['Event', `${formatDate(s.date)}${s.occasion ? ` · ${s.occasion}` : ''}`, 6],
-                  ['Instructions', s.instructions || '—', 7],
-                  ['Contact', `${s.name} · ${s.email}${s.phone ? ` · ${s.phone}` : ''}`, 8],
-                ].map(([label, value, i]) => (
-                  <div key={label as string}>
-                    <dt>{label}</dt>
-                    <dd>{value}</dd>
-                    <button type="button" className="review-list__edit" onClick={() => setStep(i as number)}>
-                      Edit<span className="visually-hidden"> {label}</span>
-                    </button>
-                  </div>
-                ))}
-              </dl>
-              <p className="small muted">
-                Submitting is free and doesn’t commit you to anything. We’ll reply with a quote and a design sketch; your date is reserved once you approve
-                and pay the {cfg.depositPercent}% deposit.
-              </p>
-            </div>
-          )}
+            )}
+            {step === 9 && (
+              <div className="builder__review">
+                <dl className="review-list">
+                  {[
+                    ['Size', s.size, 0],
+                    ['Flavour', s.flavor, 1],
+                    ['Filling', s.filling, 2],
+                    ['Frosting', s.frosting, 3],
+                    ['Decoration', s.style, 4],
+                    ['Inspiration', s.files.length ? `${s.files.length} image${s.files.length > 1 ? 's' : ''}` : 'None added', 5],
+                    ['Event', `${formatDate(s.date)}${s.occasion ? ` · ${s.occasion}` : ''}`, 6],
+                    ['Instructions', s.instructions || '—', 7],
+                    ['Contact', `${s.name} · ${s.email}${s.phone ? ` · ${s.phone}` : ''}`, 8],
+                  ].map(([label, value, i]) => (
+                    <div key={label as string}>
+                      <dt>{label}</dt>
+                      <dd>{value}</dd>
+                      <button type="button" className="review-list__edit" onClick={() => setStep(i as number)}>
+                        Edit<span className="visually-hidden"> {label}</span>
+                      </button>
+                    </div>
+                  ))}
+                </dl>
+                <p className="small muted">
+                  Submitting is free and doesn’t commit you to anything. We’ll reply with a quote and a design sketch; your date is reserved once you approve
+                  and pay the {cfg.depositPercent}% deposit.
+                </p>
+              </div>
+            )}
+
+          </div>
 
           {error && (
             <p className="notice notice--error" role="alert">
@@ -346,6 +365,10 @@ export function CakeBuilder() {
         </div>
 
         <aside className="builder__summary" aria-label="Your cake so far">
+          <div className="builder__preview">
+            <CakePreview {...preview} celebrate={step === steps.length - 1} />
+            {!s.size && <p className="builder__preview-hint">Your cake takes shape as you choose.</p>}
+          </div>
           <p className="eyebrow eyebrow--plain">Your cake</p>
           <ul>
             {[
@@ -358,13 +381,13 @@ export function CakeBuilder() {
             ].map(([k, v]) => (
               <li key={k} className={v ? 'is-set' : ''}>
                 <span>{k}</span>
-                <span>{v || '—'}</span>
+                <span key={v}>{v || '—'}</span>
               </li>
             ))}
           </ul>
           <div className="builder__estimate">
             <span>Estimated from</span>
-            <span className="serif">{estimate ? formatPrice(estimate) : '—'}</span>
+            <span className="serif">{estimate ? formatPrice(shownEstimate) : '—'}</span>
           </div>
           <p className="small muted">Final price is confirmed in your personal quote.</p>
           {demo && <p className="small muted">Demo mode: requests aren’t sent until Supabase is connected.</p>}
@@ -440,4 +463,31 @@ function InspirationUpload({ files, onChange }: { files: File[]; onChange: (f: F
       )}
     </div>
   );
+}
+
+/** Eases a number towards its target so the price estimate counts up instead of jumping. */
+function useCountUp(target: number, ms = 600) {
+  const [value, setValue] = useState(target);
+  const from = useRef(target);
+  useEffect(() => {
+    const start = from.current;
+    if (start === target || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      from.current = target;
+      setValue(target);
+      return;
+    }
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const k = Math.min(1, (now - t0) / ms);
+      const eased = 1 - (1 - k) ** 3;
+      const v = Math.round(start + (target - start) * eased);
+      from.current = v;
+      setValue(v);
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms]);
+  return value;
 }

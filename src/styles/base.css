@@ -63,6 +63,20 @@ a {
   text-decoration: none;
 }
 
+/* A link inside running text. */
+.link-inline {
+  color: var(--olive-deep);
+  text-decoration: underline;
+  text-decoration-color: var(--blush);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--t) var(--ease);
+}
+
+.link-inline:hover {
+  text-decoration-color: currentColor;
+}
+
 button,
 input,
 select,

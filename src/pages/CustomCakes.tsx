@@ -1,12 +1,9 @@
 import { Link } from 'react-router';
-import { AvailabilityCalendar } from '../components/AvailabilityCalendar';
 import { CakeBuilder } from '../components/CakeBuilder';
-import { Icon } from '../components/Icon';
 import { Img } from '../components/Img';
 import { Reveal } from '../components/Reveal';
 import { Seo } from '../components/Seo';
 import { useSettings } from '../context/CatalogContext';
-import { weekdayNames } from '../data/settings';
 
 const designs = [
   { image: 'wedding', title: 'The Garden Wedding', note: 'Three tiers · pressed flowers' },
@@ -18,8 +15,7 @@ const designs = [
 ];
 
 export default function CustomCakes() {
-  const { custom, store } = useSettings();
-  const closedDays = store.closedWeekdays.map((d) => weekdayNames[d]);
+  const { custom } = useSettings();
   return (
     <>
       <Seo
@@ -53,9 +49,9 @@ export default function CustomCakes() {
               <a href="#builder" className="btn">
                 Request a Custom Cake
               </a>
-              <a href="#availability" className="btn btn--outline">
+              <Link to="/availability" className="btn btn--outline">
                 View availability
-              </a>
+              </Link>
             </div>
           </div>
           <div className="custom-hero__media">
@@ -106,42 +102,18 @@ export default function CustomCakes() {
         </div>
       </section>
 
-      <section id="availability" className="section" aria-labelledby="availability-title">
-        <div className="container availability">
-          <Reveal className="availability__copy">
-            <span className="eyebrow">Availability</span>
-            <h2 id="availability-title">Upcoming availability</h2>
-            <p className="lead">
-              We take a limited number of custom cakes each week so every one receives our full attention. Custom orders need at least{' '}
-              {custom.leadDays} days notice.
-            </p>
-            <ul className="availability__notes">
-              <li>
-                <Icon name="calendar" /> Weddings & tiered cakes: book 4–8 weeks ahead
-              </li>
-              <li>
-                <Icon name="clock" /> Shop cakes: from 24–48 hours ahead
-              </li>
-              {closedDays.length > 0 && (
-                <li>
-                  <Icon name="store" /> Closed {closedDays.join(', ')}
-                </li>
-              )}
-            </ul>
-          </Reveal>
-          <Reveal delay={120} className="availability__cal">
-            <AvailabilityCalendar leadDays={custom.leadDays} />
-          </Reveal>
-        </div>
-      </section>
-
       <section id="builder" className="section section--sage" aria-labelledby="builder-title">
         <div className="container">
           <Reveal className="section-head section-head--center">
             <div className="section-head__text">
               <span className="eyebrow eyebrow--plain">Custom cake request</span>
               <h2 id="builder-title">Design your cake</h2>
-              <p className="muted">Ten simple steps — it takes about three minutes.</p>
+              <p className="muted">
+                Ten simple steps — it takes about three minutes. Custom cakes need at least {custom.leadDays} days notice ·{' '}
+                <Link to="/availability" className="link-inline">
+                  see availability
+                </Link>
+              </p>
             </div>
           </Reveal>
           <CakeBuilder />
