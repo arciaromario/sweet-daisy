@@ -444,7 +444,10 @@ as $$
 #variable_conflict use_column
 declare
   v_store        jsonb := coalesce((select s.value from public.settings s where s.key = 'store'), '{}'::jsonb);
-  v_closed       int[] := coalesce(array(select jsonb_array_elements_text(v_store -> 'closedWeekdays')::int), array[1]);
+  -- Missing setting => closed on Mondays; an explicitly empty list => open every day.
+  v_closed       int[] := case when v_store ? 'closedWeekdays'
+                            then array(select jsonb_array_elements_text(v_store -> 'closedWeekdays')::int)
+                            else array[1] end;
   v_fee_amount   numeric := coalesce((v_store ->> 'deliveryFee')::numeric, 12);
   v_free_over    numeric := coalesce((v_store ->> 'freeDeliveryOver')::numeric, 120);
   v_slots        jsonb;
