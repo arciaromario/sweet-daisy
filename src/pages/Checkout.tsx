@@ -9,10 +9,31 @@ import { deliveryFee, useCart } from '../context/CartContext';
 import { useCatalog, useSite } from '../context/CatalogContext';
 import { formatPrep, formatPrice } from '../data/products';
 import { placeOrder, type PlacedOrder } from '../lib/api';
-import { firstAvailable, formatDate } from '../lib/availability';
+import { dayStatus, firstAvailable, formatDate, isBookable, parseISO } from '../lib/availability';
 import { supabase } from '../lib/supabase';
 
 type Method = 'pickup' | 'delivery';
+type Form = { name: string; email: string; phone: string; line1: string; line2: string; city: string; postal: string; instructions: string };
+
+const fieldIds: Record<keyof Form, string> = {
+  name: 'c-name',
+  email: 'c-email',
+  phone: 'c-phone',
+  line1: 'c-line1',
+  line2: 'c-line2',
+  city: 'c-city',
+  postal: 'c-postal',
+  instructions: 'c-notes',
+};
+
+function readForm(el: HTMLFormElement, current: Form): Form {
+  const next = { ...current };
+  for (const k of Object.keys(fieldIds) as (keyof Form)[]) {
+    const input = el.querySelector<HTMLInputElement | HTMLTextAreaElement>(`#${fieldIds[k]}`);
+    if (input) next[k] = input.value;
+  }
+  return next;
+}
 
 export default function Checkout() {
   const cart = useCart();
@@ -23,7 +44,7 @@ export default function Checkout() {
   const [date, setDate] = useState('');
   const [slot, setSlot] = useState('');
   const [payment, setPayment] = useState<'card' | 'in_person'>('card');
-  const [form, setForm] = useState({ name: '', email: '', phone: '', line1: '', line2: '', city: site.address.city, postal: '', instructions: '' });
+  const [state, setForm] = useState<Form>({ name: '', email: '', phone: '', line1: '', line2: '', city: site.address.city, postal: '', instructions: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState('');
   const [sending, setSending] = useState(false);
@@ -36,14 +57,18 @@ export default function Checkout() {
     });
   }, []);
 
+  // Keep the chosen date valid as the live catalogue, settings and bag load or change.
   useEffect(() => {
-    if (!date) setDate(firstAvailable(overrides, cart.maxLeadDays, closed));
+    if (!date || !isBookable(dayStatus(parseISO(date), overrides, cart.maxLeadDays, closed))) {
+      setDate(firstAvailable(overrides, cart.maxLeadDays, closed));
+    }
   }, [overrides, cart.maxLeadDays, closed, date]);
 
   const fee = deliveryFee(cart.subtotal, method, settings.store);
   const total = cart.subtotal + fee;
   const slots = method === 'pickup' ? settings.store.pickupSlots : settings.store.deliverySlots;
-  const set = (k: keyof typeof form) => (e: { target: { value: string } }) => {
+  const form = state;
+  const set = (k: keyof Form) => (e: { target: { value: string } }) => {
     setForm((f) => ({ ...f, [k]: e.target.value }));
     if (errors[k]) setErrors(({ [k]: _, ...rest }) => rest);
   };
@@ -58,7 +83,7 @@ export default function Checkout() {
     [errors],
   );
 
-  function validate() {
+  function validate(form: Form) {
     const e: Record<string, string> = {};
     if (!form.name.trim()) e.name = 'Please enter your full name.';
     if (!/^\S+@\S+\.\S+$/.test(form.email)) e.email = 'Please enter a valid email.';
@@ -71,14 +96,23 @@ export default function Checkout() {
     if (!date) e.date = 'Please choose a date.';
     if (!slot) e.slot = 'Please choose a time.';
     setErrors(e);
-    return Object.keys(e).length === 0;
+    return e;
   }
 
-  async function onSubmit(ev: FormEvent) {
+  async function onSubmit(ev: FormEvent<HTMLFormElement>) {
     ev.preventDefault();
     setSubmitError('');
-    if (!validate()) {
-      document.querySelector<HTMLElement>('[aria-invalid="true"], .slot-error')?.focus();
+    // iOS autofill can fill inputs without firing change events, so read what is actually on screen.
+    const form = readForm(ev.currentTarget, state);
+    setForm(form);
+    const invalid = validate(form);
+    if (Object.keys(invalid).length) {
+      // On phones the first error can be far above the button; bring it into view explicitly.
+      requestAnimationFrame(() => {
+        const el = document.querySelector<HTMLElement>('[aria-invalid="true"], .slot-error, #err-date');
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el?.focus({ preventScroll: true });
+      });
       return;
     }
     setSending(true);
@@ -401,6 +435,11 @@ export default function Checkout() {
               <span>Total</span>
               <span className="price">{formatPrice(total)}</span>
             </div>
+            {Object.keys(errors).length > 0 && (
+              <p className="notice notice--error" role="alert">
+                <Icon name="info" /> Please check the highlighted fields: {Object.values(errors).map((m) => m.replace(/^Please (enter|choose) /, '').replace(/\.$/, '')).join(', ')}.
+              </p>
+            )}
             {submitError && (
               <p className="notice notice--error" role="alert">
                 <Icon name="info" /> {submitError}
