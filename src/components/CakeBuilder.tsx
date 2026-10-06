@@ -338,7 +338,7 @@ export function CakeBuilder() {
               </button>
             ) : (
               // Distinct key: reusing the "Continue" node would let its click submit the form.
-              <button key="submit" type="submit" className="btn btn--gold" disabled={status === 'sending'}>
+              <button key="submit" type="submit" className="btn btn--blush" disabled={status === 'sending'}>
                 {status === 'sending' ? <span className="spinner" aria-label="Sending" /> : 'Submit Request'}
               </button>
             )}

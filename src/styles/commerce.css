@@ -806,7 +806,7 @@
 }
 
 .builder__bar .is-current .builder__seg {
-  background: var(--gold);
+  background: var(--rose);
 }
 
 .builder__label {

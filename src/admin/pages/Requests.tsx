@@ -4,7 +4,7 @@ import { deleteRequest, inspirationUrls, listRequests, updateRequest } from '../
 import type { CustomRequestRecord, RequestStatus } from '../../lib/types';
 import { Badge, Drawer, Empty, ErrorNote, fmtDate, fmtDateTime, Loading, money, PageTitle, requestStatus, useLoad, useToast } from '../ui';
 
-const tone = (s: RequestStatus) => (s === 'new' ? 'gold' : s === 'confirmed' ? 'sage' : s === 'declined' ? 'danger' : 'neutral');
+const tone = (s: RequestStatus) => (s === 'new' ? 'blush' : s === 'confirmed' ? 'sage' : s === 'declined' ? 'danger' : 'neutral');
 
 export default function Requests() {
   const { data, setData, error, loading, reload } = useLoad(listRequests);

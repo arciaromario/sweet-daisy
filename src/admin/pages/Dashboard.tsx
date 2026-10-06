@@ -60,7 +60,7 @@ export default function Dashboard() {
                       {o.customer_name} · {o.order_items.map((i) => `${i.quantity}× ${i.product_name}`).join(', ')}
                     </span>
                   </div>
-                  <Badge tone={o.fulfillment === 'delivery' ? 'gold' : 'sage'}>{o.fulfillment === 'delivery' ? 'Envío' : 'Recogida'}</Badge>
+                  <Badge tone={o.fulfillment === 'delivery' ? 'blush' : 'sage'}>{o.fulfillment === 'delivery' ? 'Envío' : 'Recogida'}</Badge>
                 </li>
               ))}
             </ul>
@@ -80,7 +80,7 @@ export default function Dashboard() {
                       {r.size} · {r.flavor} · {r.decoration_style}
                     </span>
                   </div>
-                  <Badge tone={r.status === 'new' ? 'gold' : 'neutral'}>{requestStatus[r.status]}</Badge>
+                  <Badge tone={r.status === 'new' ? 'blush' : 'neutral'}>{requestStatus[r.status]}</Badge>
                 </li>
               ))}
             </ul>
@@ -100,7 +100,7 @@ export default function Dashboard() {
                       {money(o.total)} · para el {fmtDate(o.fulfillment_date)}
                     </span>
                   </div>
-                  <Badge tone={o.status === 'received' ? 'gold' : o.status === 'cancelled' ? 'danger' : 'neutral'}>{orderStatus[o.status]}</Badge>
+                  <Badge tone={o.status === 'received' ? 'blush' : o.status === 'cancelled' ? 'danger' : 'neutral'}>{orderStatus[o.status]}</Badge>
                 </li>
               ))}
             </ul>

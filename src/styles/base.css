@@ -77,13 +77,13 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--rose);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
 ::selection {
-  background: var(--gold-soft);
+  background: var(--blush);
   color: var(--ink);
 }
 
@@ -354,10 +354,10 @@ h2 em {
   --btn-bd: var(--ivory);
 }
 
-.btn--gold {
-  --btn-bg: var(--gold);
-  --btn-fg: #fff;
-  --btn-bd: var(--gold);
+.btn--blush {
+  --btn-bg: var(--blush);
+  --btn-fg: var(--ink);
+  --btn-bd: var(--blush);
 }
 
 .btn--sm {
@@ -456,9 +456,9 @@ h2 em {
   backdrop-filter: blur(6px);
 }
 
-.badge--gold {
-  background: var(--gold);
-  color: #fff;
+.badge--blush {
+  background: var(--blush);
+  color: var(--ink);
 }
 
 .chip {

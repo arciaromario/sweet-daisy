@@ -96,7 +96,7 @@ export default function Products() {
                       {catName(p.category)} · desde {money(fromPrice(p))} · {p.sizes.length} tamaño(s)
                     </span>
                     <span className="adm-badges">
-                      {p.bestseller && <Badge tone="gold">Destacado</Badge>}
+                      {p.bestseller && <Badge tone="blush">Destacado</Badge>}
                       {p.badge && <Badge>{p.badge}</Badge>}
                       {p.active === false && <Badge tone="danger">Oculto</Badge>}
                     </span>
