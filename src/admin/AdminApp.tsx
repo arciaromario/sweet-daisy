@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router';
 import { Icon, type IconName } from '../components/Icon';
-import { DaisyMark } from '../components/Logo';
+import { Wordmark } from '../components/Logo';
 import { useCatalog } from '../context/CatalogContext';
 import { getAdminSession, sendPasswordReset, signIn, signOut, type AdminSession } from '../lib/adminApi';
 import { resetDb } from '../lib/localDb';
@@ -75,15 +75,12 @@ function Shell({ session }: { session: AdminSession }) {
     <div className="adm">
       <aside className={`adm-side${menuOpen ? ' is-open' : ''}`}>
         <div className="adm-side__brand">
-          <DaisyMark />
-          <div>
-            <strong>Sweet Daisy</strong>
-            <span>Panel de administración</span>
-          </div>
+          <Wordmark compact />
+          <span className="adm-side__label">Panel de administración</span>
         </div>
         <nav aria-label="Admin">
           {nav.map((n) => (
-            <NavLink key={n.to} to={`/admin/${n.to}`} end={n.end} className={({ isActive }) => `adm-nav${isActive ? ' is-active' : ''}`}>
+            <NavLink key={n.to} to={n.to ? `/admin/${n.to}` : '/admin'} end={n.end} className={({ isActive }) => `adm-nav${isActive ? ' is-active' : ''}`}>
               <Icon name={n.icon} /> {n.label}
             </NavLink>
           ))}
@@ -107,7 +104,9 @@ function Shell({ session }: { session: AdminSession }) {
           <button className="icon-btn adm-top__menu" aria-label="Abrir menú" onClick={() => setMenuOpen(true)}>
             <Icon name="menu" />
           </button>
-          <span className="adm-top__brand">Sweet Daisy · Admin</span>
+          <span className="adm-top__brand">
+            <Wordmark compact /> <span className="adm-side__label">Admin</span>
+          </span>
         </header>
 
         {demo && (
@@ -171,7 +170,7 @@ function Login() {
   return (
     <div className="adm-center">
       <form className="adm-login" onSubmit={onSubmit}>
-        <DaisyMark />
+        <Wordmark />
         <h1>Panel de Sweet Daisy</h1>
         <p className="adm-muted">Inicia sesión con tu cuenta de administración.</p>
         <label className="adm-field">
@@ -214,7 +213,7 @@ function NotAdmin({ email }: { email: string }) {
   return (
     <div className="adm-center">
       <div className="adm-login">
-        <DaisyMark />
+        <Wordmark />
         <h1>Sin permisos</h1>
         <p className="adm-muted">
           La cuenta <strong>{email}</strong> no tiene permisos de administración. Para darle acceso, ejecuta en el SQL Editor de Supabase:

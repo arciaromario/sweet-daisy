@@ -5,7 +5,7 @@
 .adm {
   display: grid;
   min-height: 100vh;
-  background: #f7f4ee;
+  background: #faf9f7;
   font-size: 0.94rem;
 }
 
@@ -74,8 +74,9 @@
   flex-direction: column;
   width: 264px;
   padding: 22px 14px;
-  background: var(--olive-deep);
-  color: rgba(255, 255, 255, 0.82);
+  background: #fff;
+  border-right: 1px solid var(--line);
+  color: var(--ink-soft);
   transform: translateX(-100%);
   transition: transform var(--t) var(--ease);
   overflow-y: auto;
@@ -107,33 +108,21 @@
   gap: 12px;
   padding: 4px 10px 22px;
   margin-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: 1px solid var(--line);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 
-.adm-side__brand .daisy-mark {
-  width: 32px;
-  height: 32px;
-  color: var(--blush);
-}
-
-.adm-side__brand strong {
-  display: block;
-  font-family: var(--serif);
-  font-size: 1.25rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ivory);
-}
-
-.adm-side__brand span {
+.adm-side__brand .adm-side__label {
   font-size: 0.72rem;
   letter-spacing: 0.08em;
-  color: var(--blush);
+  color: var(--rose);
 }
 
 .adm-side nav {
   display: grid;
+  align-content: start;
   gap: 2px;
   flex: 1;
 }
@@ -159,25 +148,32 @@
 }
 
 .adm-nav:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: #f6f5f1;
+  color: var(--ink);
 }
 
 .adm-nav.is-active {
-  background: rgba(255, 255, 255, 0.14);
-  color: var(--ivory);
+  background: var(--cream);
+  color: var(--olive-deep);
+  font-weight: 500;
+}
+
+.adm-nav.is-active .icon {
+  color: var(--rose);
+  opacity: 1;
 }
 
 .adm-side__foot {
   display: grid;
   gap: 2px;
   padding-top: 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  border-top: 1px solid var(--line);
 }
 
 .adm-side__user {
   padding: 8px 12px 0;
   font-size: 0.74rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--muted);
   overflow-wrap: anywhere;
 }
 
@@ -195,14 +191,19 @@
   gap: 10px;
   height: 60px;
   padding: 0 12px;
-  background: rgba(247, 244, 238, 0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
 }
 
 .adm-top__brand {
-  font-family: var(--serif);
-  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.adm-top__brand .wordmark__name {
+  font-size: 1.4rem;
 }
 
 @media (min-width: 1000px) {
@@ -424,7 +425,7 @@
 .adm-center {
   min-height: 100vh;
   padding: 20px;
-  background: #f7f4ee;
+  background: #faf9f7;
 }
 
 /* Badges -------------------------------------------------------------------- */
@@ -1077,11 +1078,9 @@
   text-align: left;
 }
 
-.adm-login .daisy-mark {
+.adm-login .wordmark {
   justify-self: center;
-  width: 44px;
-  height: 44px;
-  color: var(--olive);
+  margin-bottom: 4px;
 }
 
 .adm-login h1 {
@@ -1432,7 +1431,7 @@
 }
 
 .adm-day.is-closed {
-  background: repeating-linear-gradient(135deg, #efeae1, #efeae1 4px, #f7f4ee 4px, #f7f4ee 8px);
+  background: repeating-linear-gradient(135deg, #efeee9, #efeee9 4px, #faf9f7 4px, #faf9f7 8px);
   color: var(--muted);
 }
 
