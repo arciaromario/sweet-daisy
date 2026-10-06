@@ -354,7 +354,12 @@ export function move<T>(list: T[], from: number, to: number): T[] {
 export function toCsv(rows: Record<string, unknown>[]): string {
   if (!rows.length) return '';
   const keys = Object.keys(rows[0]);
-  const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  // Prefix values that spreadsheets would run as formulas (CSV injection), then quote.
+  const esc = (v: unknown) => {
+    const text = String(v ?? '');
+    const safe = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+    return `"${safe.replace(/"/g, '""')}"`;
+  };
   return [keys.join(','), ...rows.map((r) => keys.map((k) => esc(r[k])).join(','))].join('\n');
 }
 
