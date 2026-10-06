@@ -1,9 +1,18 @@
 // Receives Stripe events and marks orders as paid.
-// Secrets: STRIPE_WEBHOOK_SECRET (the endpoint's signing secret, whsec_…).
+// Secrets: STRIPE_WEBHOOK_SECRET (the endpoint's signing secret, whsec_…), as an Edge Function
+// secret or a row in private.app_secrets.
 // Deployed with verify_jwt = false: Stripe authenticates with its signature instead.
 import postgres from 'npm:postgres@3';
 
 const sql = postgres(Deno.env.get('SUPABASE_DB_URL')!, { prepare: false });
+
+/** Edge Function secret first, then the private.app_secrets table (set from SQL). */
+async function secret(name: string): Promise<string | undefined> {
+  const fromEnv = Deno.env.get(name);
+  if (fromEnv) return fromEnv;
+  const [row] = await sql<{ value: string }[]>`select value from private.app_secrets where key = ${name}`;
+  return row?.value || undefined;
+}
 
 const TOLERANCE_SECONDS = 300;
 
@@ -29,11 +38,11 @@ function timingSafeEqual(a: string, b: string) {
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
-  const secret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
-  if (!secret) return new Response('Webhook not configured', { status: 503 });
+  const signingSecret = await secret('STRIPE_WEBHOOK_SECRET');
+  if (!signingSecret) return new Response('Webhook not configured', { status: 503 });
 
   const payload = await req.text();
-  const ok = await verify(payload, req.headers.get('stripe-signature') ?? '', secret);
+  const ok = await verify(payload, req.headers.get('stripe-signature') ?? '', signingSecret);
   if (!ok) return new Response('Invalid signature', { status: 400 });
 
   const event = JSON.parse(payload);

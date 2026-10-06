@@ -1,8 +1,17 @@
 // Creates a Stripe Checkout session for an order that place_order already saved and priced.
-// Secrets: STRIPE_SECRET_KEY (required), ALLOWED_ORIGINS (optional, comma-separated).
+// Secrets: STRIPE_SECRET_KEY (required; Edge Function secret or private.app_secrets),
+// ALLOWED_ORIGINS (optional, comma-separated).
 import postgres from 'npm:postgres@3';
 
 const sql = postgres(Deno.env.get('SUPABASE_DB_URL')!, { prepare: false });
+
+/** Edge Function secret first, then the private.app_secrets table (set from SQL). */
+async function secret(name: string): Promise<string | undefined> {
+  const fromEnv = Deno.env.get(name);
+  if (fromEnv) return fromEnv;
+  const [row] = await sql<{ value: string }[]>`select value from private.app_secrets where key = ${name}`;
+  return row?.value || undefined;
+}
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -31,7 +40,7 @@ async function handle(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
-  const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+  const stripeKey = await secret('STRIPE_SECRET_KEY');
   if (!stripeKey) return json({ error: 'Online payments are not set up yet.' }, 503);
 
   let body: { order_number?: string; email?: string; return_url?: string };
