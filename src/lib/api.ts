@@ -147,6 +147,30 @@ export async function placeOrder(order: OrderPayload, settings: Settings): Promi
   return { orderNumber: row.order_number, total: Number(row.total) };
 }
 
+/**
+ * Opens Stripe Checkout for a saved order and returns the payment page URL.
+ * Prices come from the order stored by place_order, never from the browser.
+ */
+export async function startCardPayment(orderNumber: string, email: string): Promise<string> {
+  if (!supabase) throw new Error('Online payments are not available in demo mode.');
+  const returnUrl = new URL(`${import.meta.env.BASE_URL}checkout`, window.location.origin).toString();
+  const { data, error } = await supabase.functions.invoke('create-checkout', {
+    body: { order_number: orderNumber, email, return_url: returnUrl },
+  });
+  if (error) {
+    let message = 'The payment page could not be opened. Please try again.';
+    try {
+      const body = await (error as { context?: Response }).context?.json();
+      if (body?.error) message = body.error;
+    } catch {
+      // Keep the generic message.
+    }
+    throw new Error(message);
+  }
+  if (!data?.url) throw new Error('The payment page could not be opened. Please try again.');
+  return data.url as string;
+}
+
 /** Demo mode: price the bag from the local catalogue and store the order in this browser. */
 async function placeDemoOrder(order: OrderPayload, settings: Settings): Promise<PlacedOrder> {
   await wait(600);
