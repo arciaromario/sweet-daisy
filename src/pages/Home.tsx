@@ -13,12 +13,12 @@ import { useSite } from '../context/CatalogContext';
 import { firstAvailable, formatDate } from '../lib/availability';
 
 const collections = [
-  { title: 'Celebration Cakes', note: 'Tiered & layered', image: 'celebration', href: '/shop?category=cakes', tint: '#EFE3D6' },
-  { title: 'Birthday Cakes', note: 'Made to be wished upon', image: 'birthday', href: '/shop?category=cakes', tint: '#F2E4DC' },
-  { title: 'Mini Cakes', note: 'Little & lovely', image: 'mini', href: '/shop?category=mini-cakes', tint: '#F3E9DD' },
-  { title: 'Cupcakes', note: 'Boxed to gift', image: 'cupcakes', href: '/shop?category=cupcakes', tint: '#F1E7DA' },
-  { title: 'Dessert Boxes', note: 'For sharing', image: 'dessertBox', href: '/shop?category=treats', tint: '#EEE6D6' },
-  { title: 'Seasonal Treats', note: 'Here for a moment', image: 'seasonal', href: '/shop?category=seasonal', tint: '#ECE1CB' },
+  { title: 'Celebration Cakes', note: 'Tiered & layered', image: 'celebration', href: '/shop?category=cakes', tint: '#F6E7E3' },
+  { title: 'Birthday Cakes', note: 'Made to be wished upon', image: 'birthday', href: '/shop?category=cakes', tint: '#EFEEE6' },
+  { title: 'Mini Cakes', note: 'Little & lovely', image: 'mini', href: '/shop?category=mini-cakes', tint: '#F6E7E3' },
+  { title: 'Cupcakes', note: 'Boxed to gift', image: 'cupcakes', href: '/shop?category=cupcakes', tint: '#EFEEE6' },
+  { title: 'Dessert Boxes', note: 'For sharing', image: 'dessertBox', href: '/shop?category=treats', tint: '#F6E7E3' },
+  { title: 'Seasonal Treats', note: 'Here for a moment', image: 'seasonal', href: '/shop?category=seasonal', tint: '#EFEEE6' },
 ];
 
 const gallery = [
@@ -116,9 +116,9 @@ export default function Home() {
           </div>
 
           <div className="hero__visual">
-            <Img src="hero" alt="A tall vanilla layer cake finished with fresh berries and flowers" ratio="4 / 5" width={1400} sizes="(min-width: 900px) 52vw, 100vw" priority className="hero__img" tint="#EFE4D6" />
+            <Img src="hero" alt="A tall vanilla layer cake finished with fresh berries and flowers" ratio="4 / 5" width={1400} sizes="(min-width: 900px) 52vw, 100vw" priority className="hero__img" tint="#F6E7E3" />
             <div className="hero__inset" aria-hidden="true">
-              <Img src="mini" alt="" ratio="1 / 1" width={400} sizes="200px" tint="#F2E6DA" />
+              <Img src="mini" alt="" ratio="1 / 1" width={400} sizes="200px" tint="#EFEEE6" />
             </div>
             <Link to="/custom-cakes#availability" className="hero__card">
               <span className="hero__card-label">
@@ -245,7 +245,7 @@ export default function Home() {
       <section className="section story" aria-labelledby="story-title">
         <div className="container story__grid">
           <Reveal className="story__media">
-            <Img src="studio" alt="Inside the Sweet Daisy cake studio" ratio="4 / 5" width={1100} sizes="(min-width: 900px) 45vw, 100vw" tint="#EADFCE" />
+            <Img src="studio" alt="Inside the Sweet Daisy cake studio" ratio="4 / 5" width={1100} sizes="(min-width: 900px) 45vw, 100vw" tint="#EFEEE6" />
             <span className="story__stamp serif" aria-hidden="true">
               made
               <br />

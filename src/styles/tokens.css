@@ -1,17 +1,17 @@
 /* ==========================================================================
    Sweet Daisy — design tokens
-   Taken from the Sweet Daisy logo: olive #626047, cream #F9E6C8 and blush #E2ADA5,
-   on a clean white background.
+   Sweet Daisy brand colours: olive #626047 and blush #E2ADA5 on a clean white background.
    ========================================================================== */
 
 :root {
-  /* Colour — brand: olive #626047, cream #F9E6C8, blush #E2ADA5 */
+  /* Colour — brand: olive #626047 and blush #E2ADA5 on white */
   --ivory: #ffffff;
   --paper: #ffffff;
-  --cream: #f9e6c8;
-  --cream-soft: #fdf4e6;
-  --beige: #f0dcbd;
-  --sand: #dcc6a3;
+  /* Soft blush tints for section backgrounds and fills (no cream). */
+  --cream: #faeeeb;
+  --cream-soft: #fdf6f4;
+  --beige: #f2dcd7;
+  --sand: #dfc3bc;
   --sage-100: #efeee6;
   --sage: #a9a78e;
   --olive: #6e6b52;
@@ -21,8 +21,8 @@
   --ink: #2e2b22;
   --ink-soft: #5c584a;
   --muted: #878271;
-  --line: #eee6d8;
-  --line-strong: #ddd1bc;
+  --line: #ece8e3;
+  --line-strong: #d9d3cb;
   --danger: #a4493d;
   --success: #5d7450;
 

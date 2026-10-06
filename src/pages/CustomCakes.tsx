@@ -59,7 +59,7 @@ export default function CustomCakes() {
             </div>
           </div>
           <div className="custom-hero__media">
-            <Img src="wedding" alt="A tiered custom celebration cake with fresh flowers" ratio="4 / 5" width={1200} sizes="(min-width: 900px) 45vw, 100vw" priority tint="#EFE4D6" />
+            <Img src="wedding" alt="A tiered custom celebration cake with fresh flowers" ratio="4 / 5" width={1200} sizes="(min-width: 900px) 45vw, 100vw" priority tint="#F6E7E3" />
           </div>
         </div>
       </section>
