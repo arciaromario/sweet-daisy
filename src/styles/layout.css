@@ -307,8 +307,7 @@
 }
 
 .mobile-menu__nav a.active {
-  font-style: italic;
-  color: var(--olive);
+  color: var(--rose);
 }
 
 .mobile-menu__foot {

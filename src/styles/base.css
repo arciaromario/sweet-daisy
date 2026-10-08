@@ -110,9 +110,10 @@ h4,
 h5 {
   margin: 0;
   font-family: var(--serif);
-  font-weight: 400;
+  /* Heavier, like the "sweet daisy" wordmark, rather than Fraunces' thin display cut. */
+  font-weight: 600;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
   color: var(--ink);
   text-wrap: balance;
 }
@@ -135,26 +136,32 @@ p {
   text-wrap: pretty;
 }
 
+/* No italics in the brand: emphasis is weight, as Montserrat is only loaded upright. */
 em,
 .italic {
-  font-style: italic;
+  font-style: normal;
+  font-weight: 500;
 }
 
 .serif {
   font-family: var(--serif);
+  font-weight: 600;
 }
 
 .display {
   font-size: var(--fs-display);
-  line-height: 0.98;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.015em;
 }
 
+/* The logo has no italics: emphasis in headings is colour, like "CAKES & TREATS". */
 .display em,
 h1 em,
-h2 em {
-  font-style: italic;
-  color: var(--olive);
+h2 em,
+h3 em {
+  font-style: normal;
+  color: var(--rose);
 }
 
 .eyebrow {

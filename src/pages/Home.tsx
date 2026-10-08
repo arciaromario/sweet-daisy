@@ -6,6 +6,7 @@ import { Newsletter } from '../components/Newsletter';
 import { ProductCard } from '../components/ProductCard';
 import { QuickView } from '../components/QuickView';
 import { Reveal } from '../components/Reveal';
+import { Seal } from '../components/Seal';
 import { Seo } from '../components/Seo';
 import { useCatalog } from '../context/CatalogContext';
 import { pickBestsellers, type Product } from '../data/products';
@@ -246,11 +247,7 @@ export default function Home() {
         <div className="container story__grid">
           <Reveal className="story__media">
             <Img src="studio" alt="Inside the Sweet Daisy cake studio" ratio="4 / 5" width={1100} sizes="(min-width: 900px) 45vw, 100vw" tint="#EFEEE6" />
-            <span className="story__stamp serif" aria-hidden="true">
-              made
-              <br />
-              by hand
-            </span>
+            <Seal text="Made by hand · Sweet Daisy · Austin · " />
           </Reveal>
           <Reveal delay={120} className="story__copy">
             <span className="eyebrow">Our story</span>

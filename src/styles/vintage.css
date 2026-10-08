@@ -1,0 +1,162 @@
+/* ==========================================================================
+   Vintage details: paper grain, scalloped edges (like a cake doily), daisy
+   ornaments, arched frames and double-line buttons. Layered on top of the
+   base styles so the palette and layout stay as they are.
+   ========================================================================== */
+
+/* Paper ---------------------------------------------------------------------- */
+/* A barely-there grain over the white, so pages feel printed rather than flat. */
+body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .38 0 0 0 0 .32 0 0 0 0 .26 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Scalloped edges --------------------------------------------------------------- */
+/* Tinted sections and the footer get a doily-style scalloped top edge. */
+.section--cream,
+.section--sage,
+.footer {
+  position: relative;
+  --scallop: 22px;
+}
+
+.section--cream::before,
+.section--sage::before,
+.footer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--scallop) / -2 + 1px);
+  height: calc(var(--scallop) / 2);
+  background: inherit;
+  -webkit-mask: radial-gradient(circle at 50% 100%, #000 calc(var(--scallop) / 2 - 0.5px), transparent calc(var(--scallop) / 2)) 0 0 / var(--scallop) calc(var(--scallop) / 2) repeat-x;
+  mask: radial-gradient(circle at 50% 100%, #000 calc(var(--scallop) / 2 - 0.5px), transparent calc(var(--scallop) / 2)) 0 0 / var(--scallop) calc(var(--scallop) / 2) repeat-x;
+  pointer-events: none;
+}
+
+/* A dotted "piped" line just inside the scallops, like icing beads. */
+.section--cream::after,
+.section--sage::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 14px;
+  height: 4px;
+  background: radial-gradient(circle, var(--sand) 1.4px, transparent 1.8px) 0 0 / 14px 4px repeat-x;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* Daisy ornaments ------------------------------------------------------------------ */
+/* Eyebrows open with a small daisy instead of a plain rule. */
+.eyebrow::before {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  opacity: 0.85;
+  -webkit-mask: var(--daisy) center / contain no-repeat;
+  mask: var(--daisy) center / contain no-repeat;
+}
+
+:root {
+  /* The brand daisy (outlined petals), for masks and as a rose ornament. */
+  --daisy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-32 -32 64 64'%3E%3Cg fill='none' stroke='%23000' stroke-width='4.5'%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(0)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(45)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(90)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(135)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(180)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(225)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(270)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(315)'/%3E%3C/g%3E%3Ccircle r='6.5' fill='%23000'/%3E%3C/svg%3E");
+  --daisy-rose: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-32 -32 64 64'%3E%3Cg fill='none' stroke='%23c4867b' stroke-width='4.5'%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(0)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(45)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(90)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(135)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(180)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(225)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(270)'/%3E%3Cellipse rx='5.5' ry='11.5' cy='-15' transform='rotate(315)'/%3E%3C/g%3E%3Ccircle r='6.5' fill='%23c4867b'/%3E%3C/svg%3E");
+}
+
+/* Centered section headings get a daisy flourish between two fine lines. */
+.section-head--center .section-head__text::after {
+  content: '';
+  width: 124px;
+  height: 16px;
+  margin-top: 4px;
+  background:
+    var(--daisy-rose) center / 16px 16px no-repeat,
+    linear-gradient(var(--sand), var(--sand)) left center / 44px 1px no-repeat,
+    linear-gradient(var(--sand), var(--sand)) right center / 44px 1px no-repeat;
+  opacity: 0.9;
+}
+
+/* Arched frames ---------------------------------------------------------------- */
+/* Product photos sit in a gentle dome, like an old shop-window frame. */
+.pcard__media {
+  border-radius: 50% 50% var(--r-lg) var(--r-lg) / 16% 16% var(--r-lg) var(--r-lg);
+}
+
+/* Badges move to the bottom-left so the dome doesn't clip them. */
+.pcard__badge {
+  top: auto;
+  bottom: 14px;
+}
+
+/* Double-line buttons ------------------------------------------------------------ */
+/* A fine inner line, like the border on a vintage label. */
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px solid currentColor;
+  border-radius: inherit;
+  opacity: 0.28;
+  pointer-events: none;
+}
+
+.btn--outline::after {
+  opacity: 0.18;
+}
+
+/* Framed cards ------------------------------------------------------------------- */
+/* Cards carry a second hairline inside the first, like a printed frame. */
+.avail-card,
+.summary-card,
+.confirm__card,
+.builder__summary {
+  outline: 1px solid var(--line);
+  outline-offset: -7px;
+}
+
+/* Seal --------------------------------------------------------------------------- */
+.seal {
+  position: absolute;
+  right: 4px;
+  bottom: 24px;
+  width: 132px;
+  height: 132px;
+  filter: drop-shadow(0 10px 22px rgba(43, 39, 34, 0.14));
+}
+
+.seal__ring {
+  animation: seal-spin 40s linear infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.seal__text {
+  font-family: var(--sans);
+  font-size: 8.4px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  fill: var(--olive-deep);
+}
+
+@keyframes seal-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 900px) {
+  .seal {
+    right: -28px;
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seal__ring {
+    animation: none;
+  }
+}

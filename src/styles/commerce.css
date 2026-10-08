@@ -1304,7 +1304,6 @@
   inset: auto 12px 14%;
   text-align: center;
   font-family: var(--serif);
-  font-style: italic;
   font-size: 0.95rem;
   color: var(--muted);
   animation: value-in 600ms var(--ease-out) both;
