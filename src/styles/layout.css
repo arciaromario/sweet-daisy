@@ -136,7 +136,7 @@
   }
   .header__nav ul {
     display: flex;
-    gap: clamp(20px, 2.4vw, 40px);
+    gap: clamp(14px, 1.8vw, 36px);
     list-style: none;
     margin: 0;
     padding: 0;
@@ -158,7 +158,8 @@
   padding: 8px 0;
   font-size: 0.78rem;
   font-weight: 400;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
   text-transform: uppercase;
   color: var(--ink);
 }

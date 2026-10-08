@@ -20,7 +20,13 @@ interface CatalogState {
 
 const CatalogContext = createContext<CatalogState | null>(null);
 
-const bundled: Catalog = { products: bundledProducts, categories: bundledCategories, overrides: {}, settings: defaultSettings };
+// Shown until the live catalogue loads: only active products, in shop order.
+const bundled: Catalog = {
+  products: bundledProducts.filter((p) => p.active !== false).sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0)),
+  categories: bundledCategories,
+  overrides: {},
+  settings: defaultSettings,
+};
 
 export function CatalogProvider({ children }: { children: ReactNode }) {
   // Render instantly from the bundled catalogue, then replace it with the live data.

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Outlet, Route, Routes, useLocation } from 'react-router';
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router';
 import { CartDrawer } from './components/CartDrawer';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
@@ -84,8 +84,10 @@ export default function App() {
             <Route element={<StoreLayout />}>
               <Route index element={<Home />} />
               <Route path="shop" element={<Shop />} />
-              <Route path="cakes" element={<Shop scope="cakes" />} />
-              <Route path="treats" element={<Shop scope="treats" />} />
+              <Route path="cookies" element={<Shop scope="cookies" />} />
+              {/* Earlier cake and treat pages now lead to the cookie menu. */}
+              <Route path="cakes" element={<Navigate to="/cookies" replace />} />
+              <Route path="treats" element={<Navigate to="/cookies" replace />} />
               <Route path="products/:slug" element={<ProductPage />} />
               <Route path="custom-cakes" element={<CustomCakes />} />
               <Route path="availability" element={<Availability />} />

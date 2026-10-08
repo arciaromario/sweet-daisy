@@ -1,15 +1,15 @@
 export const site = {
   name: 'Sweet Daisy',
   descriptor: 'Cakes and Treats',
-  tagline: 'Cakes made for your sweetest moments.',
+  tagline: 'New York–style cookies, baked fresh.',
   description:
-    'Sweet Daisy is a boutique cake studio crafting handmade celebration cakes, mini cakes, cupcakes and treats. Order online for pickup or local delivery, or request a custom cake.',
+    'Sweet Daisy bakes big, gooey New York–style cookies in Austin — sold in packs of 2, 4 and 6 or in a box you build yourself — plus custom celebration cakes made to order.',
 };
 
 export const mainNav = [
   { label: 'Home', href: '/' },
-  { label: 'Cakes', href: '/cakes' },
-  { label: 'Treats', href: '/treats' },
+  { label: 'Cookies', href: '/cookies' },
+  { label: 'Build a Box', href: '/products/build-your-box' },
   { label: 'Custom Cakes', href: '/custom-cakes' },
   { label: 'Availability', href: '/availability' },
   { label: 'About', href: '/about' },
@@ -17,7 +17,8 @@ export const mainNav = [
 ];
 
 export const footerNav = [
-  { label: 'Shop', href: '/shop' },
+  { label: 'Cookies', href: '/cookies' },
+  { label: 'Build a Box', href: '/products/build-your-box' },
   { label: 'Custom Cakes', href: '/custom-cakes' },
   { label: 'Availability', href: '/availability' },
   { label: 'About', href: '/about' },

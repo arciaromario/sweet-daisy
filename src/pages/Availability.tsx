@@ -14,15 +14,13 @@ export default function Availability() {
   const closed = settings.store.closedWeekdays;
   const closedDays = closed.map((d) => weekdayNames[d]);
 
-  const lead = (list: typeof products) => (list.length ? Math.max(...list.map((p) => p.leadDays)) : 0);
-  const quickest = products.length ? Math.min(...products.map((p) => p.leadDays)) : 0;
-  const cakes = products.filter((p) => p.category === 'cakes');
-  const cakeLead = lead(cakes) || 2;
+  const cookies = products.filter((p) => p.category === 'cookies');
+  const cookieLead = cookies.length ? Math.max(...cookies.map((p) => p.leadDays)) : 1;
   const customLead = settings.custom.leadDays;
 
   const options: { icon: IconName; title: string; lead: number; note: string; cta: string; to: string }[] = [
-    { icon: 'gift', title: 'Treats & cupcakes', lead: quickest, note: 'Cookies, macarons, cupcakes and mini cakes.', cta: 'Shop treats', to: '/treats' },
-    { icon: 'heart', title: 'Celebration cakes', lead: cakeLead, note: 'Our signature layer cakes, made to order.', cta: 'Shop cakes', to: '/cakes' },
+    { icon: 'gift', title: 'NY cookies', lead: cookieLead, note: 'Packs of 2, 4 and 6 in every flavour.', cta: 'Shop cookies', to: '/cookies' },
+    { icon: 'heart', title: 'Build your own box', lead: cookieLead, note: 'Mix any flavours in one box.', cta: 'Build your box', to: '/products/build-your-box' },
     { icon: 'sparkle', title: 'Custom cakes', lead: customLead, note: 'Designed with you, from sketch to stand.', cta: 'Design your cake', to: '/custom-cakes#builder' },
   ];
 
@@ -30,13 +28,13 @@ export default function Availability() {
     <>
       <Seo
         title="Availability"
-        description="See upcoming availability at Sweet Daisy, the earliest date for treats, celebration cakes and custom cakes, and how far ahead to order."
+        description="See upcoming availability at Sweet Daisy, the earliest pickup for New York–style cookies and custom cakes, and how far ahead to order."
         path="/availability"
       />
       <PageHeader
         eyebrow="Availability"
         title="Plan your celebration"
-        intro="Every cake is made by hand, so we take a limited number of orders each day. Here’s when we can bake for you."
+        intro="Everything is baked by hand, so we take a limited number of orders each day. Here’s when we can bake for you."
         crumbs={[{ label: 'Availability' }]}
       />
 

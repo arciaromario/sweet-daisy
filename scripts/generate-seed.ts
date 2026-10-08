@@ -16,20 +16,21 @@ lines.push(
 );
 
 lines.push(
-  'insert into public.products (slug, name, category, short, description, images, sizes, flavors, decorations, allow_message, lead_days, prep_hours, badge, bestseller, details, tint, sort) values',
+  'insert into public.products (slug, name, category, short, description, images, sizes, flavors, decorations, allow_message, lead_days, prep_hours, badge, bestseller, details, tint, sort, active) values',
 );
 lines.push(
   products
     .map(
       (p, i) =>
-        `  (${q(p.slug)}, ${q(p.name)}, ${q(p.category)}, ${q(p.short)}, ${q(p.description)}, ${j(p.images)}, ${j(p.sizes)}, ${j(p.flavors)}, ${j(p.decorations)}, ${!!p.message}, ${p.leadDays}, ${p.prepHours ?? 'null'}, ${q(p.badge)}, ${!!p.bestseller}, ${j(p.details)}, ${q(p.tint)}, ${i})`,
+        `  (${q(p.slug)}, ${q(p.name)}, ${q(p.category)}, ${q(p.short)}, ${q(p.description)}, ${j(p.images)}, ${j(p.sizes)}, ${j(p.flavors)}, ${j(p.decorations)}, ${!!p.message}, ${p.leadDays}, ${p.prepHours ?? 'null'}, ${q(p.badge)}, ${!!p.bestseller}, ${j(p.details)}, ${q(p.tint)}, ${p.sort ?? i}, ${p.active !== false})`,
     )
     .join(',\n') +
     `\non conflict (slug) do update set name = excluded.name, category = excluded.category, short = excluded.short,
   description = excluded.description, images = excluded.images, sizes = excluded.sizes, flavors = excluded.flavors,
   decorations = excluded.decorations, allow_message = excluded.allow_message, lead_days = excluded.lead_days, prep_hours = excluded.prep_hours,
   badge = excluded.badge, bestseller = excluded.bestseller, details = excluded.details, tint = excluded.tint,
-  sort = excluded.sort, updated_at = now();`,
+  sort = excluded.sort, updated_at = now();
+-- active is only set for new rows, so re-seeding never undoes products switched on or off in /admin.`,
 );
 
 lines.push(

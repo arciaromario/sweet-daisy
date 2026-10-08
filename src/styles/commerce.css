@@ -528,6 +528,8 @@
 
 .pdp__grid {
   display: grid;
+  /* minmax(0, …) so wide option rows can't stretch the page past the screen on phones. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 36px;
 }
 
@@ -613,6 +615,7 @@
 
 .pdp__info {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   align-content: start;
 }
@@ -659,6 +662,7 @@
 
 .pdp__form {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 28px;
   padding-block: 12px 8px;
 }
@@ -682,11 +686,13 @@
 
 .pdp__buy {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
+/* Beside the quantity stepper, or below it when the label is long on a phone. */
 .pdp__add {
-  flex: 1;
+  flex: 1 1 200px;
 }
 
 .pdp__perks {
@@ -713,7 +719,7 @@
 
 @media (min-width: 1000px) {
   .pdp__grid {
-    grid-template-columns: 1.15fr 1fr;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
     gap: clamp(48px, 6vw, 96px);
     align-items: start;
   }
@@ -1520,6 +1526,155 @@
   }
   .builder__seg::after {
     transition: none;
+  }
+}
+
+/* Build-your-own cookie box ------------------------------------------------------ */
+.boxb {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--paper);
+  min-width: 0;
+}
+
+.boxb__legend {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  float: left; /* lets the legend sit inside the padded box */
+  margin-bottom: 4px;
+}
+
+.boxb__status {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--rose);
+}
+
+.boxb__status.is-full {
+  color: var(--olive);
+}
+
+/* The box itself: one round slot per cookie, filling as flavours are chosen. */
+.boxb__slots {
+  clear: both;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--r-md);
+  background: var(--cream);
+}
+
+.boxb__slot {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1.5px dashed var(--sand);
+  border-radius: 50%;
+}
+
+.boxb__slot.is-filled {
+  border-style: solid;
+  border-color: transparent;
+}
+
+.boxb__cookie {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 35%, rgba(60, 35, 20, 0.55) 0 7%, transparent 8%),
+    radial-gradient(circle at 62% 28%, rgba(60, 35, 20, 0.55) 0 6%, transparent 7%),
+    radial-gradient(circle at 55% 64%, rgba(60, 35, 20, 0.55) 0 8%, transparent 9%),
+    radial-gradient(circle at 28% 70%, rgba(60, 35, 20, 0.45) 0 5%, transparent 6%),
+    radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.35), transparent 60%),
+    var(--h);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+  animation: cookie-drop 420ms cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+@keyframes cookie-drop {
+  from {
+    transform: translateY(-10px) scale(0.6);
+    opacity: 0;
+  }
+}
+
+.boxb__list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.boxb__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.boxb__row:last-child {
+  border-bottom: 0;
+}
+
+.boxb__dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--h);
+}
+
+.boxb__name {
+  font-size: 0.95rem;
+}
+
+.boxb__row.is-picked .boxb__name {
+  font-weight: 500;
+}
+
+.boxb__stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.boxb__stepper .icon-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line-strong);
+}
+
+.boxb__stepper .icon-btn:disabled {
+  opacity: 0.35;
+}
+
+.boxb__count {
+  min-width: 22px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.boxb__actions {
+  display: flex;
+  gap: 18px;
+  font-size: 0.85rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boxb__cookie {
+    animation: none;
   }
 }
 

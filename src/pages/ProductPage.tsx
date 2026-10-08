@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
+import { BoxBuilder, boxTotal, describeBox, fitBox, type BoxFill } from '../components/BoxBuilder';
 import { Icon } from '../components/Icon';
 import { Img } from '../components/Img';
 import { OptionGroup } from '../components/OptionGroup';
@@ -10,7 +11,7 @@ import { Seo } from '../components/Seo';
 import { useCart } from '../context/CartContext';
 import { useCatalog, useSite } from '../context/CatalogContext';
 import { img } from '../data/images';
-import { categoryName, formatPrep, formatPrice, relatedProducts } from '../data/products';
+import { categoryName, formatPrep, formatPrice, MIX_BOX_SLUG, packCount, relatedProducts } from '../data/products';
 import { firstAvailable, formatDate } from '../lib/availability';
 import NotFound from './NotFound';
 
@@ -31,6 +32,7 @@ export default function ProductPage() {
   const [notes, setNotes] = useState('');
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [fill, setFill] = useState<BoxFill>({});
 
   useEffect(() => {
     if (!product) return;
@@ -41,16 +43,28 @@ export default function ProductPage() {
     setMessage('');
     setNotes('');
     setQty(1);
+    setFill({});
   }, [product]);
 
   if (!product) return ready ? <NotFound /> : <div className="page-loading" aria-busy="true" />;
 
-  const item = toCartItem(product, { sizeId, flavor, decorationId, message, notes, quantity: qty });
-  const size = product.sizes.find((s) => s.id === item.sizeId)!;
+  const isMix = product.slug === MIX_BOX_SLUG;
+  // The box offers every cookie on the menu, so new flavours added in /admin appear automatically.
+  const mixFlavors = isMix
+    ? products.filter((p) => p.category === product.category && p.slug !== product.slug).map((p) => p.name)
+    : [];
+  const size = product.sizes.find((s) => s.id === sizeId) ?? product.sizes[0];
+  const capacity = packCount(size.label);
+  const boxLeft = isMix ? capacity - boxTotal(fill) : 0;
+  const item = toCartItem(product, { sizeId, flavor, mix: isMix ? describeBox(fill) : undefined, decorationId, message, notes, quantity: qty });
   const earliest = firstAvailable(overrides, product.leadDays, settings.store.closedWeekdays);
   const related = relatedProducts(product, products);
 
   const onAdd = () => {
+    if (boxLeft > 0) {
+      document.querySelector('.boxb')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     add(item);
     setAdded(true);
     setTimeout(() => setAdded(false), 2400);
@@ -174,12 +188,26 @@ export default function ProductPage() {
                 legend="Size"
                 hint="Servings are approximate"
                 value={sizeId}
-                onChange={setSizeId}
+                onChange={(id) => {
+                  setSizeId(id);
+                  // Keep a mixed box within the new pack size.
+                  const next = product.sizes.find((s) => s.id === id);
+                  if (isMix && next) setFill((f) => fitBox(f, packCount(next.label)));
+                }}
                 min={130}
                 choices={product.sizes.map((s) => ({ value: s.id, title: s.label, meta: s.servings, price: s.price, priceMode: 'absolute' }))}
               />
 
-              {product.flavors && (
+              {isMix && (
+                <BoxBuilder
+                  flavors={mixFlavors.length ? mixFlavors : (product.flavors ?? []).map((f) => f.label)}
+                  capacity={capacity}
+                  fill={fill}
+                  onChange={setFill}
+                />
+              )}
+
+              {product.flavors && !isMix && (
                 <OptionGroup
                   name="flavor"
                   legend="Flavour"
@@ -238,8 +266,12 @@ export default function ProductPage() {
 
               <div className="pdp__buy">
                 <QuantityStepper value={qty} onChange={setQty} />
-                <button className="btn pdp__add" onClick={onAdd}>
-                  {added ? (
+                <button className="btn pdp__add" onClick={onAdd} aria-disabled={boxLeft > 0}>
+                  {boxLeft > 0 ? (
+                    <>
+                      Choose {boxLeft} more {boxLeft === 1 ? 'cookie' : 'cookies'}
+                    </>
+                  ) : added ? (
                     <>
                       <Icon name="check" /> Added to bag
                     </>
@@ -311,7 +343,7 @@ export default function ProductPage() {
           <span className="price">{formatPrice(item.unitPrice * qty)}</span>
         </div>
         <button className="btn btn--sm" tabIndex={-1} onClick={onAdd}>
-          {added ? 'Added' : 'Add to Cart'}
+          {boxLeft > 0 ? `Choose ${boxLeft} more` : added ? 'Added' : 'Add to Cart'}
         </button>
       </div>
     </>
