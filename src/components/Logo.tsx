@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { useLang } from '../i18n';
 
 export function DaisyMark({ className = '' }: { className?: string }) {
   return (
@@ -23,7 +24,7 @@ export function Wordmark({ compact = false, className = '' }: { compact?: boolea
 
 export function Logo({ compact = false, light = false }: { compact?: boolean; light?: boolean }) {
   return (
-    <Link to="/" className={`logo${light ? ' logo--light' : ''}`} aria-label="Sweet Daisy — Cakes & Treats, home">
+    <Link to="/" className={`logo${light ? ' logo--light' : ''}`} aria-label={`Sweet Daisy — Cakes & Treats, ${useLang() === 'es' ? 'inicio' : 'home'}`}>
       <Wordmark compact={compact} />
     </Link>
   );

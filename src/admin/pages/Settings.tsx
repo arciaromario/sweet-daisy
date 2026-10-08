@@ -101,8 +101,11 @@ export default function SettingsPage() {
             <Field label="Envío gratis a partir de (USD)">
               <input className="input" type="number" min={0} step="any" value={st.freeDeliveryOver} onChange={(e) => setSt({ freeDeliveryOver: Number(e.target.value) })} />
             </Field>
-            <Field label="Zona de reparto" hint="Texto que ven los clientes, p. ej. “within 15 miles of the studio”." wide>
+            <Field label="Zona de reparto (inglés)" hint="Texto que ven los clientes, p. ej. “within 15 miles of the studio”." wide>
               <input className="input" value={st.deliveryRadius} onChange={(e) => setSt({ deliveryRadius: e.target.value })} />
+            </Field>
+            <Field label="Zona de reparto (español)" hint="Se muestra cuando el cliente elige ES, p. ej. “a menos de 15 millas del estudio”." wide>
+              <input className="input" value={st.deliveryRadiusEs ?? ''} onChange={(e) => setSt({ deliveryRadiusEs: e.target.value })} />
             </Field>
           </div>
           <div className="adm-grid-2 adm-mt">
@@ -132,8 +135,11 @@ export default function SettingsPage() {
             <Field label="TikTok (URL)">
               <input className="input" value={b.tiktok} onChange={(e) => setB({ tiktok: e.target.value })} />
             </Field>
-            <Field label="Texto de la barra superior" hint="Se muestra junto al aviso de envío gratis. Déjalo vacío para ocultarlo." wide>
+            <Field label="Texto de la barra superior (inglés)" hint="Se muestra junto al aviso de envío gratis. Déjalo vacío para ocultarlo." wide>
               <input className="input" value={b.announcement} onChange={(e) => setB({ announcement: e.target.value })} />
+            </Field>
+            <Field label="Texto de la barra superior (español)" hint="Se muestra cuando el cliente elige ES. Vacío = se usa el texto en inglés." wide>
+              <input className="input" value={b.announcementEs ?? ''} onChange={(e) => setB({ announcementEs: e.target.value })} />
             </Field>
           </div>
         </Card>

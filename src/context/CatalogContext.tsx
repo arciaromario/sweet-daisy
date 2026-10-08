@@ -1,9 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
-import { categories as bundledCategories, products as bundledProducts, type Category, type Product } from '../data/products';
-import { defaultSettings, phoneHref, type Settings } from '../data/settings';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { categories as bundledCategories, localizeCategory, localizeProduct, products as bundledProducts, type Category, type Product } from '../data/products';
+import { defaultSettings, localizeHours, phoneHref, type Settings } from '../data/settings';
 import { site as brand } from '../data/site';
 import { fetchCatalog, type Catalog, type DayStatus } from '../lib/api';
 import { isSupabaseConfigured } from '../lib/supabase';
+import { useLang } from '../i18n';
 
 interface CatalogState {
   products: Product[];
@@ -55,10 +56,16 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('sweetdaisy:demo-db', reload);
   }, [reload]);
 
-  const getProduct = (slug: string) => catalog.products.find((p) => p.slug === slug);
+  // Everything the storefront reads is already in the active language.
+  const lang = useLang();
+  const localized = useMemo(
+    () => ({ ...catalog, products: catalog.products.map((p) => localizeProduct(p, lang)), categories: catalog.categories.map((c) => localizeCategory(c, lang)) }),
+    [catalog, lang],
+  );
+  const getProduct = (slug: string) => localized.products.find((p) => p.slug === slug);
 
   return (
-    <CatalogContext.Provider value={{ ...catalog, demo: !isSupabaseConfigured, ready, getProduct, reload }}>{children}</CatalogContext.Provider>
+    <CatalogContext.Provider value={{ ...localized, demo: !isSupabaseConfigured, ready, getProduct, reload }}>{children}</CatalogContext.Provider>
   );
 }
 
@@ -73,10 +80,17 @@ export const useSettings = () => useCatalog().settings;
 /** Brand + editable business details in one object (address, hours, socials, delivery terms). */
 export function useSite() {
   const { business, store } = useCatalog().settings;
+  const lang = useLang();
+  const es = lang === 'es';
   return {
     ...brand,
+    tagline: es ? brand.taglineEs : brand.tagline,
+    description: es ? brand.descriptionEs : brand.description,
     ...business,
+    // Owner-entered text in the active language (English when no Spanish version is set).
+    announcement: es && business.announcementEs ? business.announcementEs : business.announcement,
+    hours: business.hours.map((h) => ({ days: localizeHours(h.days, lang), time: localizeHours(h.time, lang) })),
     phoneHref: phoneHref(business.phone),
-    delivery: { fee: store.deliveryFee, freeOver: store.freeDeliveryOver, radius: store.deliveryRadius },
+    delivery: { fee: store.deliveryFee, freeOver: store.freeDeliveryOver, radius: es && store.deliveryRadiusEs ? store.deliveryRadiusEs : store.deliveryRadius },
   };
 }

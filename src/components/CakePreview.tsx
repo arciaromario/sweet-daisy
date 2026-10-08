@@ -1,4 +1,16 @@
 import { useId, type CSSProperties, type ReactNode } from 'react';
+import { useCopy } from '../i18n';
+
+const en = {
+  preview: (parts: string) => `Preview: ${parts}`,
+  filling: (f: string) => `${f} filling`,
+  empty: 'Cake preview: choose a size to start',
+};
+const es: typeof en = {
+  preview: (parts) => `Vista previa: ${parts}`,
+  filling: (f) => `relleno de ${f}`,
+  empty: 'Vista previa del pastel: elige un tamaño para empezar',
+};
 
 /**
  * Live illustration for the custom cake builder. It assembles itself as the customer chooses:
@@ -135,9 +147,10 @@ export function CakePreview({ size, sizeIndex, flavor, filling, frosting, style,
   const deco = decoFor(style);
   const top = tiers[tiers.length - 1];
   const uid = useId().replace(/:/g, '');
+  const t = useCopy({ en, es });
   const label = size
-    ? `Preview: ${[size, flavor, filling && `${filling} filling`, frosting, style].filter(Boolean).join(', ')}`
-    : 'Cake preview: choose a size to start';
+    ? t.preview([size, flavor, filling && t.filling(filling), frosting, style].filter(Boolean).join(', '))
+    : t.empty;
 
   return (
     <svg className={`cake-preview${celebrate ? ' is-celebrating' : ''} ${className}`} viewBox={`0 ${TOP} ${W} ${H - TOP}`} role="img" aria-label={label}>

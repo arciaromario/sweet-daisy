@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { AvailabilityCalendar } from '../components/AvailabilityCalendar';
 import { Icon } from '../components/Icon';
@@ -11,6 +11,217 @@ import { formatPrep, formatPrice } from '../data/products';
 import { placeOrder, startCardPayment, type PlacedOrder } from '../lib/api';
 import { dayStatus, firstAvailable, formatDate, isBookable, parseISO } from '../lib/availability';
 import { supabase } from '../lib/supabase';
+import { useCopy } from '../i18n';
+
+type FieldKey = 'name' | 'email' | 'phone' | 'line1' | 'city' | 'postal' | 'date' | 'slot';
+
+const en = {
+  // Validation: the full message under the field, and the short form used in the summary notice.
+  errors: {
+    name: 'Please enter your full name.',
+    email: 'Please enter a valid email.',
+    phone: 'Please enter a phone number we can reach you on.',
+    line1: 'Please enter your street address.',
+    city: 'Please enter your city.',
+    postal: 'Please enter your ZIP code.',
+    date: 'Please choose a date.',
+    slot: 'Please choose a time.',
+  } as Record<FieldKey, string>,
+  short: {
+    name: 'your full name',
+    email: 'a valid email',
+    phone: 'a phone number we can reach you on',
+    line1: 'your street address',
+    city: 'your city',
+    postal: 'your ZIP code',
+    date: 'a date',
+    slot: 'a time',
+  } as Record<FieldKey, string>,
+  checkFields: (list: string) => `Please check the highlighted fields: ${list}.`,
+  payOpenFailed: 'The payment page could not be opened.',
+  placeFailed: 'We couldn’t place your order. Please try again.',
+  // Confirmation
+  seoPending: 'Complete your payment',
+  seoConfirmed: 'Order confirmed',
+  orderNo: (n: string) => `Order ${n}`,
+  headPending: 'Your order is saved — payment is still pending.',
+  headConfirmed: 'Thank you — your order is in the oven.',
+  confirmLead: (unpaid: boolean, method: Method, date: string, slot: string) => (
+    <>
+      {unpaid ? 'We’ve reserved your order' : 'Your treats will be ready'} for {method} on <strong>{date}</strong>, {slot}.
+    </>
+  ),
+  inTouch: (email: string) => (
+    <>
+      We’ll be in touch at <strong>{email}</strong>.
+    </>
+  ),
+  paymentReceived: 'Your payment was received. We’ll be in touch by email with the details.',
+  openingPayment: 'Opening secure payment',
+  paySecurely: (total: string) => `Pay securely · ${total}`,
+  preferOffline: (phone: ReactNode, email: ReactNode, method: Method) => (
+    <>
+      Prefer not to pay online? Call us on {phone} or email {email} and you can pay at {method} instead.
+    </>
+  ),
+  pickupFrom: 'Pickup from',
+  delivery: 'Delivery',
+  toAddress: 'To your address',
+  total: 'Total',
+  dueAt: (method: Method) => `Payment is due at ${method}. We accept card and contactless.`,
+  paidStripe: 'Paid securely by card through Stripe.',
+  demoLink: 'A secure payment link will follow by email to complete your order.',
+  notCompleted: 'Card payment not completed yet.',
+  demoNote: 'Demo mode — this order was not saved. Connect Supabase to receive real orders.',
+  continueShopping: 'Continue shopping',
+  viewOrders: 'View my orders',
+  // Empty bag
+  seoCheckout: 'Checkout',
+  empty: 'Your bag is empty.',
+  shop: 'Shop Cookies',
+  // Form
+  title: 'Checkout',
+  customer: 'Customer information',
+  fullName: 'Full name',
+  email: 'Email',
+  phone: 'Phone',
+  deliveryOrPickup: 'Delivery or pickup',
+  studioPickup: 'Studio pickup',
+  localDelivery: 'Local delivery',
+  free: 'Free',
+  street: 'Street address',
+  apartment: 'Apartment, suite',
+  optional: 'Optional',
+  city: 'City',
+  zip: 'ZIP code',
+  dateTime: 'Date and time',
+  chooseDate: (method: Method) => `Choose a ${method} date`,
+  pickupTime: 'Pickup time',
+  deliveryWindow: 'Delivery window',
+  leadNote: (n: number) => `Some items in your bag need ${n} ${n === 1 ? 'day' : 'days'} notice, so earlier dates are unavailable.`,
+  payment: 'Payment',
+  payCard: 'Pay online by card',
+  payCardMeta: 'Secure payment link sent with your confirmation',
+  payAt: (method: Method) => `Pay at ${method}`,
+  payAtMeta: 'Card or contactless',
+  secureNote: 'Payments are processed securely. We never store your card details.',
+  instructions: 'Special instructions',
+  notes: 'Notes for the studio',
+  notesPlaceholder: 'Allergies, delivery access, a surprise to keep secret…',
+  summaryLabel: 'Order summary',
+  subtotal: 'Subtotal',
+  pickup: 'Pickup',
+  prepTime: 'Preparation time',
+  placing: 'Placing order',
+  placeOrder: (total: string) => `Place order · ${total}`,
+  terms: (link: (label: string) => ReactNode) => <>By placing your order you agree to our {link('terms')}.</>,
+  // Header
+  back: 'Back to bag',
+  secure: 'Secure checkout',
+};
+
+const esMethod = (m: Method) => (m === 'pickup' ? 'recoger' : 'la entrega a domicilio');
+const esPayAt = (m: Method) => (m === 'pickup' ? 'al recoger' : 'en la entrega a domicilio');
+
+const es: typeof en = {
+  errors: {
+    name: 'Por favor, escribe tu nombre completo.',
+    email: 'Por favor, escribe un correo electrónico válido.',
+    phone: 'Por favor, escribe un teléfono en el que podamos contactarte.',
+    line1: 'Por favor, escribe tu dirección.',
+    city: 'Por favor, escribe tu ciudad.',
+    postal: 'Por favor, escribe tu código postal.',
+    date: 'Por favor, elige una fecha.',
+    slot: 'Por favor, elige un horario.',
+  },
+  short: {
+    name: 'nombre completo',
+    email: 'correo electrónico válido',
+    phone: 'teléfono de contacto',
+    line1: 'dirección',
+    city: 'ciudad',
+    postal: 'código postal',
+    date: 'fecha',
+    slot: 'horario',
+  },
+  checkFields: (list) => `Por favor, revisa los campos marcados: ${list}.`,
+  payOpenFailed: 'No pudimos abrir la página de pago.',
+  placeFailed: 'No pudimos realizar tu pedido. Por favor, inténtalo de nuevo.',
+  seoPending: 'Completa tu pago',
+  seoConfirmed: 'Pedido confirmado',
+  orderNo: (n) => `Pedido ${n}`,
+  headPending: 'Tu pedido está guardado, pero el pago sigue pendiente.',
+  headConfirmed: '¡Gracias! Tu pedido ya está en el horno.',
+  confirmLead: (unpaid, method, date, slot) => (
+    <>
+      {unpaid ? 'Reservamos tu pedido' : 'Tus dulces estarán listos'} para {esMethod(method)} el <strong>{date}</strong>, {slot}.
+    </>
+  ),
+  inTouch: (email) => (
+    <>
+      Te escribiremos a <strong>{email}</strong>.
+    </>
+  ),
+  paymentReceived: 'Recibimos tu pago. Te enviaremos los detalles por correo electrónico.',
+  openingPayment: 'Abriendo el pago seguro',
+  paySecurely: (total) => `Pagar de forma segura · ${total}`,
+  preferOffline: (phone, email, method) => (
+    <>
+      ¿Prefieres no pagar en línea? Llámanos al {phone} o escríbenos a {email} y podrás pagar {esPayAt(method)}.
+    </>
+  ),
+  pickupFrom: 'Recoger en',
+  delivery: 'Entrega a domicilio',
+  toAddress: 'A tu dirección',
+  total: 'Total',
+  dueAt: (method) => `El pago se realiza ${esPayAt(method)}. Aceptamos tarjeta y pago sin contacto.`,
+  paidStripe: 'Pagado de forma segura con tarjeta a través de Stripe.',
+  demoLink: 'Te enviaremos por correo un enlace de pago seguro para completar tu pedido.',
+  notCompleted: 'El pago con tarjeta aún no se ha completado.',
+  demoNote: 'Modo demo: este pedido no se guardó. Conecta Supabase para recibir pedidos reales.',
+  continueShopping: 'Seguir comprando',
+  viewOrders: 'Ver mis pedidos',
+  seoCheckout: 'Finalizar compra',
+  empty: 'Tu bolsa está vacía.',
+  shop: 'Ver galletas',
+  title: 'Finalizar compra',
+  customer: 'Tus datos',
+  fullName: 'Nombre completo',
+  email: 'Correo electrónico',
+  phone: 'Teléfono',
+  deliveryOrPickup: 'Entrega a domicilio o recogida',
+  studioPickup: 'Recoger en el estudio',
+  localDelivery: 'Entrega a domicilio',
+  free: 'Gratis',
+  street: 'Dirección',
+  apartment: 'Apartamento, suite',
+  optional: 'Opcional',
+  city: 'Ciudad',
+  zip: 'Código postal',
+  dateTime: 'Fecha y hora',
+  chooseDate: (method) => (method === 'pickup' ? 'Elige una fecha de recogida' : 'Elige una fecha de entrega'),
+  pickupTime: 'Hora de recogida',
+  deliveryWindow: 'Horario de entrega',
+  leadNote: (n) => `Algunos productos de tu bolsa necesitan ${n} ${n === 1 ? 'día' : 'días'} de anticipación, por eso las fechas anteriores no están disponibles.`,
+  payment: 'Pago',
+  payCard: 'Pagar en línea con tarjeta',
+  payCardMeta: 'Enlace de pago seguro enviado con tu confirmación',
+  payAt: (method) => `Pagar ${esPayAt(method)}`,
+  payAtMeta: 'Tarjeta o pago sin contacto',
+  secureNote: 'Los pagos se procesan de forma segura. Nunca guardamos los datos de tu tarjeta.',
+  instructions: 'Instrucciones especiales',
+  notes: 'Notas para el estudio',
+  notesPlaceholder: 'Alergias, acceso para la entrega, una sorpresa que hay que mantener en secreto…',
+  summaryLabel: 'Resumen del pedido',
+  subtotal: 'Subtotal',
+  pickup: 'Recogida',
+  prepTime: 'Tiempo de preparación',
+  placing: 'Realizando pedido',
+  placeOrder: (total) => `Realizar pedido · ${total}`,
+  terms: (link) => <>Al realizar tu pedido aceptas nuestros {link('términos')}.</>,
+  back: 'Volver a la bolsa',
+  secure: 'Pago seguro',
+};
 
 type Method = 'pickup' | 'delivery';
 type Payment = 'card' | 'in_person';
@@ -80,6 +291,7 @@ export default function Checkout() {
   const [placed, setPlaced] = useState<Placed | null>(null);
   const [params, setParams] = useSearchParams();
   const [paying, setPaying] = useState(false);
+  const t = useCopy({ en, es });
 
   // Back from Stripe: ?paid=SD-… or ?unpaid=SD-… (cancelled).
   useEffect(() => {
@@ -109,7 +321,7 @@ export default function Checkout() {
       savePending(order);
       window.location.assign(await startCardPayment(order.orderNumber, order.email));
     } catch (e) {
-      setPlaced({ ...order, pay: 'unpaid', payError: e instanceof Error ? e.message : 'The payment page could not be opened.' });
+      setPlaced({ ...order, pay: 'unpaid', payError: e instanceof Error ? e.message : t.payOpenFailed });
       setPaying(false);
     }
   }
@@ -149,16 +361,16 @@ export default function Checkout() {
 
   function validate(form: Form) {
     const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = 'Please enter your full name.';
-    if (!/^\S+@\S+\.\S+$/.test(form.email)) e.email = 'Please enter a valid email.';
-    if (form.phone.replace(/\D/g, '').length < 7) e.phone = 'Please enter a phone number we can reach you on.';
+    if (!form.name.trim()) e.name = t.errors.name;
+    if (!/^\S+@\S+\.\S+$/.test(form.email)) e.email = t.errors.email;
+    if (form.phone.replace(/\D/g, '').length < 7) e.phone = t.errors.phone;
     if (method === 'delivery') {
-      if (!form.line1.trim()) e.line1 = 'Please enter your street address.';
-      if (!form.city.trim()) e.city = 'Please enter your city.';
-      if (!form.postal.trim()) e.postal = 'Please enter your ZIP code.';
+      if (!form.line1.trim()) e.line1 = t.errors.line1;
+      if (!form.city.trim()) e.city = t.errors.city;
+      if (!form.postal.trim()) e.postal = t.errors.postal;
     }
-    if (!date) e.date = 'Please choose a date.';
-    if (!slot) e.slot = 'Please choose a time.';
+    if (!date) e.date = t.errors.date;
+    if (!slot) e.slot = t.errors.slot;
     setErrors(e);
     return e;
   }
@@ -213,7 +425,7 @@ export default function Checkout() {
       }
       window.scrollTo({ top: 0 });
     } catch (e) {
-      setSubmitError(e instanceof Error ? e.message : 'We couldn’t place your order. Please try again.');
+      setSubmitError(e instanceof Error ? e.message : t.placeFailed);
     } finally {
       if (!leaving) setSending(false);
     }
@@ -224,25 +436,21 @@ export default function Checkout() {
     const known = Boolean(placed.date);
     return (
       <div className="checkout-shell">
-        <Seo title={unpaid ? 'Complete your payment' : 'Order confirmed'} path="/checkout" />
+        <Seo title={unpaid ? t.seoPending : t.seoConfirmed} path="/checkout" />
         <CheckoutHeader />
         <section className="container container--narrow confirm" role="status">
           <span className={`builder__done-icon${unpaid ? ' builder__done-icon--wait' : ''}`}>
             <Icon name={unpaid ? 'card' : 'check'} />
           </span>
-          <span className="eyebrow eyebrow--plain">Order {placed.orderNumber}</span>
-          <h1>{unpaid ? 'Your order is saved — payment is still pending.' : 'Thank you — your order is in the oven.'}</h1>
+          <span className="eyebrow eyebrow--plain">{t.orderNo(placed.orderNumber)}</span>
+          <h1>{unpaid ? t.headPending : t.headConfirmed}</h1>
           {known ? (
             <p className="lead">
-              {unpaid ? 'We’ve reserved your order' : 'Your treats will be ready'} for {placed.method} on <strong>{formatDate(placed.date)}</strong>, {placed.slot}.{' '}
-              {!unpaid && (
-                <>
-                  We’ll be in touch at <strong>{placed.email}</strong>.
-                </>
-              )}
+              {t.confirmLead(unpaid, placed.method, formatDate(placed.date), placed.slot)}{' '}
+              {!unpaid && t.inTouch(placed.email)}
             </p>
           ) : (
-            !unpaid && <p className="lead">Your payment was received. We’ll be in touch by email with the details.</p>
+            !unpaid && <p className="lead">{t.paymentReceived}</p>
           )}
 
           {unpaid && (
@@ -254,11 +462,11 @@ export default function Checkout() {
               )}
               {known && !demo ? (
                 <button className="btn btn--block" disabled={paying} onClick={() => payNow(placed)}>
-                  {paying ? <span className="spinner" aria-label="Opening secure payment" /> : <>Pay securely · {formatPrice(placed.total)}</>}
+                  {paying ? <span className="spinner" aria-label={t.openingPayment} /> : <>{t.paySecurely(formatPrice(placed.total))}</>}
                 </button>
               ) : null}
               <p className="small muted">
-                Prefer not to pay online? Call us on <a href={site.phoneHref}>{site.phone}</a> or email <a href={`mailto:${site.email}`}>{site.email}</a> and you can pay at {placed.method || 'pickup'} instead.
+                {t.preferOffline(<a href={site.phoneHref}>{site.phone}</a>, <a href={`mailto:${site.email}`}>{site.email}</a>, placed.method || 'pickup')}
               </p>
             </div>
           )}
@@ -266,31 +474,31 @@ export default function Checkout() {
           {known && (
             <div className="confirm__card">
               <div className="summary-row">
-                <span>{placed.method === 'pickup' ? 'Pickup from' : 'Delivery'}</span>
-                <span>{placed.method === 'pickup' ? `${site.address.street}, ${site.address.city}` : 'To your address'}</span>
+                <span>{placed.method === 'pickup' ? t.pickupFrom : t.delivery}</span>
+                <span>{placed.method === 'pickup' ? `${site.address.street}, ${site.address.city}` : t.toAddress}</span>
               </div>
               <div className="summary-row summary-row--total">
-                <span>Total</span>
+                <span>{t.total}</span>
                 <span className="price">{formatPrice(placed.total)}</span>
               </div>
               <p className="small muted">
                 {placed.payment === 'in_person'
-                  ? `Payment is due at ${placed.method}. We accept card and contactless.`
+                  ? t.dueAt(placed.method)
                   : placed.pay === 'paid'
-                    ? 'Paid securely by card through Stripe.'
+                    ? t.paidStripe
                     : demo
-                      ? 'A secure payment link will follow by email to complete your order.'
-                      : 'Card payment not completed yet.'}
+                      ? t.demoLink
+                      : t.notCompleted}
               </p>
             </div>
           )}
-          {demo && <p className="small muted">Demo mode — this order was not saved. Connect Supabase to receive real orders.</p>}
+          {demo && <p className="small muted">{t.demoNote}</p>}
           <div className="hero__ctas">
             <Link to="/shop" className="btn">
-              Continue shopping
+              {t.continueShopping}
             </Link>
             <Link to="/account" className="btn btn--outline">
-              View my orders
+              {t.viewOrders}
             </Link>
           </div>
         </section>
@@ -301,12 +509,12 @@ export default function Checkout() {
   if (cart.items.length === 0) {
     return (
       <div className="checkout-shell">
-        <Seo title="Checkout" path="/checkout" />
+        <Seo title={t.seoCheckout} path="/checkout" />
         <CheckoutHeader />
         <section className="container empty">
-          <p className="serif empty__title">Your bag is empty.</p>
+          <p className="serif empty__title">{t.empty}</p>
           <Link to="/shop" className="btn">
-            Shop Cakes
+            {t.shop}
           </Link>
         </section>
       </div>
@@ -315,37 +523,37 @@ export default function Checkout() {
 
   return (
     <div className="checkout-shell">
-      <Seo title="Checkout" path="/checkout" />
+      <Seo title={t.seoCheckout} path="/checkout" />
       <meta name="robots" content="noindex" />
       <CheckoutHeader />
 
       <form className="container checkout" onSubmit={onSubmit} noValidate>
         <div className="checkout__main">
-          <h1 className="checkout__title">Checkout</h1>
+          <h1 className="checkout__title">{t.title}</h1>
 
           {/* 1. Customer */}
           <fieldset className="checkout__section">
             <legend>
-              <span className="checkout__n">1</span> Customer information
+              <span className="checkout__n">1</span> {t.customer}
             </legend>
             <div className="form-grid form-grid--2">
               <div className="field span-2">
                 <label className="field__label" htmlFor="c-name">
-                  Full name
+                  {t.fullName}
                 </label>
                 <input id="c-name" className="input" autoComplete="name" value={form.name} onChange={set('name')} aria-invalid={!!errors.name} aria-describedby="err-name" />
                 {err('name')}
               </div>
               <div className="field">
                 <label className="field__label" htmlFor="c-email">
-                  Email
+                  {t.email}
                 </label>
                 <input id="c-email" className="input" type="email" autoComplete="email" value={form.email} onChange={set('email')} aria-invalid={!!errors.email} aria-describedby="err-email" />
                 {err('email')}
               </div>
               <div className="field">
                 <label className="field__label" htmlFor="c-phone">
-                  Phone
+                  {t.phone}
                 </label>
                 <input id="c-phone" className="input" type="tel" autoComplete="tel" value={form.phone} onChange={set('phone')} aria-invalid={!!errors.phone} aria-describedby="err-phone" />
                 {err('phone')}
@@ -356,7 +564,7 @@ export default function Checkout() {
           {/* 2. Delivery or pickup */}
           <fieldset className="checkout__section">
             <legend>
-              <span className="checkout__n">2</span> Delivery or pickup
+              <span className="checkout__n">2</span> {t.deliveryOrPickup}
             </legend>
             <div className="method">
               {(['pickup', 'delivery'] as const).map((m) => (
@@ -371,11 +579,11 @@ export default function Checkout() {
                     }}
                   />
                   <Icon name={m === 'pickup' ? 'store' : 'truck'} />
-                  <span className="option__title">{m === 'pickup' ? 'Studio pickup' : 'Local delivery'}</span>
+                  <span className="option__title">{m === 'pickup' ? t.studioPickup : t.localDelivery}</span>
                   <span className="option__meta">
                     {m === 'pickup'
                       ? `${site.address.street}, ${site.address.city}`
-                      : `${site.delivery.radius} · ${cart.subtotal >= site.delivery.freeOver ? 'Free' : formatPrice(site.delivery.fee)}`}
+                      : `${site.delivery.radius} · ${cart.subtotal >= site.delivery.freeOver ? t.free : formatPrice(site.delivery.fee)}`}
                   </span>
                 </label>
               ))}
@@ -384,27 +592,27 @@ export default function Checkout() {
               <div className="form-grid form-grid--2 checkout__address">
                 <div className="field span-2">
                   <label className="field__label" htmlFor="c-line1">
-                    Street address
+                    {t.street}
                   </label>
                   <input id="c-line1" className="input" autoComplete="address-line1" value={form.line1} onChange={set('line1')} aria-invalid={!!errors.line1} aria-describedby="err-line1" />
                   {err('line1')}
                 </div>
                 <div className="field span-2">
                   <label className="field__label" htmlFor="c-line2">
-                    Apartment, suite <span className="opt-group__hint">Optional</span>
+                    {t.apartment} <span className="opt-group__hint">{t.optional}</span>
                   </label>
                   <input id="c-line2" className="input" autoComplete="address-line2" value={form.line2} onChange={set('line2')} />
                 </div>
                 <div className="field">
                   <label className="field__label" htmlFor="c-city">
-                    City
+                    {t.city}
                   </label>
                   <input id="c-city" className="input" autoComplete="address-level2" value={form.city} onChange={set('city')} aria-invalid={!!errors.city} aria-describedby="err-city" />
                   {err('city')}
                 </div>
                 <div className="field">
                   <label className="field__label" htmlFor="c-postal">
-                    ZIP code
+                    {t.zip}
                   </label>
                   <input id="c-postal" className="input" autoComplete="postal-code" inputMode="numeric" value={form.postal} onChange={set('postal')} aria-invalid={!!errors.postal} aria-describedby="err-postal" />
                   {err('postal')}
@@ -416,10 +624,10 @@ export default function Checkout() {
           {/* 3. Date & time */}
           <fieldset className="checkout__section">
             <legend>
-              <span className="checkout__n">3</span> Date and time
+              <span className="checkout__n">3</span> {t.dateTime}
             </legend>
             <div className="checkout__when">
-              <AvailabilityCalendar leadDays={cart.maxLeadDays} value={date} onChange={setDate} label={`Choose a ${method} date`} />
+              <AvailabilityCalendar leadDays={cart.maxLeadDays} value={date} onChange={setDate} label={t.chooseDate(method)} />
               <div className="stack">
                 {date && (
                   <p className="builder__picked">
@@ -429,7 +637,7 @@ export default function Checkout() {
                 {err('date')}
                 <div className="field">
                   <span className="field__label" id="slot-label">
-                    {method === 'pickup' ? 'Pickup time' : 'Delivery window'}
+                    {method === 'pickup' ? t.pickupTime : t.deliveryWindow}
                   </span>
                   <div className="slots" role="radiogroup" aria-labelledby="slot-label">
                     {slots.map((t) => (
@@ -456,7 +664,7 @@ export default function Checkout() {
                 </div>
                 {cart.maxLeadDays > 0 && (
                   <p className="small muted">
-                    Some items in your bag need {cart.maxLeadDays} {cart.maxLeadDays === 1 ? 'day' : 'days'} notice, so earlier dates are unavailable.
+                    {t.leadNote(cart.maxLeadDays)}
                   </p>
                 )}
               </div>
@@ -466,41 +674,41 @@ export default function Checkout() {
           {/* 4. Payment */}
           <fieldset className="checkout__section">
             <legend>
-              <span className="checkout__n">4</span> Payment
+              <span className="checkout__n">4</span> {t.payment}
             </legend>
             <div className="method">
               <label className="option method__opt">
                 <input type="radio" name="payment" checked={payment === 'card'} onChange={() => setPayment('card')} />
                 <Icon name="card" />
-                <span className="option__title">Pay online by card</span>
-                <span className="option__meta">Secure payment link sent with your confirmation</span>
+                <span className="option__title">{t.payCard}</span>
+                <span className="option__meta">{t.payCardMeta}</span>
               </label>
               <label className="option method__opt">
                 <input type="radio" name="payment" checked={payment === 'in_person'} onChange={() => setPayment('in_person')} />
                 <Icon name="store" />
-                <span className="option__title">Pay at {method}</span>
-                <span className="option__meta">Card or contactless</span>
+                <span className="option__title">{t.payAt(method)}</span>
+                <span className="option__meta">{t.payAtMeta}</span>
               </label>
             </div>
             <p className="checkout__secure small muted">
-              <Icon name="lock" /> Payments are processed securely. We never store your card details.
+              <Icon name="lock" /> {t.secureNote}
             </p>
           </fieldset>
 
           {/* 5. Instructions */}
           <fieldset className="checkout__section">
             <legend>
-              <span className="checkout__n">5</span> Special instructions
+              <span className="checkout__n">5</span> {t.instructions}
             </legend>
             <div className="field">
               <label className="field__label" htmlFor="c-notes">
-                Notes for the studio <span className="opt-group__hint">Optional</span>
+                {t.notes} <span className="opt-group__hint">{t.optional}</span>
               </label>
               <textarea
                 id="c-notes"
                 className="textarea"
                 maxLength={800}
-                placeholder="Allergies, delivery access, a surprise to keep secret…"
+                placeholder={t.notesPlaceholder}
                 value={form.instructions}
                 onChange={set('instructions')}
               />
@@ -509,9 +717,9 @@ export default function Checkout() {
         </div>
 
         {/* Order summary */}
-        <aside className="checkout__summary" aria-label="Order summary">
+        <aside className="checkout__summary" aria-label={t.summaryLabel}>
           <div className="summary-card">
-            <h2 className="summary-card__title">Order summary</h2>
+            <h2 className="summary-card__title">{t.summaryLabel}</h2>
             <ul className="mini-lines">
               {cart.items.map((i) => (
                 <li key={i.key}>
@@ -530,26 +738,26 @@ export default function Checkout() {
             </ul>
             <hr className="divider" />
             <div className="summary-row">
-              <span>Subtotal</span>
+              <span>{t.subtotal}</span>
               <span className="price">{formatPrice(cart.subtotal)}</span>
             </div>
             <div className="summary-row">
-              <span>{method === 'pickup' ? 'Pickup' : 'Delivery'}</span>
-              <span>{fee ? formatPrice(fee) : 'Free'}</span>
+              <span>{method === 'pickup' ? t.pickup : t.delivery}</span>
+              <span>{fee ? formatPrice(fee) : t.free}</span>
             </div>
             {formatPrep(cart.maxPrepHours) && (
               <div className="summary-row">
-                <span>Preparation time</span>
+                <span>{t.prepTime}</span>
                 <span>{formatPrep(cart.maxPrepHours)}</span>
               </div>
             )}
             <div className="summary-row summary-row--total">
-              <span>Total</span>
+              <span>{t.total}</span>
               <span className="price">{formatPrice(total)}</span>
             </div>
             {Object.keys(errors).length > 0 && (
               <p className="notice notice--error" role="alert">
-                <Icon name="info" /> Please check the highlighted fields: {Object.values(errors).map((m) => m.replace(/^Please (enter|choose) /, '').replace(/\.$/, '')).join(', ')}.
+                <Icon name="info" /> {t.checkFields(Object.keys(errors).map((k) => t.short[k as FieldKey] ?? errors[k]).join(', '))}
               </p>
             )}
             {submitError && (
@@ -558,10 +766,10 @@ export default function Checkout() {
               </p>
             )}
             <button type="submit" className="btn btn--block" disabled={sending}>
-              {sending ? <span className="spinner" aria-label="Placing order" /> : `Place order · ${formatPrice(total)}`}
+              {sending ? <span className="spinner" aria-label={t.placing} /> : t.placeOrder(formatPrice(total))}
             </button>
             <p className="small muted center">
-              By placing your order you agree to our <Link to="/terms">terms</Link>.
+              {t.terms((label) => <Link to="/terms">{label}</Link>)}
             </p>
           </div>
         </aside>
@@ -571,15 +779,16 @@ export default function Checkout() {
 }
 
 function CheckoutHeader() {
+  const t = useCopy({ en, es });
   return (
     <header className="checkout-header">
       <div className="container checkout-header__inner">
         <Link to="/cart" className="link">
-          <Icon name="arrowLeft" /> <span className="checkout-header__back">Back to bag</span>
+          <Icon name="arrowLeft" /> <span className="checkout-header__back">{t.back}</span>
         </Link>
         <Logo />
         <span className="checkout-header__secure small">
-          <Icon name="lock" /> <span>Secure checkout</span>
+          <Icon name="lock" /> <span>{t.secure}</span>
         </span>
       </div>
     </header>

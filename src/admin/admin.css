@@ -1599,3 +1599,17 @@
   color: #7a4038;
   font-size: 0.8rem;
 }
+
+/* Spanish translation fields in the product editor */
+.adm-i18n-sizes,
+.adm-i18n-details {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.adm-i18n-sizes__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr);
+  gap: 8px;
+}

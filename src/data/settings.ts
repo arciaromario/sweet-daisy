@@ -13,6 +13,8 @@ export interface BusinessSettings {
   tiktok: string;
   handle: string;
   announcement: string;
+  /** Spanish version of the announcement; empty falls back to English. */
+  announcementEs: string;
 }
 
 export interface StoreSettings {
@@ -21,6 +23,8 @@ export interface StoreSettings {
   deliveryFee: number;
   freeDeliveryOver: number;
   deliveryRadius: string;
+  /** Spanish version of the delivery radius ("a menos de 15 millas del estudio"). */
+  deliveryRadiusEs: string;
   pickupSlots: string[];
   deliverySlots: string[];
 }
@@ -60,12 +64,14 @@ export const defaultSettings: Settings = {
     tiktok: 'https://tiktok.com/@sweetdaisy',
     handle: '@sweetdaisy',
     announcement: 'Order a day ahead for fresh-baked cookies',
+    announcementEs: 'Haz tu pedido con un día de anticipación para galletas recién horneadas',
   },
   store: {
     closedWeekdays: [1],
     deliveryFee: 12,
     freeDeliveryOver: 120,
     deliveryRadius: 'within 15 miles of the studio',
+    deliveryRadiusEs: 'a menos de 15 millas del estudio',
     pickupSlots: ['9:00 – 11:00', '11:00 – 13:00', '13:00 – 15:00', '15:00 – 17:00'],
     deliverySlots: ['10:00 – 13:00', '13:00 – 16:00', '16:00 – 18:00'],
   },
@@ -112,3 +118,23 @@ export function mergeSettings(stored: Partial<Record<SettingsKey, unknown>>): Se
 export const phoneHref = (phone: string) => `tel:${phone.replace(/[^\d+]/g, '')}`;
 
 export const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+export const weekdayNamesEs = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+
+/** Weekday name (0 = Sunday) in the given language. */
+export const weekdayName = (d: number, lang: 'en' | 'es') => (lang === 'es' ? weekdayNamesEs : weekdayNames)[d];
+
+const hoursEs: [RegExp, string][] = [
+  [/\bSunday\b/g, 'Domingo'],
+  [/\bMonday\b/g, 'Lunes'],
+  [/\bTuesday\b/g, 'Martes'],
+  [/\bWednesday\b/g, 'Miércoles'],
+  [/\bThursday\b/g, 'Jueves'],
+  [/\bFriday\b/g, 'Viernes'],
+  [/\bSaturday\b/g, 'Sábado'],
+  [/\bbaking day\b/gi, 'día de horneado'],
+  [/\bClosed\b/g, 'Cerrado'],
+  [/\bby appointment\b/gi, 'con cita previa'],
+];
+
+/** Opening-hours text from /admin ("Tuesday – Friday", "Closed — baking day") in the given language. */
+export const localizeHours = (text: string, lang: 'en' | 'es') => (lang === 'es' ? hoursEs.reduce((t, [re, es]) => t.replace(re, es), text) : text);

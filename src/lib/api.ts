@@ -4,9 +4,48 @@ import { mergeSettings, type Settings, type SettingsKey } from '../data/settings
 import type { CartItem } from '../context/CartContext';
 import { readDb, uid, writeDb } from './localDb';
 import { toISO } from './availability';
+import { currentLang } from '../i18n';
 import type { DayOverride, DayStatus, OrderItemRecord } from './types';
 
 export type { DayStatus } from './types';
+
+/* ------------------------------------------------------------ error messages */
+
+/** Spanish versions of the fixed English messages raised by the database and the payment function. */
+const ES_ERRORS: Record<string, string> = {
+  'Your bag is empty.': 'Tu bolsa está vacía.',
+  'The studio is closed on that day. Please choose another date.': 'El estudio está cerrado ese día. Por favor, elige otra fecha.',
+  'That date is fully booked. Please choose another date.': 'Esa fecha ya está completa. Por favor, elige otra fecha.',
+  'Please choose one of the available times.': 'Por favor, elige uno de los horarios disponibles.',
+  'A product in your bag is no longer available.': 'Un producto de tu bolsa ya no está disponible.',
+  'Online payments are not set up yet.': 'Los pagos en línea aún no están configurados.',
+  'Online payments are not available in demo mode.': 'Los pagos en línea no están disponibles en modo demo.',
+  'The payment page could not be opened. Please try again.': 'No pudimos abrir la página de pago. Por favor, inténtalo de nuevo.',
+  'Order not found.': 'No encontramos el pedido.',
+  'This order is already paid.': 'Este pedido ya está pagado.',
+  'Something went wrong. Please try again.': 'Algo salió mal. Por favor, inténtalo de nuevo.',
+  'Accounts are available once Supabase is connected.': 'Las cuentas estarán disponibles cuando se conecte Supabase.',
+};
+
+const ES_PATTERNS: [RegExp, (...m: string[]) => string][] = [
+  [/^Please choose a valid size for (.+)\.$/, (name) => `Por favor, elige un tamaño válido para ${name}.`],
+  [
+    /^Some items need (\d+) days? notice\. Please choose a later date\.$/,
+    (n) => `Algunos productos necesitan ${n} ${n === '1' ? 'día' : 'días'} de anticipación. Por favor, elige una fecha posterior.`,
+  ],
+  [/^We couldn't upload (.+)\. Please try a smaller image\.$/, (name) => `No pudimos subir ${name}. Por favor, prueba con una imagen más pequeña.`],
+];
+
+/** Returns a user-facing error in the active language; unknown messages pass through unchanged. */
+export function localizeError(message: string): string {
+  if (currentLang() !== 'es') return message;
+  if (ES_ERRORS[message]) return ES_ERRORS[message];
+  for (const [re, fn] of ES_PATTERNS) {
+    const m = message.match(re);
+    if (m) return fn(...m.slice(1));
+  }
+  return message;
+}
 
 /* ------------------------------------------------------------------ catalogue */
 
@@ -29,6 +68,7 @@ export interface ProductRow {
   tint: string;
   sort: number;
   active: boolean;
+  i18n: NonNullable<Product['i18n']>;
 }
 
 export const fromRow = (r: ProductRow): Product => ({
@@ -50,6 +90,7 @@ export const fromRow = (r: ProductRow): Product => ({
   tint: r.tint,
   sort: r.sort,
   active: r.active,
+  i18n: r.i18n ?? {},
 });
 
 export const toRow = (p: Product): ProductRow => ({
@@ -71,6 +112,7 @@ export const toRow = (p: Product): ProductRow => ({
   tint: p.tint,
   sort: p.sort ?? 0,
   active: p.active !== false,
+  i18n: p.i18n ?? {},
 });
 
 export interface Catalog {
@@ -95,7 +137,7 @@ export async function fetchCatalog(): Promise<Catalog> {
 
   const [p, c, a, s] = await Promise.all([
     supabase.from('products').select('*').eq('active', true).order('sort'),
-    supabase.from('categories').select('id,name,blurb').order('sort'),
+    supabase.from('categories').select('id,name,blurb,i18n').order('sort'),
     supabase.from('availability_overrides').select('day,status').gte('day', today),
     supabase.from('settings').select('key,value'),
   ]);
@@ -142,7 +184,7 @@ export async function placeOrder(order: OrderPayload, settings: Settings): Promi
     quantity: i.quantity,
   }));
   const { data, error } = await supabase.rpc('place_order', { payload: { ...order, items } });
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(localizeError(error.message));
   const row = Array.isArray(data) ? data[0] : data;
   return { orderNumber: row.order_number, total: Number(row.total) };
 }
@@ -152,7 +194,7 @@ export async function placeOrder(order: OrderPayload, settings: Settings): Promi
  * Prices come from the order stored by place_order, never from the browser.
  */
 export async function startCardPayment(orderNumber: string, email: string): Promise<string> {
-  if (!supabase) throw new Error('Online payments are not available in demo mode.');
+  if (!supabase) throw new Error(localizeError('Online payments are not available in demo mode.'));
   const returnUrl = new URL(`${import.meta.env.BASE_URL}checkout`, window.location.origin).toString();
   const { data, error } = await supabase.functions.invoke('create-checkout', {
     body: { order_number: orderNumber, email, return_url: returnUrl },
@@ -165,9 +207,9 @@ export async function startCardPayment(orderNumber: string, email: string): Prom
     } catch {
       // Keep the generic message.
     }
-    throw new Error(message);
+    throw new Error(localizeError(message));
   }
-  if (!data?.url) throw new Error('The payment page could not be opened. Please try again.');
+  if (!data?.url) throw new Error(localizeError('The payment page could not be opened. Please try again.'));
   return data.url as string;
 }
 
@@ -178,7 +220,7 @@ async function placeDemoOrder(order: OrderPayload, settings: Settings): Promise<
   const items: OrderItemRecord[] = order.items.map((i) => {
     const p = db.products.find((x) => x.slug === i.slug);
     const size = p?.sizes.find((s) => s.id === i.sizeId);
-    if (!p || p.active === false || !size) throw new Error('A product in your bag is no longer available.');
+    if (!p || p.active === false || !size) throw new Error(localizeError('A product in your bag is no longer available.'));
     const flavor = p.flavors?.find((f) => f.label === i.flavor);
     const deco = p.decorations?.find((d) => d.id === i.decorationId);
     const unit = size.price + (flavor?.price ?? 0) + (deco?.price ?? 0);
@@ -291,7 +333,7 @@ export async function submitCustomCakeRequest(req: CustomCakeRequest, files: Fil
     const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
     const path = `${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from('cake-inspiration').upload(path, file, { contentType: file.type });
-    if (error) throw new Error(`We couldn't upload ${file.name}. Please try a smaller image.`);
+    if (error) throw new Error(localizeError(`We couldn't upload ${file.name}. Please try a smaller image.`));
     paths.push(path);
   }
 
@@ -330,7 +372,7 @@ export async function sendContactMessage(msg: { name: string; email: string; top
 /* --------------------------------------------------------------------- auth */
 
 export async function sendMagicLink(email: string): Promise<void> {
-  if (!supabase) throw new Error('Accounts are available once Supabase is connected.');
+  if (!supabase) throw new Error(localizeError('Accounts are available once Supabase is connected.'));
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: { emailRedirectTo: `${window.location.origin}${import.meta.env.BASE_URL}account` },

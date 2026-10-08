@@ -3,8 +3,34 @@ import { footerNav } from '../data/site';
 import { useSite } from '../context/CatalogContext';
 import { Icon } from './Icon';
 import { Wordmark } from './Logo';
+import { useCopy, useLang } from '../i18n';
+
+const en = {
+  explore: 'Explore',
+  visit: 'Visit the studio',
+  hours: 'Opening hours',
+  follow: 'Follow along',
+  social: 'Behind the scenes, new bakes and sweet moments.',
+  rights: (year: number, city: string) => `© ${year} Sweet Daisy — Cakes and Treats. Handmade in ${city}.`,
+  terms: 'Terms',
+  privacy: 'Privacy',
+  delivery: 'Delivery',
+};
+const es: typeof en = {
+  explore: 'Explora',
+  visit: 'Visita el estudio',
+  hours: 'Horario',
+  follow: 'Síguenos',
+  social: 'Detrás de cámaras, nuevas recetas y momentos dulces.',
+  rights: (year, city) => `© ${year} Sweet Daisy — Cakes and Treats. Hecho a mano en ${city}.`,
+  terms: 'Términos',
+  privacy: 'Privacidad',
+  delivery: 'Entregas',
+};
 
 export function Footer() {
+  const t = useCopy({ en, es });
+  const lang = useLang();
   const year = new Date().getFullYear();
   const site = useSite();
   return (
@@ -16,18 +42,18 @@ export function Footer() {
 
         <div className="footer__grid">
           <div className="footer__col">
-            <h2 className="footer__title">Explore</h2>
+            <h2 className="footer__title">{t.explore}</h2>
             <ul>
               {footerNav.map((l) => (
                 <li key={l.href}>
-                  <Link to={l.href}>{l.label}</Link>
+                  <Link to={l.href}>{lang === 'es' ? l.es : l.label}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
           <div className="footer__col">
-            <h2 className="footer__title">Visit the studio</h2>
+            <h2 className="footer__title">{t.visit}</h2>
             <address>
               {site.address.street}
               <br />
@@ -41,7 +67,7 @@ export function Footer() {
           </div>
 
           <div className="footer__col">
-            <h2 className="footer__title">Opening hours</h2>
+            <h2 className="footer__title">{t.hours}</h2>
             <dl className="footer__hours">
               {site.hours.map((h) => (
                 <div key={h.days}>
@@ -53,8 +79,8 @@ export function Footer() {
           </div>
 
           <div className="footer__col">
-            <h2 className="footer__title">Follow along</h2>
-            <p className="footer__social-text">Behind the scenes, new bakes and sweet moments.</p>
+            <h2 className="footer__title">{t.follow}</h2>
+            <p className="footer__social-text">{t.social}</p>
             <ul className="footer__social">
               <li>
                 <a href={site.instagram} target="_blank" rel="noreferrer" aria-label="Instagram">
@@ -76,11 +102,11 @@ export function Footer() {
         </div>
 
         <div className="footer__bottom">
-          <p>© {year} Sweet Daisy — Cakes and Treats. Handmade in {site.address.city}.</p>
+          <p>{t.rights(year, site.address.city)}</p>
           <p className="footer__legal">
-            <Link to="/terms">Terms</Link>
-            <Link to="/privacy">Privacy</Link>
-            <Link to="/shipping-delivery">Delivery</Link>
+            <Link to="/terms">{t.terms}</Link>
+            <Link to="/privacy">{t.privacy}</Link>
+            <Link to="/shipping-delivery">{t.delivery}</Link>
           </p>
         </div>
       </div>

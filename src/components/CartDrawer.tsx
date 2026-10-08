@@ -6,12 +6,39 @@ import { CartLine } from './CartLine';
 import { FreeDeliveryMeter } from './FreeDeliveryMeter';
 import { Icon } from './Icon';
 import { useScrollLock } from '../lib/scrollLock';
+import { useCopy } from '../i18n';
+
+const en = {
+  title: 'Your bag',
+  close: 'Close bag',
+  empty: 'Your bag is empty.',
+  emptyText: 'Something sweet is waiting for you.',
+  shop: 'Shop Cookies',
+  subtotal: 'Subtotal',
+  pickupFree: 'Pickup is free. Delivery and date are chosen at checkout.',
+  prep: (time: string) => `Average preparation time: ${time}.`,
+  checkout: 'Continue to Checkout',
+  view: 'View bag',
+};
+const es: typeof en = {
+  title: 'Tu bolsa',
+  close: 'Cerrar bolsa',
+  empty: 'Tu bolsa está vacía.',
+  emptyText: 'Algo dulce te está esperando.',
+  shop: 'Ver galletas',
+  subtotal: 'Subtotal',
+  pickupFree: 'La recogida es gratis. La entrega a domicilio y la fecha se eligen al finalizar la compra.',
+  prep: (time) => `Tiempo promedio de preparación: ${time}.`,
+  checkout: 'Finalizar compra',
+  view: 'Ver bolsa',
+};
 
 export function CartDrawer() {
   const { items, isOpen, close, subtotal, count, maxPrepHours } = useCart();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const panelRef = useRef<HTMLDivElement>(null);
+  const t = useCopy({ en, es });
 
   useEffect(() => close(), [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
   useScrollLock(isOpen);
@@ -34,19 +61,19 @@ export function CartDrawer() {
       <div className="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title" tabIndex={-1} ref={panelRef}>
         <div className="drawer__head">
           <h2 id="drawer-title" className="drawer__title">
-            Your bag <span className="muted">({count})</span>
+            {t.title} <span className="muted">({count})</span>
           </h2>
-          <button className="icon-btn" aria-label="Close bag" onClick={close}>
+          <button className="icon-btn" aria-label={t.close} onClick={close}>
             <Icon name="close" />
           </button>
         </div>
 
         {items.length === 0 ? (
           <div className="drawer__empty">
-            <p className="serif drawer__empty-title">Your bag is empty.</p>
-            <p className="muted">Something sweet is waiting for you.</p>
+            <p className="serif drawer__empty-title">{t.empty}</p>
+            <p className="muted">{t.emptyText}</p>
             <Link to="/shop" className="btn" onClick={close}>
-              Shop Cakes
+              {t.shop}
             </Link>
           </div>
         ) : (
@@ -61,25 +88,25 @@ export function CartDrawer() {
             </div>
             <div className="drawer__foot">
               <div className="summary-row summary-row--total">
-                <span>Subtotal</span>
+                <span>{t.subtotal}</span>
                 <span className="price">{formatPrice(subtotal)}</span>
               </div>
               <p className="small muted">
-                <Icon name="store" className="inline-icon" /> Pickup is free. Delivery and date are chosen at checkout.
+                <Icon name="store" className="inline-icon" /> {t.pickupFree}
               </p>
               {formatPrep(maxPrepHours) && (
                 <p className="small muted">
-                  <Icon name="clock" className="inline-icon" /> Average preparation time: {formatPrep(maxPrepHours)}.
+                  <Icon name="clock" className="inline-icon" /> {t.prep(formatPrep(maxPrepHours) ?? '')}
                 </p>
               )}
               <button className="btn btn--block" onClick={() => {
                   close();
                   navigate('/checkout');
                 }}>
-                Continue to Checkout
+                {t.checkout}
               </button>
               <Link to="/cart" className="link drawer__view" onClick={close}>
-                View bag
+                {t.view}
               </Link>
             </div>
           </>

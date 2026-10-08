@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
 import { BoxBuilder, boxTotal, describeBox, fitBox, type BoxFill } from '../components/BoxBuilder';
 import { Icon } from '../components/Icon';
@@ -12,12 +12,95 @@ import { useCart } from '../context/CartContext';
 import { useCatalog, useSite } from '../context/CatalogContext';
 import { img } from '../data/images';
 import { categoryName, formatPrep, formatPrice, MIX_BOX_SLUG, packCount, relatedProducts } from '../data/products';
+import { useCopy } from '../i18n';
 import { firstAvailable, formatDate } from '../lib/availability';
 import NotFound from './NotFound';
 
 const MESSAGE_MAX = 40;
 
+const en = {
+  breadcrumb: 'Breadcrumb',
+  home: 'Home',
+  productImages: 'Product images',
+  imageOf: (i: number, n: number) => `Image ${i} of ${n}`,
+  detailAlt: (name: string, i: number) => `${name} — detail ${i}`,
+  avgPrep: (time: string) => `Average preparation time: ${time}`,
+  madeFresh: ' · Each order is made fresh by hand.',
+  availableFrom: (date: string) => `Available from ${date}`,
+  sameDay: ' · Baked fresh daily, ready same day.',
+  notice: (n: number) => ` · Needs ${n} ${n === 1 ? 'day' : 'days'} notice. Choose your date at checkout.`,
+  size: 'Size',
+  servingsHint: 'Servings are approximate',
+  flavour: 'Flavour',
+  decoration: 'Decoration',
+  customMessage: 'Custom message',
+  messageHint: 'Optional · piped or on a plaque',
+  messagePlaceholder: 'e.g. Happy 30th, Sophie',
+  characters: (n: number, max: number) => `${n}/${max} characters`,
+  addNotes: 'Add order notes',
+  orderNotes: 'Order notes',
+  notesPlaceholder: 'Allergies, colour preferences, candles…',
+  chooseMore: (n: number) => `Choose ${n} more ${n === 1 ? 'cookie' : 'cookies'}`,
+  addedToBag: 'Added to bag',
+  addToCart: 'Add to Cart',
+  addToCartPrice: (price: string) => `Add to Cart · ${price}`,
+  freePickup: (city: string) => `Free pickup from our ${city} studio`,
+  localDelivery: (radius: string, price: string) => `Local delivery ${radius} — free over ${price}`,
+  keepsakeBox: 'Presented in our signature keepsake box',
+  pickupDelivery: 'Pickup & delivery',
+  pickupText: (street: string, radius: string, link: (text: string) => ReactNode): ReactNode => (
+    <>
+      Collect from {street} at your chosen time, or choose local delivery {radius}. {link('Read our delivery guide')}.
+    </>
+  ),
+  moreToLove: 'More to love',
+  youMightLike: 'You might also like',
+  chooseMoreShort: (n: number) => `Choose ${n} more`,
+  added: 'Added',
+};
+const es: typeof en = {
+  breadcrumb: 'Ruta de navegación',
+  home: 'Inicio',
+  productImages: 'Imágenes del producto',
+  imageOf: (i, n) => `Imagen ${i} de ${n}`,
+  detailAlt: (name, i) => `${name} — detalle ${i}`,
+  avgPrep: (time) => `Tiempo promedio de preparación: ${time}`,
+  madeFresh: ' · Cada pedido se hace a mano y al momento.',
+  availableFrom: (date) => `Disponible desde el ${date}`,
+  sameDay: ' · Horneado fresco cada día, listo el mismo día.',
+  notice: (n) => ` · Requiere ${n} ${n === 1 ? 'día' : 'días'} de anticipación. Elige tu fecha al finalizar la compra.`,
+  size: 'Tamaño',
+  servingsHint: 'Las porciones son aproximadas',
+  flavour: 'Sabor',
+  decoration: 'Decoración',
+  customMessage: 'Mensaje personalizado',
+  messageHint: 'Opcional · escrito con manga o en una placa',
+  messagePlaceholder: 'p. ej. Feliz 30, Sophie',
+  characters: (n, max) => `${n}/${max} caracteres`,
+  addNotes: 'Agregar notas al pedido',
+  orderNotes: 'Notas del pedido',
+  notesPlaceholder: 'Alergias, colores preferidos, velas…',
+  chooseMore: (n) => `Elige ${n} ${n === 1 ? 'galleta' : 'galletas'} más`,
+  addedToBag: 'Añadido a la bolsa',
+  addToCart: 'Añadir a la bolsa',
+  addToCartPrice: (price) => `Añadir a la bolsa · ${price}`,
+  freePickup: (city) => `Recogida gratis en nuestro estudio de ${city}`,
+  localDelivery: (radius, price) => `Entrega a domicilio local ${radius}: gratis en pedidos de más de ${price}`,
+  keepsakeBox: 'Presentado en nuestra caja de recuerdo exclusiva',
+  pickupDelivery: 'Recogida y entrega a domicilio',
+  pickupText: (street, radius, link) => (
+    <>
+      Recoge tu pedido en {street} a la hora que elijas, o elige entrega a domicilio local {radius}. {link('Lee nuestra guía de entregas')}.
+    </>
+  ),
+  moreToLove: 'Más para enamorarte',
+  youMightLike: 'También te puede gustar',
+  chooseMoreShort: (n) => `Elige ${n} más`,
+  added: 'Añadido',
+};
+
 export default function ProductPage() {
+  const t = useCopy({ en, es });
   const { slug = '' } = useParams();
   const { getProduct, products, overrides, settings, ready } = useCatalog();
   const site = useSite();
@@ -95,10 +178,10 @@ export default function ProductPage() {
       />
 
       <div className="container pdp">
-        <nav aria-label="Breadcrumb" className="crumbs pdp__crumbs">
+        <nav aria-label={t.breadcrumb} className="crumbs pdp__crumbs">
           <ol>
             <li>
-              <Link to="/">Home</Link>
+              <Link to="/">{t.home}</Link>
             </li>
             <li>
               <Link to={`/shop?category=${product.category}`}>{categoryName(product.category)}</Link>
@@ -112,13 +195,13 @@ export default function ProductPage() {
         <div className="pdp__grid">
           {/* Gallery */}
           <div className="pdp__gallery">
-            <div className="pdp__thumbs" role="tablist" aria-label="Product images">
+            <div className="pdp__thumbs" role="tablist" aria-label={t.productImages}>
               {product.images.map((im, i) => (
                 <button
                   key={im + i}
                   role="tab"
                   aria-selected={i === active}
-                  aria-label={`Image ${i + 1} of ${product.images.length}`}
+                  aria-label={t.imageOf(i + 1, product.images.length)}
                   className={`pdp__thumb${i === active ? ' is-active' : ''}`}
                   onClick={() => setActive(i)}
                 >
@@ -131,7 +214,7 @@ export default function ProductPage() {
                 <div key={im + i} className={`pdp__slide${i === active ? ' is-active' : ''}`} aria-hidden={i !== active}>
                   <Img
                     src={im}
-                    alt={i === 0 ? product.name : `${product.name} — detail ${i + 1}`}
+                    alt={i === 0 ? product.name : t.detailAlt(product.name, i + 1)}
                     ratio="4 / 5"
                     width={1400}
                     sizes="(min-width: 1000px) 55vw, 100vw"
@@ -164,19 +247,17 @@ export default function ProductPage() {
                 <p>
                   <Icon name="clock" />
                   <span>
-                    <strong>Average preparation time: {formatPrep(product.prepHours)}</strong>
-                    <span className="muted"> · Each order is made fresh by hand.</span>
+                    <strong>{t.avgPrep(formatPrep(product.prepHours)!)}</strong>
+                    <span className="muted">{t.madeFresh}</span>
                   </span>
                 </p>
               )}
               <p>
                 <Icon name="calendar" />
                 <span>
-                  <strong>Available from {formatDate(earliest, { weekday: 'short', month: 'short', day: 'numeric' })}</strong>
+                  <strong>{t.availableFrom(formatDate(earliest, { weekday: 'short', month: 'short', day: 'numeric' }))}</strong>
                   <span className="muted">
-                    {product.leadDays === 0
-                      ? ' · Baked fresh daily, ready same day.'
-                      : ` · Needs ${product.leadDays} ${product.leadDays === 1 ? 'day' : 'days'} notice. Choose your date at checkout.`}
+                    {product.leadDays === 0 ? t.sameDay : t.notice(product.leadDays)}
                   </span>
                 </span>
               </p>
@@ -185,8 +266,8 @@ export default function ProductPage() {
             <div className="pdp__form">
               <OptionGroup
                 name="size"
-                legend="Size"
-                hint="Servings are approximate"
+                legend={t.size}
+                hint={t.servingsHint}
                 value={sizeId}
                 onChange={(id) => {
                   setSizeId(id);
@@ -210,7 +291,7 @@ export default function ProductPage() {
               {product.flavors && !isMix && (
                 <OptionGroup
                   name="flavor"
-                  legend="Flavour"
+                  legend={t.flavour}
                   value={flavor}
                   onChange={setFlavor}
                   min={180}
@@ -221,7 +302,7 @@ export default function ProductPage() {
               {product.decorations && (
                 <OptionGroup
                   name="decoration"
-                  legend="Decoration"
+                  legend={t.decoration}
                   value={decorationId}
                   onChange={setDecorationId}
                   min={200}
@@ -232,33 +313,33 @@ export default function ProductPage() {
               {product.message && (
                 <div className="field">
                   <label className="field__label" htmlFor="pdp-message">
-                    Custom message <span className="opt-group__hint">Optional · piped or on a plaque</span>
+                    {t.customMessage} <span className="opt-group__hint">{t.messageHint}</span>
                   </label>
                   <input
                     id="pdp-message"
                     className="input"
                     maxLength={MESSAGE_MAX}
-                    placeholder="e.g. Happy 30th, Sophie"
+                    placeholder={t.messagePlaceholder}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     aria-describedby="pdp-message-count"
                   />
                   <span id="pdp-message-count" className="field__hint">
-                    {message.length}/{MESSAGE_MAX} characters
+                    {t.characters(message.length, MESSAGE_MAX)}
                   </span>
                 </div>
               )}
 
               <details className="pdp__notes">
-                <summary>Add order notes</summary>
+                <summary>{t.addNotes}</summary>
                 <label htmlFor="pdp-notes" className="visually-hidden">
-                  Order notes
+                  {t.orderNotes}
                 </label>
                 <textarea
                   id="pdp-notes"
                   className="textarea"
                   maxLength={500}
-                  placeholder="Allergies, colour preferences, candles…"
+                  placeholder={t.notesPlaceholder}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                 />
@@ -268,28 +349,26 @@ export default function ProductPage() {
                 <QuantityStepper value={qty} onChange={setQty} />
                 <button className="btn pdp__add" onClick={onAdd} aria-disabled={boxLeft > 0}>
                   {boxLeft > 0 ? (
-                    <>
-                      Choose {boxLeft} more {boxLeft === 1 ? 'cookie' : 'cookies'}
-                    </>
+                    <>{t.chooseMore(boxLeft)}</>
                   ) : added ? (
                     <>
-                      <Icon name="check" /> Added to bag
+                      <Icon name="check" /> {t.addedToBag}
                     </>
                   ) : (
-                    <>Add to Cart · {formatPrice(item.unitPrice * qty)}</>
+                    <>{t.addToCartPrice(formatPrice(item.unitPrice * qty))}</>
                   )}
                 </button>
               </div>
 
               <ul className="pdp__perks">
                 <li>
-                  <Icon name="store" /> Free pickup from our {site.address.city} studio
+                  <Icon name="store" /> {t.freePickup(site.address.city)}
                 </li>
                 <li>
-                  <Icon name="truck" /> Local delivery {site.delivery.radius} — free over {formatPrice(site.delivery.freeOver)}
+                  <Icon name="truck" /> {t.localDelivery(site.delivery.radius, formatPrice(site.delivery.freeOver))}
                 </li>
                 <li>
-                  <Icon name="gift" /> Presented in our signature keepsake box
+                  <Icon name="gift" /> {t.keepsakeBox}
                 </li>
               </ul>
             </div>
@@ -306,12 +385,11 @@ export default function ProductPage() {
               ))}
               <details>
                 <summary>
-                  Pickup & delivery
+                  {t.pickupDelivery}
                   <Icon name="plus" />
                 </summary>
                 <p>
-                  Collect from {site.address.street} at your chosen time, or choose local delivery {site.delivery.radius}.{' '}
-                  <Link to="/shipping-delivery">Read our delivery guide</Link>.
+                  {t.pickupText(site.address.street, site.delivery.radius, (text) => <Link to="/shipping-delivery">{text}</Link>)}
                 </p>
               </details>
             </div>
@@ -324,8 +402,8 @@ export default function ProductPage() {
           <div className="container">
             <Reveal className="section-head">
               <div className="section-head__text">
-                <span className="eyebrow">More to love</span>
-                <h2 id="related-title">You might also like</h2>
+                <span className="eyebrow">{t.moreToLove}</span>
+                <h2 id="related-title">{t.youMightLike}</h2>
               </div>
             </Reveal>
             <div className="product-grid product-grid--four product-grid--rail">
@@ -343,7 +421,7 @@ export default function ProductPage() {
           <span className="price">{formatPrice(item.unitPrice * qty)}</span>
         </div>
         <button className="btn btn--sm" tabIndex={-1} onClick={onAdd}>
-          {boxLeft > 0 ? `Choose ${boxLeft} more` : added ? 'Added' : 'Add to Cart'}
+          {boxLeft > 0 ? t.chooseMoreShort(boxLeft) : added ? t.added : t.addToCart}
         </button>
       </div>
     </>

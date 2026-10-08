@@ -1,3 +1,4 @@
+import { currentLocale } from '../i18n';
 import type { DayStatus } from './types';
 
 export type Status = 'available' | 'limited' | 'booked' | 'closed' | 'too-soon';
@@ -17,7 +18,7 @@ export const parseISO = (s: string) => {
 };
 
 export const formatDate = (s: string, opts: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric' }) =>
-  parseISO(s).toLocaleDateString('en-US', opts);
+  parseISO(s).toLocaleDateString(currentLocale(), opts);
 
 export function dayStatus(date: Date, overrides: Record<string, DayStatus>, leadDays: number, closedWeekdays: number[]): Status {
   const iso = toISO(date);
