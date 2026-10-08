@@ -1,14 +1,43 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { useCatalog } from '../context/CatalogContext';
 import { categoryName, formatPrice, fromPrice } from '../data/products';
+import { useCopy } from '../i18n';
 import { Icon } from './Icon';
 import { Img } from './Img';
 import { useScrollLock } from '../lib/scrollLock';
 
-const suggestions = ['Strawberry', 'Chocolate', 'Mini cakes', 'Cupcakes', 'Macarons', 'Gluten-free'];
+const en = {
+  suggestions: ['Strawberry', 'Chocolate', 'Mini cakes', 'Cupcakes', 'Macarons', 'Gluten-free'],
+  search: 'Search',
+  searchLabel: 'Search cakes and treats',
+  placeholder: 'Search cakes, flavours, treats…',
+  close: 'Close search',
+  popular: 'Popular',
+  nothingFound: (q: string, link: (text: string) => ReactNode): ReactNode => (
+    <>
+      Nothing found for “{q}”. Try another flavour, or {link('request a custom cake')}.
+    </>
+  ),
+  from: (price: string) => `from ${price}`,
+};
+const es: typeof en = {
+  suggestions: ['Fresa', 'Chocolate', 'Mini pasteles', 'Cupcakes', 'Macarons', 'Sin gluten'],
+  search: 'Buscar',
+  searchLabel: 'Buscar pasteles y dulces',
+  placeholder: 'Busca pasteles, sabores, dulces…',
+  close: 'Cerrar búsqueda',
+  popular: 'Populares',
+  nothingFound: (q, link) => (
+    <>
+      No encontramos nada para “{q}”. Prueba otro sabor o {link('pide un pastel personalizado')}.
+    </>
+  ),
+  from: (price) => `desde ${price}`,
+};
 
 export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const t = useCopy({ en, es });
   const { products } = useCatalog();
   const [q, setQ] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -30,7 +59,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
   const results = useMemo(() => searchProducts(products, q).slice(0, 6), [products, q]);
 
   return (
-    <div className={`search${open ? ' is-open' : ''}`} role="dialog" aria-modal="true" aria-label="Search" inert={!open}>
+    <div className={`search${open ? ' is-open' : ''}`} role="dialog" aria-modal="true" aria-label={t.search} inert={!open}>
       <div className="search__backdrop" onClick={onClose} />
       <div className="search__panel">
         <div className="container">
@@ -43,27 +72,27 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
           >
             <Icon name="search" />
             <label htmlFor="site-search" className="visually-hidden">
-              Search cakes and treats
+              {t.searchLabel}
             </label>
             <input
               ref={inputRef}
               id="site-search"
               type="search"
-              placeholder="Search cakes, flavours, treats…"
+              placeholder={t.placeholder}
               value={q}
               onChange={(e) => setQ(e.target.value)}
               autoComplete="off"
             />
-            <button type="button" className="icon-btn" aria-label="Close search" onClick={onClose}>
+            <button type="button" className="icon-btn" aria-label={t.close} onClick={onClose}>
               <Icon name="close" />
             </button>
           </form>
 
           {!q && (
             <div className="search__suggest">
-              <span className="eyebrow eyebrow--plain">Popular</span>
+              <span className="eyebrow eyebrow--plain">{t.popular}</span>
               <div className="search__chips">
-                {suggestions.map((s) => (
+                {t.suggestions.map((s) => (
                   <button key={s} className="chip" onClick={() => setQ(s)}>
                     {s}
                   </button>
@@ -76,7 +105,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
             <div className="search__results" aria-live="polite">
               {results.length === 0 ? (
                 <p className="muted">
-                  Nothing found for “{q}”. Try another flavour, or <Link to="/custom-cakes">request a custom cake</Link>.
+                  {t.nothingFound(q, (text) => <Link to="/custom-cakes">{text}</Link>)}
                 </p>
               ) : (
                 <ul>
@@ -87,7 +116,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                         <span>
                           <span className="search__name">{p.name}</span>
                           <span className="muted small">
-                            {categoryName(p.category)} · from {formatPrice(fromPrice(p))}
+                            {categoryName(p.category)} · {t.from(formatPrice(fromPrice(p)))}
                           </span>
                         </span>
                       </Link>

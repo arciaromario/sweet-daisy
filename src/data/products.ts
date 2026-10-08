@@ -1,3 +1,5 @@
+import { currentLang, type Lang } from '../i18n/lang.ts';
+
 
 /** Category ids are managed from /admin; these are the defaults: cookies, then the (hidden) cake and treat lines. */
 export type CategoryId = string;
@@ -6,10 +8,28 @@ export interface Category {
   id: CategoryId;
   name: string;
   blurb: string;
+  /** Optional Spanish copy, edited in /admin. English is always the base. */
+  i18n?: { es?: { name?: string; blurb?: string } };
+}
+
+/** Optional Spanish copy for a product. Anything left empty falls back to English. */
+export interface ProductTranslation {
+  name?: string;
+  short?: string;
+  description?: string;
+  badge?: string;
+  details?: { label: string; value: string }[];
+  /** Pack/size names by size id, e.g. { pack2: { label: 'Paquete de 2', servings: '2 galletas' } }. */
+  sizes?: Record<string, { label?: string; servings?: string }>;
 }
 
 export const categories: Category[] = [
-  { id: 'cookies', name: 'NY Cookies', blurb: 'Big, gooey New York–style cookies, boxed in 2s, 4s and 6s.' },
+  {
+    id: 'cookies',
+    name: 'NY Cookies',
+    blurb: 'Big, gooey New York–style cookies, boxed in 2s, 4s and 6s.',
+    i18n: { es: { name: 'Galletas NY', blurb: 'Galletas grandes y suaves estilo New York, en cajas de 2, 4 y 6.' } },
+  },
   { id: 'cakes', name: 'Cakes', blurb: 'Layered celebration cakes, finished by hand.' },
   { id: 'mini-cakes', name: 'Mini Cakes', blurb: 'Small cakes for intimate celebrations.' },
   { id: 'cupcakes', name: 'Cupcakes', blurb: 'Signature cupcakes, boxed to gift.' },
@@ -57,6 +77,27 @@ export interface Product {
   /** Hidden from the shop when false (managed from /admin). */
   active?: boolean;
   sort?: number;
+  i18n?: { es?: ProductTranslation };
+}
+
+/** The product as shown in a language: Spanish fields where filled in, English otherwise. */
+export function localizeProduct(p: Product, lang: Lang): Product {
+  const t = lang === 'es' ? p.i18n?.es : undefined;
+  if (!t) return p;
+  return {
+    ...p,
+    name: t.name || p.name,
+    short: t.short || p.short,
+    description: t.description || p.description,
+    badge: p.badge ? t.badge || p.badge : p.badge,
+    details: t.details?.length ? t.details : p.details,
+    sizes: p.sizes.map((s) => ({ ...s, label: t.sizes?.[s.id]?.label || s.label, servings: t.sizes?.[s.id]?.servings || s.servings })),
+  };
+}
+
+export function localizeCategory(c: Category, lang: Lang): Category {
+  const t = lang === 'es' ? c.i18n?.es : undefined;
+  return t ? { ...c, name: t.name || c.name, blurb: t.blurb || c.blurb } : c;
 }
 
 const standardDecorations: AddOn[] = [
@@ -97,6 +138,23 @@ const packs = (two: number, four: number, six: number) => [
   { id: 'pack6', label: 'Pack of 6', servings: '6 cookies', price: six },
 ];
 
+/** Spanish copy shared by every cookie: pack names and details. */
+const cookieEs = (t: Pick<ProductTranslation, 'name' | 'short' | 'description' | 'badge'>): Product['i18n'] => ({
+  es: {
+    ...t,
+    sizes: {
+      pack2: { label: 'Paquete de 2', servings: '2 galletas' },
+      pack4: { label: 'Paquete de 4', servings: '4 galletas' },
+      pack6: { label: 'Paquete de 6', servings: '6 galletas' },
+    },
+    details: [
+      { label: 'Alérgenos', value: 'Contiene trigo, huevo y lácteos. Hecho en una cocina que maneja frutos secos.' },
+      { label: 'Tamaño', value: 'Cada galleta pesa unas 5 oz — gruesa, crujiente por fuera y suave por dentro.' },
+      { label: 'Conservación', value: 'Guárdalas en la caja a temperatura ambiente hasta 3 días. Caliéntalas 5 minutos a 350 °F para que sepan recién horneadas.' },
+    ],
+  },
+});
+
 const cookie = (p: Omit<Product, 'category' | 'sizes' | 'details' | 'leadDays' | 'prepHours'> & Partial<Product>): Product => ({
   category: 'cookies',
   sizes: packs(10, 19, 27),
@@ -109,6 +167,7 @@ const cookie = (p: Omit<Product, 'category' | 'sizes' | 'details' | 'leadDays' |
 const cookieProducts: Product[] = [
   cookie({
     slug: 'classic-chocolate-chip',
+    i18n: cookieEs({ name: 'Chispas de chocolate clásica', short: 'Masa de mantequilla tostada, trozos de chocolate oscuro y sal en escamas.', description: 'La que empezó todo. Una galleta gruesa estilo New York hecha con mantequilla tostada y llena de charcos de chocolate oscuro y con leche, terminada con sal en escamas.', badge: 'La más vendida' }),
     name: 'Classic Chocolate Chip',
     short: 'Brown butter dough, dark chocolate chunks and flaky sea salt.',
     description:
@@ -121,6 +180,7 @@ const cookieProducts: Product[] = [
   }),
   cookie({
     slug: 'double-chocolate-fudge',
+    i18n: cookieEs({ name: 'Doble chocolate fudge', short: 'Masa de cacao oscuro con centro de fudge fundido.', description: 'Para los amantes del chocolate: una galleta de cacao intenso con chocolate blanco y oscuro, que esconde un centro suave de fudge fundido.' }),
     name: 'Double Chocolate Fudge',
     short: 'Dark cocoa dough with a molten fudge centre.',
     description: 'For serious chocolate lovers: a deep cocoa cookie studded with white and dark chocolate, hiding a soft, molten fudge centre.',
@@ -131,6 +191,7 @@ const cookieProducts: Product[] = [
   }),
   cookie({
     slug: 'biscoff-crumble',
+    i18n: cookieEs({ name: 'Biscoff crumble', short: 'Centro de crema Biscoff, chocolate blanco y galleta Biscoff triturada.', description: 'Una galleta de azúcar morena rellena de crema de galleta Biscoff, cubierta con chocolate blanco y galletas Lotus trituradas.', badge: 'Favorita de los clientes' }),
     name: 'Biscoff Crumble',
     short: 'Cookie-butter centre, white chocolate and Biscoff crumb.',
     description: 'A brown sugar cookie stuffed with a gooey Biscoff cookie-butter centre, topped with white chocolate and crushed Lotus biscuits.',
@@ -142,6 +203,7 @@ const cookieProducts: Product[] = [
   }),
   cookie({
     slug: 'red-velvet-cheesecake',
+    i18n: cookieEs({ name: 'Red velvet con cheesecake', short: 'Red velvet de cacao con corazón de queso crema.', description: 'Masa suave de red velvet con chispas de chocolate blanco, envolviendo un centro cremoso de cheesecake.' }),
     name: 'Red Velvet Cheesecake',
     short: 'Cocoa red velvet with a cream cheese heart.',
     description: 'Soft red velvet dough with white chocolate chips, wrapped around a tangy, creamy cheesecake centre.',
@@ -152,6 +214,7 @@ const cookieProducts: Product[] = [
   }),
   cookie({
     slug: 'smores',
+    i18n: cookieEs({ name: 'S’mores', short: 'Masa de galleta graham, chocolate con leche y malvavisco tostado.', description: 'Una fogata en una galleta: masa de galleta graham, trozos de chocolate con leche y un centro de malvavisco, tostado por encima.' }),
     name: 'S’mores',
     short: 'Graham dough, milk chocolate and toasted marshmallow.',
     description: 'Campfire in a cookie: graham cracker dough, milk chocolate chunks and a gooey marshmallow centre, toasted on top.',
@@ -161,6 +224,7 @@ const cookieProducts: Product[] = [
   }),
   cookie({
     slug: 'birthday-funfetti',
+    i18n: cookieEs({ name: 'Funfetti de cumpleaños', short: 'Masa de vainilla, chispas de colores y chocolate blanco.', description: 'Cada día es una celebración: masa de vainilla con mantequilla, llena de chispas de colores y chocolate blanco cremoso.' }),
     name: 'Birthday Funfetti',
     short: 'Vanilla dough, rainbow sprinkles and white chocolate.',
     description: 'Every day is a celebration: buttery vanilla dough packed with rainbow sprinkles and creamy white chocolate.',
@@ -172,6 +236,7 @@ const cookieProducts: Product[] = [
 
 const mixBox: Product = cookie({
   slug: MIX_BOX_SLUG,
+    i18n: cookieEs({ name: 'Arma tu caja', short: 'Combina los sabores que quieras en un paquete de 2, 4 o 6.', description: '¿No puedes elegir solo una? Elige el tamaño de tu paquete y llénalo con la combinación de sabores que quieras. Va en caja y con lazo, lista para regalar.', badge: 'Combina sabores' }),
   name: 'Build Your Own Box',
   short: 'Mix and match any flavours in a pack of 2, 4 or 6.',
   description: 'Can’t choose just one? Pick your pack size, then fill it with any mix of our cookie flavours. Boxed and ribboned, ready to gift.',
@@ -489,7 +554,10 @@ export const pickBestsellers = (list: Product[]) => list.filter((p) => p.bestsel
 
 export const fromPrice = (p: Product) => Math.min(...p.sizes.map((s) => s.price));
 
-export const categoryName = (id: CategoryId) => categories.find((c) => c.id === id)?.name ?? id;
+export const categoryName = (id: CategoryId, list: Category[] = categories) => {
+  const c = list.find((x) => x.id === id);
+  return c ? localizeCategory(c, currentLang()).name : id;
+};
 
 export function relatedProducts(product: Product, list: Product[] = products, count = 4): Product[] {
   const same = list.filter((p) => p.slug !== product.slug && p.category === product.category);
@@ -497,16 +565,20 @@ export function relatedProducts(product: Product, list: Product[] = products, co
   return [...same, ...others].slice(0, count);
 }
 
-/** "about 6 hours", "about 1 day", "about 2½ days" — for showing average preparation time. */
+/** "about 6 hours", "about 1 day", "about 2½ days" (or "aprox. 6 horas"…) — for showing average preparation time. */
 export function formatPrep(hours: number | undefined, style: 'long' | 'short' = 'long'): string | null {
   if (hours == null || !(hours > 0)) return null;
+  const es = currentLang() === 'es';
   if (hours < 24) {
     const h = Math.round(hours * 2) / 2;
-    return style === 'short' ? `~${h} h` : `about ${h} ${h === 1 ? 'hour' : 'hours'}`;
+    const unit = es ? (h === 1 ? 'hora' : 'horas') : h === 1 ? 'hour' : 'hours';
+    if (style === 'short') return `~${h} h`;
+    return es ? `aprox. ${h} ${unit}` : `about ${h} ${unit}`;
   }
   const days = Math.round((hours / 24) * 2) / 2;
   const label = Number.isInteger(days) ? String(days) : `${Math.floor(days)}½`;
-  return style === 'short' ? `~${label} ${days === 1 ? 'day' : 'days'}` : `about ${label} ${days === 1 ? 'day' : 'days'}`;
+  const unit = es ? (days === 1 ? 'día' : 'días') : days === 1 ? 'day' : 'days';
+  return style === 'short' ? `~${label} ${unit}` : es ? `aprox. ${label} ${unit}` : `about ${label} ${unit}`;
 }
 
 export const formatPrice = (n: number) =>

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
+import { useLang } from '../i18n';
 
 export function PageHeader({
   eyebrow,
@@ -16,6 +17,7 @@ export function PageHeader({
   children?: ReactNode;
   align?: 'left' | 'center';
 }) {
+  const lang = useLang();
   return (
     <header className={`page-header page-header--${align}`}>
       <div className="container">
@@ -23,7 +25,7 @@ export function PageHeader({
           <nav aria-label="Breadcrumb" className="crumbs">
             <ol>
               <li>
-                <Link to="/">Home</Link>
+                <Link to="/">{lang === 'es' ? 'Inicio' : 'Home'}</Link>
               </li>
               {crumbs.map((c) => (
                 <li key={c.label}>{c.href ? <Link to={c.href}>{c.label}</Link> : <span aria-current="page">{c.label}</span>}</li>

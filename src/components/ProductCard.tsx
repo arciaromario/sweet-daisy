@@ -1,9 +1,27 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { useCart } from '../context/CartContext';
+import { useCopy } from '../i18n';
 import { formatPrep, formatPrice, fromPrice, MIX_BOX_SLUG, type Product } from '../data/products';
 import { Icon } from './Icon';
 import { Img } from './Img';
+
+const en = {
+  quickView: 'Quick view',
+  from: (price: string) => `From ${price}`,
+  prepTime: 'Prep time',
+  sizeFor: (name: string) => `Size for ${name}`,
+  chooseCookies: 'Choose your cookies',
+  addToBag: 'Add to bag',
+};
+const es: typeof en = {
+  quickView: 'Vista rápida',
+  from: (price) => `Desde ${price}`,
+  prepTime: 'Preparación',
+  sizeFor: (name) => `Tamaño de ${name}`,
+  chooseCookies: 'Elige tus galletas',
+  addToBag: 'Añadir a la bolsa',
+};
 
 export function toCartItem(
   p: Product,
@@ -44,6 +62,7 @@ export function ProductCard({
   showOptions?: boolean;
   priority?: boolean;
 }) {
+  const t = useCopy({ en, es });
   const { add } = useCart();
   const [sizeId, setSizeId] = useState(product.sizes[0].id);
   const size = product.sizes.find((s) => s.id === sizeId)!;
@@ -62,7 +81,7 @@ export function ProductCard({
         {product.badge && <span className={`badge pcard__badge${product.badge === 'Limited' ? ' badge--blush' : ''}`}>{product.badge}</span>}
         {onQuickView && !isMix && (
           <button type="button" className="pcard__quick" onClick={() => onQuickView(product)}>
-            <Icon name="eye" /> <span>Quick view</span>
+            <Icon name="eye" /> <span>{t.quickView}</span>
           </button>
         )}
       </div>
@@ -72,18 +91,18 @@ export function ProductCard({
           <h3 className="pcard__name">
             <Link to={href}>{product.name}</Link>
           </h3>
-          <span className="price pcard__price">{showOptions ? formatPrice(size.price) : `From ${formatPrice(fromPrice(product))}`}</span>
+          <span className="price pcard__price">{showOptions ? formatPrice(size.price) : t.from(formatPrice(fromPrice(product)))}</span>
         </div>
         <p className="pcard__desc">{product.short}</p>
         {formatPrep(product.prepHours, 'short') && (
           <p className="pcard__prep">
-            <Icon name="clock" /> Prep time {formatPrep(product.prepHours, 'short')}
+            <Icon name="clock" /> {t.prepTime} {formatPrep(product.prepHours, 'short')}
           </p>
         )}
 
         {showOptions ? (
           <>
-            <div className="pcard__sizes" role="radiogroup" aria-label={`Size for ${product.name}`}>
+            <div className="pcard__sizes" role="radiogroup" aria-label={t.sizeFor(product.name)}>
               {product.sizes.map((s) => (
                 <button
                   key={s.id}
@@ -100,11 +119,11 @@ export function ProductCard({
             </div>
             {isMix ? (
               <Link to={href} className="btn btn--outline btn--sm pcard__add">
-                <Icon name="plus" /> Choose your cookies
+                <Icon name="plus" /> {t.chooseCookies}
               </Link>
             ) : (
               <button type="button" className="btn btn--outline btn--sm pcard__add" onClick={() => add(toCartItem(product, { sizeId }))}>
-                <Icon name="plus" /> Add to bag
+                <Icon name="plus" /> {t.addToBag}
               </button>
             )}
           </>

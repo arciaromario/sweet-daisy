@@ -4,9 +4,18 @@ import type { Category } from '../../data/products';
 import { listCategories, saveCategories } from '../../lib/adminApi';
 import { Card, ErrorNote, Loading, PageTitle, RowsEditor, SaveBar, slugify, useToast } from '../ui';
 
+/** Flat rows for the table: the Spanish copy sits next to the English instead of nested in i18n. */
+type Row = Category & { nameEs: string; blurbEs: string };
+
+const toRow = (c: Category): Row => ({ ...c, nameEs: c.i18n?.es?.name ?? '', blurbEs: c.i18n?.es?.blurb ?? '' });
+const fromRow = ({ nameEs, blurbEs, ...c }: Row): Category => ({
+  ...c,
+  i18n: { ...c.i18n, es: { name: nameEs.trim() || undefined, blurb: blurbEs.trim() || undefined } },
+});
+
 export default function Categories() {
-  const [original, setOriginal] = useState<Category[] | null>(null);
-  const [rows, setRows] = useState<Category[] | null>(null);
+  const [original, setOriginal] = useState<Row[] | null>(null);
+  const [rows, setRows] = useState<Row[] | null>(null);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const toast = useToast();
@@ -15,8 +24,8 @@ export default function Categories() {
   useEffect(() => {
     listCategories()
       .then((c) => {
-        setOriginal(c);
-        setRows(c);
+        setOriginal(c.map(toRow));
+        setRows(c.map(toRow));
       })
       .catch((e) => setError(e.message));
   }, []);
@@ -32,7 +41,7 @@ export default function Categories() {
     const removed = original!.map((c) => c.id).filter((id) => !clean.some((c) => c.id === id));
     setSaving(true);
     try {
-      await saveCategories(clean, removed);
+      await saveCategories(clean.map(fromRow), removed);
       setOriginal(clean);
       setRows(clean);
       reload();
@@ -51,15 +60,18 @@ export default function Categories() {
         <RowsEditor
           rows={rows}
           onChange={setRows}
-          blank={() => ({ id: '', name: '', blurb: '' })}
+          blank={() => ({ id: '', name: '', blurb: '', nameEs: '', blurbEs: '' })}
           addLabel="Añadir categoría"
           columns={[
-            { key: 'name', label: 'Nombre', placeholder: 'Wedding Cakes', width: '1fr' },
-            { key: 'blurb', label: 'Descripción breve', width: '2fr' },
+            { key: 'name', label: 'Nombre', placeholder: 'NY Cookies', width: '1fr' },
+            { key: 'blurb', label: 'Descripción breve', width: '1.6fr' },
+            { key: 'nameEs', label: 'Nombre en español', placeholder: 'Galletas NY', width: '1fr' },
+            { key: 'blurbEs', label: 'Descripción en español', width: '1.6fr' },
           ]}
         />
         <p className="adm-muted adm-small">
-          Las páginas “Cakes” y “Treats” del menú muestran las categorías por defecto; las categorías nuevas aparecen en la tienda completa (/shop).
+          La página “Cookies” del menú muestra la categoría de galletas; las demás categorías aparecen en la tienda completa (/shop). Los textos en español
+          se muestran cuando el cliente elige ES; si los dejas vacíos se usa el inglés.
         </p>
       </Card>
       <SaveBar dirty={dirty} saving={saving} onSave={save} onReset={() => setRows(original)} />

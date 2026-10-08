@@ -4,7 +4,7 @@ import { Icon } from '../../components/Icon';
 import { Img } from '../../components/Img';
 import { useCatalog } from '../../context/CatalogContext';
 import { photo } from '../../data/images';
-import type { Category, Product } from '../../data/products';
+import type { Category, Product, ProductTranslation } from '../../data/products';
 import { deleteProduct, listCategories, listProducts, saveProduct, uploadProductImage } from '../../lib/adminApi';
 import { Card, ErrorNote, Field, Loading, PageTitle, prepLabel, RowsEditor, SaveBar, slugify, Toggle, useToast } from '../ui';
 
@@ -70,6 +70,9 @@ export default function ProductEditor() {
   if (!p) return <Loading />;
 
   const set = (patch: Partial<Product>) => setP({ ...p, ...patch });
+  // Spanish copy for the storefront's ES version; empty fields fall back to English.
+  const es = p.i18n?.es ?? {};
+  const setEs = (patch: Partial<ProductTranslation>) => set({ i18n: { ...p.i18n, es: { ...es, ...patch } } });
   const dirty = JSON.stringify(p) !== JSON.stringify(original);
 
   function validate(): string {
@@ -218,6 +221,57 @@ export default function ProductEditor() {
                 { key: 'price', label: 'Extra (USD)', type: 'number', width: '0.8fr' },
               ]}
             />
+          </Card>
+
+          <Card
+            title="Traducción al español"
+            actions={<span className="adm-muted adm-small">Opcional · la tienda está en inglés y estos textos se muestran al elegir ES</span>}
+          >
+            <div className="adm-form-grid">
+              <Field label="Nombre en español" hint="Vacío = se usa el nombre en inglés." wide>
+                <input className="input" value={es.name ?? ''} placeholder={p.name} onChange={(e) => setEs({ name: e.target.value })} />
+              </Field>
+              <Field label="Descripción corta en español" wide>
+                <input className="input" value={es.short ?? ''} maxLength={140} placeholder={p.short} onChange={(e) => setEs({ short: e.target.value })} />
+              </Field>
+              <Field label="Descripción completa en español" wide>
+                <textarea className="textarea" rows={4} value={es.description ?? ''} placeholder={p.description} onChange={(e) => setEs({ description: e.target.value })} />
+              </Field>
+              {p.badge && (
+                <Field label="Etiqueta en español">
+                  <input className="input" value={es.badge ?? ''} placeholder={p.badge} onChange={(e) => setEs({ badge: e.target.value })} />
+                </Field>
+              )}
+            </div>
+            {p.sizes.length > 0 && (
+              <div className="adm-i18n-sizes">
+                <span className="adm-field__label">Tamaños en español</span>
+                {p.sizes.map((size) => {
+                  const t = es.sizes?.[size.id] ?? {};
+                  const setSize = (patch: { label?: string; servings?: string }) =>
+                    setEs({ sizes: { ...es.sizes, [size.id]: { ...t, ...patch } } });
+                  return (
+                    <div key={size.id || size.label} className="adm-i18n-sizes__row">
+                      <input className="input" value={t.label ?? ''} placeholder={size.label} aria-label={`Tamaño en español: ${size.label}`} onChange={(e) => setSize({ label: e.target.value })} />
+                      <input className="input" value={t.servings ?? ''} placeholder={size.servings} aria-label={`Raciones en español: ${size.servings}`} onChange={(e) => setSize({ servings: e.target.value })} />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <div className="adm-i18n-details">
+              <span className="adm-field__label">Detalles en español</span>
+              <RowsEditor
+                rows={es.details ?? []}
+                onChange={(details) => setEs({ details })}
+                blank={() => ({ label: '', value: '' })}
+                addLabel="Añadir detalle en español"
+                columns={[
+                  { key: 'label', label: 'Título', placeholder: 'Alérgenos', width: '0.8fr' },
+                  { key: 'value', label: 'Texto', width: '2fr' },
+                ]}
+              />
+            </div>
           </Card>
 
           <Card title="Detalles (alérgenos, conservación…)">

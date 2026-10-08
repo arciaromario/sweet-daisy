@@ -147,7 +147,7 @@ function downscaleToDataUrl(file: File, max: number): Promise<string> {
 
 export async function listCategories(): Promise<Category[]> {
   if (!supabase) return readDb().categories;
-  const { data, error } = await supabase.from('categories').select('id,name,blurb').order('sort');
+  const { data, error } = await supabase.from('categories').select('id,name,blurb,i18n').order('sort');
   fail(error);
   return data as Category[];
 }

@@ -1,4 +1,5 @@
 import { site } from '../data/site';
+import { useLang } from '../i18n';
 
 const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined) ?? 'https://www.sweetdaisycakes.com';
 
@@ -7,7 +8,7 @@ const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined) ?? 'https
  */
 export function Seo({
   title,
-  description = site.description,
+  description,
   path = '',
   image,
   jsonLd,
@@ -18,7 +19,10 @@ export function Seo({
   image?: string;
   jsonLd?: object;
 }) {
-  const fullTitle = title ? `${title} | Sweet Daisy — Cakes and Treats` : 'Sweet Daisy — Cakes and Treats | Boutique Cake Studio';
+  const es = useLang() === 'es';
+  const home = es ? 'Sweet Daisy — Galletas estilo New York y pasteles a medida' : 'Sweet Daisy — New York–Style Cookies & Custom Cakes';
+  const fullTitle = title ? `${title} | Sweet Daisy` : home;
+  description ??= es ? site.descriptionEs : site.description;
   const url = `${SITE_URL}${path}`;
   return (
     <>

@@ -8,31 +8,89 @@ import { searchProducts } from '../components/SearchOverlay';
 import { Seo } from '../components/Seo';
 import { useCatalog } from '../context/CatalogContext';
 import { formatPrice, fromPrice, type CategoryId, type Product } from '../data/products';
+import { useCopy } from '../i18n';
 
 type Scope = 'all' | 'cookies';
 
-const scopes: Record<Scope, { title: string; eyebrow: string; intro: string; categories?: CategoryId[]; path: string }> = {
-  all: {
-    title: 'The Shop',
-    eyebrow: 'Fresh from the oven',
-    intro: 'New York–style cookies in packs of 2, 4 and 6 — or build your own box with any mix of flavours.',
-    path: '/shop',
-  },
-  cookies: {
-    title: 'NY Cookies',
-    eyebrow: 'Big, gooey, baked fresh',
-    intro: 'Thick New York–style cookies with crisp edges and soft, melty centres. Choose a pack of 2, 4 or 6 — or mix flavours in your own box.',
-    categories: ['cookies'],
-    path: '/cookies',
-  },
+const scopes: Record<Scope, { categories?: CategoryId[]; path: string }> = {
+  all: { path: '/shop' },
+  cookies: { categories: ['cookies'], path: '/cookies' },
 };
 
-const sorts = [
-  { value: 'featured', label: 'Featured' },
-  { value: 'price-asc', label: 'Price: low to high' },
-  { value: 'price-desc', label: 'Price: high to low' },
-  { value: 'name', label: 'Name: A–Z' },
-];
+const en = {
+  scopes: {
+    all: {
+      title: 'The Shop',
+      eyebrow: 'Fresh from the oven',
+      intro: 'New York–style cookies in packs of 2, 4 and 6 — or build your own box with any mix of flavours.',
+    },
+    cookies: {
+      title: 'NY Cookies',
+      eyebrow: 'Big, gooey, baked fresh',
+      intro: 'Thick New York–style cookies with crisp edges and soft, melty centres. Choose a pack of 2, 4 or 6 — or mix flavours in your own box.',
+    },
+  } as Record<Scope, { title: string; eyebrow: string; intro: string }>,
+  sorts: [
+    { value: 'featured', label: 'Featured' },
+    { value: 'price-asc', label: 'Price: low to high' },
+    { value: 'price-desc', label: 'Price: high to low' },
+    { value: 'name', label: 'Name: A–Z' },
+  ],
+  filterByCategory: 'Filter by category',
+  all: 'All',
+  filters: 'Filters',
+  sortBy: 'Sort by',
+  sortPrefix: 'Sort:',
+  search: 'Search',
+  searchPlaceholder: 'Flavour, cake, treat…',
+  price: 'Price',
+  upTo: (price: string) => `Up to ${price}`,
+  helpTitle: 'Dreaming of something else?',
+  helpText: 'We design one-of-a-kind cakes for birthdays, weddings and every celebration in between.',
+  requestCustom: 'Request a custom cake',
+  clearAll: 'Clear all filters',
+  count: (n: number) => `${n} ${n === 1 ? 'product' : 'products'}`,
+  emptyTitle: 'Nothing sweet matches those filters.',
+  emptyText: 'Try a different flavour or clear your filters.',
+  clearFilters: 'Clear filters',
+};
+const es: typeof en = {
+  scopes: {
+    all: {
+      title: 'La tienda',
+      eyebrow: 'Recién salidas del horno',
+      intro: 'Galletas estilo New York en paquetes de 2, 4 y 6, o arma tu propia caja con los sabores que quieras.',
+    },
+    cookies: {
+      title: 'Galletas NY',
+      eyebrow: 'Grandes, suaves y recién horneadas',
+      intro: 'Galletas gruesas estilo New York, con bordes crujientes y centros suaves y derretidos. Elige un paquete de 2, 4 o 6, o mezcla sabores en tu propia caja.',
+    },
+  },
+  sorts: [
+    { value: 'featured', label: 'Destacados' },
+    { value: 'price-asc', label: 'Precio: de menor a mayor' },
+    { value: 'price-desc', label: 'Precio: de mayor a menor' },
+    { value: 'name', label: 'Nombre: A–Z' },
+  ],
+  filterByCategory: 'Filtrar por categoría',
+  all: 'Todo',
+  filters: 'Filtros',
+  sortBy: 'Ordenar por',
+  sortPrefix: 'Ordenar:',
+  search: 'Buscar',
+  searchPlaceholder: 'Sabor, pastel, dulce…',
+  price: 'Precio',
+  upTo: (price) => `Hasta ${price}`,
+  helpTitle: '¿Sueñas con algo diferente?',
+  helpText: 'Diseñamos pasteles únicos para cumpleaños, bodas y cualquier celebración.',
+  requestCustom: 'Pide un pastel personalizado',
+  clearAll: 'Borrar todos los filtros',
+  count: (n) => `${n} ${n === 1 ? 'producto' : 'productos'}`,
+  emptyTitle: 'Nada dulce coincide con esos filtros.',
+  emptyText: 'Prueba otro sabor o borra los filtros.',
+  clearFilters: 'Borrar filtros',
+};
 
 export default function Shop({ scope = 'all' }: { scope?: Scope }) {
   const { products, categories } = useCatalog();
@@ -40,7 +98,8 @@ export default function Shop({ scope = 'all' }: { scope?: Scope }) {
   const [quick, setQuick] = useState<Product | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const closeQuick = useCallback(() => setQuick(null), []);
-  const conf = scopes[scope];
+  const t = useCopy({ en, es });
+  const conf = { ...scopes[scope], ...t.scopes[scope] };
 
   const scoped = conf.categories ? products.filter((p) => conf.categories!.includes(p.category)) : products;
   const visibleCategories = categories.filter((c) => (!conf.categories || conf.categories.includes(c.id)) && scoped.some((p) => p.category === c.id));
@@ -77,9 +136,9 @@ export default function Shop({ scope = 'all' }: { scope?: Scope }) {
 
       <section className="shop container">
         <div className="shop__toolbar">
-          <div className="shop__cats" role="group" aria-label="Filter by category">
+          <div className="shop__cats" role="group" aria-label={t.filterByCategory}>
             <button className="chip" aria-pressed={category === 'all'} onClick={() => update('category', 'all')}>
-              All <span className="chip__count">{scoped.length}</span>
+              {t.all} <span className="chip__count">{scoped.length}</span>
             </button>
             {visibleCategories.map((c) => (
               <button key={c.id} className="chip" aria-pressed={category === c.id} onClick={() => update('category', c.id)}>
@@ -90,14 +149,14 @@ export default function Shop({ scope = 'all' }: { scope?: Scope }) {
 
           <div className="shop__controls">
             <button className="btn btn--outline btn--sm shop__filter-toggle" aria-expanded={filtersOpen} aria-controls="shop-filters" onClick={() => setFiltersOpen((o) => !o)}>
-              <Icon name="filter" /> Filters{activeFilters > 0 && ` (${activeFilters})`}
+              <Icon name="filter" /> {t.filters}{activeFilters > 0 && ` (${activeFilters})`}
             </button>
             <label className="shop__sort">
-              <span className="visually-hidden">Sort by</span>
+              <span className="visually-hidden">{t.sortBy}</span>
               <select className="select" value={sort} onChange={(e) => update('sort', e.target.value)}>
-                {sorts.map((s) => (
+                {t.sorts.map((s) => (
                   <option key={s.value} value={s.value}>
-                    Sort: {s.label}
+                    {t.sortPrefix} {s.label}
                   </option>
                 ))}
               </select>
@@ -106,20 +165,20 @@ export default function Shop({ scope = 'all' }: { scope?: Scope }) {
         </div>
 
         <div className="shop__layout">
-          <aside id="shop-filters" className={`shop__filters${filtersOpen ? ' is-open' : ''}`} aria-label="Filters">
+          <aside id="shop-filters" className={`shop__filters${filtersOpen ? ' is-open' : ''}`} aria-label={t.filters}>
             <div className="field">
               <label className="field__label" htmlFor="shop-search">
-                Search
+                {t.search}
               </label>
               <div className="input-icon">
                 <Icon name="search" />
-                <input id="shop-search" className="input" type="search" placeholder="Flavour, cake, treat…" value={q} onChange={(e) => update('q', e.target.value)} />
+                <input id="shop-search" className="input" type="search" placeholder={t.searchPlaceholder} value={q} onChange={(e) => update('q', e.target.value)} />
               </div>
             </div>
 
             <div className="field">
               <label className="field__label" htmlFor="shop-price">
-                Price
+                {t.price}
               </label>
               <input
                 id="shop-price"
@@ -130,32 +189,32 @@ export default function Shop({ scope = 'all' }: { scope?: Scope }) {
                 step={5}
                 value={maxPrice}
                 onChange={(e) => update('max', Number(e.target.value) >= ceiling ? null : e.target.value)}
-                aria-valuetext={`Up to ${formatPrice(maxPrice)}`}
+                aria-valuetext={t.upTo(formatPrice(maxPrice))}
               />
               <div className="range__labels">
                 <span>{formatPrice(10)}</span>
-                <span>Up to {formatPrice(maxPrice)}</span>
+                <span>{t.upTo(formatPrice(maxPrice))}</span>
               </div>
             </div>
 
             <div className="shop__help">
-              <p className="serif shop__help-title">Dreaming of something else?</p>
-              <p className="small muted">We design one-of-a-kind cakes for birthdays, weddings and every celebration in between.</p>
+              <p className="serif shop__help-title">{t.helpTitle}</p>
+              <p className="small muted">{t.helpText}</p>
               <Link to="/custom-cakes" className="link">
-                Request a custom cake <Icon name="arrow" />
+                {t.requestCustom} <Icon name="arrow" />
               </Link>
             </div>
 
             {activeFilters > 0 && (
               <button className="link shop__clear" onClick={() => setParams(new URLSearchParams(), { replace: true })}>
-                Clear all filters
+                {t.clearAll}
               </button>
             )}
           </aside>
 
           <div className="shop__results">
             <p className="shop__count muted small" aria-live="polite">
-              {results.length} {results.length === 1 ? 'product' : 'products'}
+              {t.count(results.length)}
             </p>
             {results.length > 0 ? (
               <div className="product-grid product-grid--shop">
@@ -165,10 +224,10 @@ export default function Shop({ scope = 'all' }: { scope?: Scope }) {
               </div>
             ) : (
               <div className="empty">
-                <p className="serif empty__title">Nothing sweet matches those filters.</p>
-                <p className="muted">Try a different flavour or clear your filters.</p>
+                <p className="serif empty__title">{t.emptyTitle}</p>
+                <p className="muted">{t.emptyText}</p>
                 <button className="btn btn--outline" onClick={() => setParams(new URLSearchParams(), { replace: true })}>
-                  Clear filters
+                  {t.clearFilters}
                 </button>
               </div>
             )}

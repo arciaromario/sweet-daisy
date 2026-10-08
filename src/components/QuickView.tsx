@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router';
 import { useCart } from '../context/CartContext';
+import { useCopy } from '../i18n';
 import { categoryName, formatPrep, formatPrice, type Product } from '../data/products';
 import { Icon } from './Icon';
 import { Img } from './Img';
@@ -10,7 +11,25 @@ import { toCartItem } from './ProductCard';
 import { QuantityStepper } from './QuantityStepper';
 import { useScrollLock } from '../lib/scrollLock';
 
+const en = {
+  close: 'Close quick view',
+  avgPrep: 'Average preparation time:',
+  size: 'Size',
+  flavour: 'Flavour',
+  addToBag: (price: string) => `Add to bag · ${price}`,
+  fullDetails: 'Full details & personalisation',
+};
+const es: typeof en = {
+  close: 'Cerrar vista rápida',
+  avgPrep: 'Tiempo promedio de preparación:',
+  size: 'Tamaño',
+  flavour: 'Sabor',
+  addToBag: (price) => `Añadir a la bolsa · ${price}`,
+  fullDetails: 'Detalles completos y personalización',
+};
+
 export function QuickView({ product, onClose }: { product: Product | null; onClose: () => void }) {
+  const t = useCopy({ en, es });
   const { add } = useCart();
   const [sizeId, setSizeId] = useState('');
   const [flavor, setFlavor] = useState('');
@@ -45,7 +64,7 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
     <div className="modal is-open">
       <div className="modal__backdrop" onClick={onClose} />
       <div className="modal__dialog quickview" role="dialog" aria-modal="true" aria-labelledby="qv-title" tabIndex={-1} ref={dialogRef}>
-        <button className="icon-btn modal__close" aria-label="Close quick view" onClick={onClose}>
+        <button className="icon-btn modal__close" aria-label={t.close} onClick={onClose}>
           <Icon name="close" />
         </button>
         <Img src={product.images[0]} alt={product.name} ratio="4 / 5" width={900} sizes="(min-width: 800px) 420px, 100vw" tint={product.tint} className="quickview__img" />
@@ -58,13 +77,13 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
           <p className="muted">{product.short}</p>
           {formatPrep(product.prepHours) && (
             <p className="prep-note">
-              <Icon name="clock" /> Average preparation time: <strong>{formatPrep(product.prepHours)}</strong>
+              <Icon name="clock" /> {t.avgPrep} <strong>{formatPrep(product.prepHours)}</strong>
             </p>
           )}
 
           <OptionGroup
             name="qv-size"
-            legend="Size"
+            legend={t.size}
             value={sizeId}
             onChange={setSizeId}
             min={120}
@@ -73,7 +92,7 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
           {product.flavors && (
             <div className="field">
               <label className="field__label" htmlFor="qv-flavor">
-                Flavour
+                {t.flavour}
               </label>
               <select id="qv-flavor" className="select" value={flavor} onChange={(e) => setFlavor(e.target.value)}>
                 {product.flavors.map((f) => (
@@ -94,11 +113,11 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
                 onClose();
               }}
             >
-              Add to bag · {formatPrice(item.unitPrice * qty)}
+              {t.addToBag(formatPrice(item.unitPrice * qty))}
             </button>
           </div>
           <Link to={`/products/${product.slug}`} className="link" onClick={onClose}>
-            Full details & personalisation <Icon name="arrow" />
+            {t.fullDetails} <Icon name="arrow" />
           </Link>
         </div>
       </div>

@@ -1,5 +1,25 @@
 import type { CSSProperties } from 'react';
+import { useCopy } from '../i18n';
 import { Icon } from './Icon';
+
+const en = {
+  fillYourBox: 'Fill your box',
+  boxFull: 'Box full',
+  toChoose: (n: number) => `${n} ${n === 1 ? 'cookie' : 'cookies'} to choose`,
+  oneLess: (name: string) => `One less ${name}`,
+  oneMore: (name: string) => `One more ${name}`,
+  mixForMe: 'Mix it for me',
+  startOver: 'Start over',
+};
+const es: typeof en = {
+  fillYourBox: 'Llena tu caja',
+  boxFull: 'Caja llena',
+  toChoose: (n) => `${n === 1 ? 'Falta elegir 1 galleta' : `Faltan elegir ${n} galletas`}`,
+  oneLess: (name) => `Una ${name} menos`,
+  oneMore: (name) => `Una ${name} más`,
+  mixForMe: 'Mézclala por mí',
+  startOver: 'Empezar de nuevo',
+};
 
 export type BoxFill = Record<string, number>;
 
@@ -29,6 +49,7 @@ export function fitBox(fill: BoxFill, capacity: number): BoxFill {
  * with a row of cookie slots that fill up as they choose.
  */
 export function BoxBuilder({ flavors, capacity, fill, onChange }: { flavors: string[]; capacity: number; fill: BoxFill; onChange: (f: BoxFill) => void }) {
+  const t = useCopy({ en, es });
   const total = boxTotal(fill);
   const left = capacity - total;
   const slots = Object.entries(fill).flatMap(([name, n]) => Array.from({ length: n }, () => name));
@@ -53,9 +74,9 @@ export function BoxBuilder({ flavors, capacity, fill, onChange }: { flavors: str
   return (
     <fieldset className="boxb">
       <legend className="field__label boxb__legend">
-        Fill your box
+        {t.fillYourBox}
         <span className={`boxb__status${left === 0 ? ' is-full' : ''}`} aria-live="polite">
-          {left === 0 ? 'Box full' : `${left} ${left === 1 ? 'cookie' : 'cookies'} to choose`}
+          {left === 0 ? t.boxFull : t.toChoose(left)}
         </span>
       </legend>
 
@@ -75,13 +96,13 @@ export function BoxBuilder({ flavors, capacity, fill, onChange }: { flavors: str
               <span className="boxb__dot" style={{ '--h': hue(name) } as CSSProperties} aria-hidden="true" />
               <span className="boxb__name">{name}</span>
               <span className="boxb__stepper">
-                <button type="button" className="icon-btn" onClick={() => change(name, -1)} disabled={!n} aria-label={`One less ${name}`}>
+                <button type="button" className="icon-btn" onClick={() => change(name, -1)} disabled={!n} aria-label={t.oneLess(name)}>
                   <Icon name="minus" />
                 </button>
                 <span className="boxb__count" aria-label={`${n} ${name}`}>
                   {n}
                 </span>
-                <button type="button" className="icon-btn" onClick={() => change(name, 1)} disabled={left <= 0} aria-label={`One more ${name}`}>
+                <button type="button" className="icon-btn" onClick={() => change(name, 1)} disabled={left <= 0} aria-label={t.oneMore(name)}>
                   <Icon name="plus" />
                 </button>
               </span>
@@ -92,11 +113,11 @@ export function BoxBuilder({ flavors, capacity, fill, onChange }: { flavors: str
 
       <div className="boxb__actions">
         <button type="button" className="link-inline" onClick={fillEvenly}>
-          Mix it for me
+          {t.mixForMe}
         </button>
         {total > 0 && (
           <button type="button" className="link-inline" onClick={() => onChange({})}>
-            Start over
+            {t.startOver}
           </button>
         )}
       </div>

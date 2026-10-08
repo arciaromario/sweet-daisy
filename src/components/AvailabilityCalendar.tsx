@@ -1,14 +1,34 @@
 import { useMemo, useState } from 'react';
 import { useCatalog } from '../context/CatalogContext';
+import { currentLocale, useCopy } from '../i18n';
 import { addDays, dayStatus, isBookable, toISO, type Status } from '../lib/availability';
 import { Icon } from './Icon';
 
-const labels: Record<Status, string> = {
-  available: 'Available',
-  limited: 'Limited',
-  booked: 'Fully booked',
-  closed: 'Closed',
-  'too-soon': 'Not enough notice',
+const en = {
+  labels: {
+    available: 'Available',
+    limited: 'Limited',
+    booked: 'Fully booked',
+    closed: 'Closed',
+    'too-soon': 'Not enough notice',
+  } as Record<Status, string>,
+  defaultLabel: 'Upcoming availability',
+  prev: 'Previous month',
+  next: 'Next month',
+  weekdays: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
+};
+const es: typeof en = {
+  labels: {
+    available: 'Disponible',
+    limited: 'Pocos lugares',
+    booked: 'Agotado',
+    closed: 'Cerrado',
+    'too-soon': 'Sin anticipación suficiente',
+  },
+  defaultLabel: 'Próxima disponibilidad',
+  prev: 'Mes anterior',
+  next: 'Mes siguiente',
+  weekdays: ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do'],
 };
 
 /**
@@ -18,13 +38,16 @@ export function AvailabilityCalendar({
   leadDays = 0,
   value,
   onChange,
-  label = 'Upcoming availability',
+  label: labelProp,
 }: {
   leadDays?: number;
   value?: string;
   onChange?: (iso: string) => void;
   label?: string;
 }) {
+  const t = useCopy({ en, es });
+  const labels = t.labels;
+  const label = labelProp ?? t.defaultLabel;
   const { overrides, settings } = useCatalog();
   const closed = settings.store.closedWeekdays;
   const today = new Date();
@@ -44,7 +67,7 @@ export function AvailabilityCalendar({
     return cells;
   }, [month.getTime(), overrides, leadDays, closed]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const title = month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const title = month.toLocaleDateString(currentLocale(), { month: 'long', year: 'numeric' });
   const selectable = Boolean(onChange);
 
   return (
@@ -55,16 +78,16 @@ export function AvailabilityCalendar({
           {title}
         </p>
         <div className="cal__nav">
-          <button type="button" className="icon-btn" aria-label="Previous month" disabled={offset === 0} onClick={() => setOffset((o) => o - 1)}>
+          <button type="button" className="icon-btn" aria-label={t.prev} disabled={offset === 0} onClick={() => setOffset((o) => o - 1)}>
             <Icon name="chevronLeft" />
           </button>
-          <button type="button" className="icon-btn" aria-label="Next month" disabled={offset >= 3} onClick={() => setOffset((o) => o + 1)}>
+          <button type="button" className="icon-btn" aria-label={t.next} disabled={offset >= 3} onClick={() => setOffset((o) => o + 1)}>
             <Icon name="chevronRight" />
           </button>
         </div>
       </div>
       <div className="cal__grid" role="grid" aria-label={`${label}, ${title}`}>
-        {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) => (
+        {t.weekdays.map((d) => (
           <span key={d} className="cal__dow" role="columnheader">
             {d}
           </span>
@@ -74,7 +97,7 @@ export function AvailabilityCalendar({
           const iso = toISO(cell.date);
           const bookable = isBookable(cell.status);
           const selected = value === iso;
-          const name = `${cell.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}, ${labels[cell.status]}`;
+          const name = `${cell.date.toLocaleDateString(currentLocale(), { weekday: 'long', month: 'long', day: 'numeric' })}, ${labels[cell.status]}`;
           return selectable ? (
             <button
               type="button"
@@ -97,13 +120,13 @@ export function AvailabilityCalendar({
       </div>
       <ul className="cal__legend">
         <li>
-          <span className="dot dot--available" /> Available
+          <span className="dot dot--available" /> {labels.available}
         </li>
         <li>
-          <span className="dot dot--limited" /> Limited
+          <span className="dot dot--limited" /> {labels.limited}
         </li>
         <li>
-          <span className="dot dot--booked" /> Fully booked
+          <span className="dot dot--booked" /> {labels.booked}
         </li>
       </ul>
     </div>

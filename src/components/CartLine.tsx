@@ -3,9 +3,28 @@ import { useCart, type CartItem } from '../context/CartContext';
 import { formatPrice } from '../data/products';
 import { Icon } from './Icon';
 import { Img } from './Img';
+import { useCopy } from '../i18n';
+
+const en = {
+  message: 'Message:',
+  notes: 'Notes:',
+  quantityFor: (name: string) => `Quantity for ${name}`,
+  decrease: 'Decrease quantity',
+  increase: 'Increase quantity',
+  remove: 'Remove',
+};
+const es: typeof en = {
+  message: 'Mensaje:',
+  notes: 'Notas:',
+  quantityFor: (name) => `Cantidad de ${name}`,
+  decrease: 'Disminuir cantidad',
+  increase: 'Aumentar cantidad',
+  remove: 'Eliminar',
+};
 
 export function CartLine({ item, onNavigate, large = false }: { item: CartItem; onNavigate?: () => void; large?: boolean }) {
   const { setQuantity, remove } = useCart();
+  const t = useCopy({ en, es });
   const options = [item.sizeLabel, item.flavor, item.decorationLabel].filter(Boolean);
 
   return (
@@ -24,21 +43,21 @@ export function CartLine({ item, onNavigate, large = false }: { item: CartItem; 
           {options.map((o) => (
             <li key={o}>{o}</li>
           ))}
-          {item.message && <li>Message: “{item.message}”</li>}
-          {item.notes && <li>Notes: {item.notes}</li>}
+          {item.message && <li>{t.message} “{item.message}”</li>}
+          {item.notes && <li>{t.notes} {item.notes}</li>}
         </ul>
         <div className="cart-line__bottom">
-          <div className="qty qty--sm" role="group" aria-label={`Quantity for ${item.name}`}>
-            <button type="button" aria-label="Decrease quantity" onClick={() => setQuantity(item.key, item.quantity - 1)}>
+          <div className="qty qty--sm" role="group" aria-label={t.quantityFor(item.name)}>
+            <button type="button" aria-label={t.decrease} onClick={() => setQuantity(item.key, item.quantity - 1)}>
               <Icon name="minus" />
             </button>
             <output aria-live="polite">{item.quantity}</output>
-            <button type="button" aria-label="Increase quantity" onClick={() => setQuantity(item.key, item.quantity + 1)}>
+            <button type="button" aria-label={t.increase} onClick={() => setQuantity(item.key, item.quantity + 1)}>
               <Icon name="plus" />
             </button>
           </div>
           <button type="button" className="cart-line__remove" onClick={() => remove(item.key)}>
-            Remove<span className="visually-hidden"> {item.name}</span>
+            {t.remove}<span className="visually-hidden"> {item.name}</span>
           </button>
         </div>
       </div>

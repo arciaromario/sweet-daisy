@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { Icon } from '../components/Icon';
 import { DaisyMark } from '../components/Logo';
@@ -12,49 +12,213 @@ import { Seo } from '../components/Seo';
 import { useCatalog } from '../context/CatalogContext';
 import { formatPrice, MIX_BOX_SLUG, packCount, type Product } from '../data/products';
 import { useSite } from '../context/CatalogContext';
+import { useCopy } from '../i18n';
 import { firstAvailable, formatDate } from '../lib/availability';
 
-const packCopy: Record<number, { title: string; note: string }> = {
-  2: { title: 'A treat for two', note: 'Or one, we won’t tell.' },
-  4: { title: 'Share with friends', note: 'The most-ordered pack.' },
-  6: { title: 'The party box', note: 'For birthdays, offices and cravings.' },
+const galleryImages = [
+  { image: 'floral', ratio: '4 / 5' },
+  { image: 'packaging', ratio: '1 / 1' },
+  { image: 'baking', ratio: '3 / 4' },
+  { image: 'sliced', ratio: '1 / 1' },
+  { image: 'wedding', ratio: '3 / 4' },
+  { image: 'macarons', ratio: '4 / 5' },
+  { image: 'celebrationTable', ratio: '1 / 1' },
+  { image: 'hands', ratio: '4 / 5' },
+];
+
+const testimonialNames = ['Isabella M.', 'Claire & Daniel', 'Natalia R.', 'Amara J.'];
+
+const en = {
+  packCopy: {
+    2: { title: 'A treat for two', note: 'Or one, we won’t tell.' },
+    4: { title: 'Share with friends', note: 'The most-ordered pack.' },
+    6: { title: 'The party box', note: 'For birthdays, offices and cravings.' },
+  } as Record<number, { title: string; note: string }>,
+  galleryAlts: [
+    'Floral buttercream celebration cake',
+    'Sweet Daisy gift box tied with ribbon',
+    'Behind the scenes in the Sweet Daisy studio',
+    'A slice of layered cake',
+    'Tiered wedding cake with fresh flowers',
+    'Pastel macarons',
+    'Birthday celebration with candles',
+    'Hands piping buttercream',
+  ],
+  testimonials: [
+    {
+      quote: 'The best cookies in Austin, no contest. The Biscoff one is gooey in the middle and still warm when you pick it up.',
+      occasion: 'Pack of 6',
+    },
+    {
+      quote: 'Sweet Daisy turned a few Pinterest photos into the wedding cake of our dreams. Calm, thoughtful and so talented.',
+      occasion: 'Wedding cake',
+    },
+    {
+      quote: 'I built a box with every flavour for the office and it was gone in ten minutes. Already ordering the next one.',
+      occasion: 'Build your own box',
+    },
+    {
+      quote: 'Ordering was effortless and the box arrived tied with a ribbon, like a gift from a little Parisian boutique.',
+      occasion: 'Gift box',
+    },
+  ],
+  heroEyebrow: 'New York–style cookies · Austin',
+  heroTitle: (
+    <>
+      Big, gooey cookies baked <em>fresh</em> every day.
+    </>
+  ) as ReactNode,
+  heroLead: 'Thick New York–style cookies with crisp edges and soft, melty centres — boxed in packs of 2, 4 and 6 for gifting, sharing or keeping.',
+  shopCookies: 'Shop Cookies',
+  buildYourBoxCta: 'Build Your Box',
+  trustButter: 'Brown butter, real chocolate',
+  trustPickup: 'Pickup & local delivery',
+  heroImgAlt: 'A stack of thick New York–style chocolate chip cookies',
+  nextPickup: 'Next pickup',
+  viewAvailability: 'View availability',
+  packsEyebrow: 'Pick your pack',
+  packsTitle: 'However many you’re craving.',
+  packsIntro: 'Every flavour comes in packs of 2, 4 and 6 — or mix them in a box you build yourself.',
+  from: (price: string) => `From ${price}`,
+  buildYourBox: 'Build your box',
+  mixAny: 'Mix any flavours',
+  mixNote: 'Choose exactly what goes in, cookie by cookie.',
+  startBuilding: 'Start building',
+  menuEyebrow: 'The cookie menu',
+  menuTitle: 'Our sweetest favorites',
+  menuAside: 'Baked fresh to order — order a day ahead for pickup or local delivery.',
+  seeAllCookies: 'See all cookies',
+  customEyebrow: 'Also by Sweet Daisy · Custom cakes',
+  customTitle: (
+    <>
+      Your cake. <em>Your story.</em>
+    </>
+  ) as ReactNode,
+  customLead: 'Tell us what you’re celebrating and we’ll create something as special as the moment itself.',
+  steps: [
+    { title: 'Share your idea', text: 'Size, flavours, colours and a few inspiration photos.' },
+    { title: 'We design it together', text: 'A personal quote and sketch within 48 hours.' },
+    { title: 'Celebrate', text: 'Collect from the studio or have it delivered with care.' },
+  ],
+  requestCustom: 'Request a Custom Cake',
+  cfAlt1: 'Tiered custom wedding cake',
+  cfAlt2: 'Custom floral birthday cake',
+  cfAlt3: 'Custom pistachio and rose cake',
+  studioAlt: 'Inside the Sweet Daisy cake studio',
+  seal: 'Made by hand · Sweet Daisy · Austin · ',
+  storyEyebrow: 'Our story',
+  storyTitle: 'A little sweetness, made by hand.',
+  storyLead: 'Sweet Daisy is a small Austin bakery best known for big New York–style cookies — thick, golden at the edges and gooey in the middle.',
+  storyText:
+    'Every batch is mixed and baked by hand with brown butter, real chocolate and plenty of patience, then boxed with a ribbon and a handwritten note. And when a celebration calls for something bigger, we design custom cakes made just for the moment.',
+  factBoxes: 'Boxes baked and boxed',
+  factScratch: 'Made from scratch',
+  factReview: 'Average review',
+  discoverStory: 'Discover Our Story',
+  sweetMoments: 'Sweet moments',
+  viewOnInstagram: (alt: string) => `${alt} — view on Instagram`,
+  followUs: 'Follow Us',
+  reviewsEyebrow: 'Reviews',
+  reviewsTitle: 'Loved by sweet tooths.',
+  stars: '5 out of 5 stars',
+};
+const es: typeof en = {
+  packCopy: {
+    2: { title: 'Un antojo para dos', note: 'O para uno, no le diremos a nadie.' },
+    4: { title: 'Para compartir con amigos', note: 'El paquete más pedido.' },
+    6: { title: 'La caja de fiesta', note: 'Para cumpleaños, oficinas y antojos.' },
+  },
+  galleryAlts: [
+    'Pastel de celebración con flores de buttercream',
+    'Caja de regalo Sweet Daisy atada con un listón',
+    'Detrás de escena en el estudio de Sweet Daisy',
+    'Una rebanada de pastel en capas',
+    'Pastel de bodas de varios pisos con flores frescas',
+    'Macarons en tonos pastel',
+    'Celebración de cumpleaños con velas',
+    'Manos decorando con buttercream',
+  ],
+  testimonials: [
+    {
+      quote: 'Las mejores galletas de Austin, sin duda. La de Biscoff es suave por dentro y todavía está tibia cuando la recoges.',
+      occasion: 'Paquete de 6',
+    },
+    {
+      quote: 'Sweet Daisy convirtió unas cuantas fotos de Pinterest en el pastel de bodas de nuestros sueños. Tranquilas, atentas y muy talentosas.',
+      occasion: 'Pastel de bodas',
+    },
+    {
+      quote: 'Armé una caja con todos los sabores para la oficina y desapareció en diez minutos. Ya estoy pidiendo la siguiente.',
+      occasion: 'Arma tu propia caja',
+    },
+    {
+      quote: 'Hacer el pedido fue facilísimo y la caja llegó atada con un listón, como un regalo de una pequeña boutique parisina.',
+      occasion: 'Caja de regalo',
+    },
+  ],
+  heroEyebrow: 'Galletas estilo New York · Austin',
+  heroTitle: (
+    <>
+      Galletas grandes y suaves, horneadas <em>frescas</em> cada día.
+    </>
+  ),
+  heroLead: 'Galletas gruesas estilo New York, con bordes crujientes y centros suaves y derretidos, en paquetes de 2, 4 y 6 para regalar, compartir o quedártelas.',
+  shopCookies: 'Ver galletas',
+  buildYourBoxCta: 'Arma tu caja',
+  trustButter: 'Mantequilla dorada, chocolate de verdad',
+  trustPickup: 'Recogida y entrega a domicilio local',
+  heroImgAlt: 'Una pila de galletas gruesas de chispas de chocolate estilo New York',
+  nextPickup: 'Próxima recogida',
+  viewAvailability: 'Ver disponibilidad',
+  packsEyebrow: 'Elige tu paquete',
+  packsTitle: 'Las que se te antojen.',
+  packsIntro: 'Cada sabor viene en paquetes de 2, 4 y 6, o mézclalos en una caja que armas tú.',
+  from: (price) => `Desde ${price}`,
+  buildYourBox: 'Arma tu caja',
+  mixAny: 'Mezcla los sabores que quieras',
+  mixNote: 'Elige exactamente qué lleva, galleta por galleta.',
+  startBuilding: 'Empieza a armarla',
+  menuEyebrow: 'El menú de galletas',
+  menuTitle: 'Nuestras favoritas',
+  menuAside: 'Horneadas al momento: haz tu pedido con un día de anticipación para recoger o entrega a domicilio local.',
+  seeAllCookies: 'Ver todas las galletas',
+  customEyebrow: 'También de Sweet Daisy · Pasteles personalizados',
+  customTitle: (
+    <>
+      Tu pastel. <em>Tu historia.</em>
+    </>
+  ),
+  customLead: 'Cuéntanos qué celebras y crearemos algo tan especial como el momento.',
+  steps: [
+    { title: 'Comparte tu idea', text: 'Tamaño, sabores, colores y algunas fotos de inspiración.' },
+    { title: 'Lo diseñamos juntos', text: 'Una cotización personalizada y un boceto en menos de 48 horas.' },
+    { title: 'Celebra', text: 'Recógelo en el estudio o recíbelo en casa con todo cuidado.' },
+  ],
+  requestCustom: 'Pide un pastel personalizado',
+  cfAlt1: 'Pastel de bodas personalizado de varios pisos',
+  cfAlt2: 'Pastel de cumpleaños personalizado con flores',
+  cfAlt3: 'Pastel personalizado de pistacho y rosa',
+  studioAlt: 'Dentro del estudio de pasteles de Sweet Daisy',
+  seal: 'Hecho a mano · Sweet Daisy · Austin · ',
+  storyEyebrow: 'Nuestra historia',
+  storyTitle: 'Un poco de dulzura, hecha a mano.',
+  storyLead: 'Sweet Daisy es una pequeña pastelería de Austin conocida por sus grandes galletas estilo New York: gruesas, doradas en los bordes y suaves por dentro.',
+  storyText:
+    'Cada tanda se mezcla y se hornea a mano con mantequilla dorada, chocolate de verdad y mucha paciencia, y luego se empaca con un listón y una nota escrita a mano. Y cuando una celebración pide algo más grande, diseñamos pasteles personalizados hechos para ese momento.',
+  factBoxes: 'Cajas horneadas y empacadas',
+  factScratch: 'Hecho desde cero',
+  factReview: 'Calificación promedio',
+  discoverStory: 'Conoce nuestra historia',
+  sweetMoments: 'Momentos dulces',
+  viewOnInstagram: (alt) => `${alt} — ver en Instagram`,
+  followUs: 'Síguenos',
+  reviewsEyebrow: 'Reseñas',
+  reviewsTitle: 'Amadas por los golosos.',
+  stars: '5 de 5 estrellas',
 };
 
-const gallery = [
-  { image: 'floral', alt: 'Floral buttercream celebration cake', ratio: '4 / 5' },
-  { image: 'packaging', alt: 'Sweet Daisy gift box tied with ribbon', ratio: '1 / 1' },
-  { image: 'baking', alt: 'Behind the scenes in the Sweet Daisy studio', ratio: '3 / 4' },
-  { image: 'sliced', alt: 'A slice of layered cake', ratio: '1 / 1' },
-  { image: 'wedding', alt: 'Tiered wedding cake with fresh flowers', ratio: '3 / 4' },
-  { image: 'macarons', alt: 'Pastel macarons', ratio: '4 / 5' },
-  { image: 'celebrationTable', alt: 'Birthday celebration with candles', ratio: '1 / 1' },
-  { image: 'hands', alt: 'Hands piping buttercream', ratio: '4 / 5' },
-];
-
-const testimonials = [
-  {
-    quote: 'The best cookies in Austin, no contest. The Biscoff one is gooey in the middle and still warm when you pick it up.',
-    name: 'Isabella M.',
-    occasion: 'Pack of 6',
-  },
-  {
-    quote: 'Sweet Daisy turned a few Pinterest photos into the wedding cake of our dreams. Calm, thoughtful and so talented.',
-    name: 'Claire & Daniel',
-    occasion: 'Wedding cake',
-  },
-  {
-    quote: 'I built a box with every flavour for the office and it was gone in ten minutes. Already ordering the next one.',
-    name: 'Natalia R.',
-    occasion: 'Build your own box',
-  },
-  {
-    quote: 'Ordering was effortless and the box arrived tied with a ribbon, like a gift from a little Parisian boutique.',
-    name: 'Amara J.',
-    occasion: 'Gift box',
-  },
-];
-
 export default function Home() {
+  const t = useCopy({ en, es });
   const { products, overrides, settings, getProduct } = useCatalog();
   const site = useSite();
   const [quick, setQuick] = useState<Product | null>(null);
@@ -97,43 +261,43 @@ export default function Home() {
       <section className="hero" aria-labelledby="hero-title">
         <div className="container hero__grid">
           <div className="hero__copy">
-            <span className="eyebrow hero__eyebrow">New York–style cookies · Austin</span>
+            <span className="eyebrow hero__eyebrow">{t.heroEyebrow}</span>
             <h1 id="hero-title" className="display hero__title">
-              Big, gooey cookies baked <em>fresh</em> every day.
+              {t.heroTitle}
             </h1>
             <p className="lead hero__lead">
-              Thick New York–style cookies with crisp edges and soft, melty centres — boxed in packs of 2, 4 and 6 for gifting, sharing or keeping.
+              {t.heroLead}
             </p>
             <div className="hero__ctas">
               <Link to="/cookies" className="btn">
-                Shop Cookies
+                {t.shopCookies}
               </Link>
               <Link to={`/products/${MIX_BOX_SLUG}`} className="btn btn--outline">
-                Build Your Box
+                {t.buildYourBoxCta}
               </Link>
             </div>
             <ul className="hero__trust">
               <li>
-                <Icon name="leaf" /> Brown butter, real chocolate
+                <Icon name="leaf" /> {t.trustButter}
               </li>
               <li>
-                <Icon name="store" /> Pickup & local delivery
+                <Icon name="store" /> {t.trustPickup}
               </li>
             </ul>
           </div>
 
           <div className="hero__visual">
-            <Img src="cookies" alt="A stack of thick New York–style chocolate chip cookies" ratio="4 / 5" width={1400} sizes="(min-width: 900px) 52vw, 100vw" priority className="hero__img" tint="#F6E7E3" />
+            <Img src="cookies" alt={t.heroImgAlt} ratio="4 / 5" width={1400} sizes="(min-width: 900px) 52vw, 100vw" priority className="hero__img" tint="#F6E7E3" />
             <div className="hero__inset" aria-hidden="true">
               <Img src="packaging" alt="" ratio="1 / 1" width={400} sizes="200px" tint="#EFEEE6" />
             </div>
             <Link to="/availability" className="hero__card">
               <span className="hero__card-label">
-                <Icon name="calendar" /> Next pickup
+                <Icon name="calendar" /> {t.nextPickup}
               </span>
               <span className="hero__card-date serif">{formatDate(nextDate, { weekday: 'long', month: 'short', day: 'numeric' })}</span>
               <span className="hero__card-link">
-                View availability <Icon name="arrow" />
+                {t.viewAvailability} <Icon name="arrow" />
               </span>
             </Link>
           </div>
@@ -145,15 +309,15 @@ export default function Home() {
         <div className="container">
           <Reveal className="section-head section-head--center">
             <div className="section-head__text">
-              <span className="eyebrow eyebrow--plain">Pick your pack</span>
-              <h2 id="packs-title">However many you’re craving.</h2>
-              <p className="muted">Every flavour comes in packs of 2, 4 and 6 — or mix them in a box you build yourself.</p>
+              <span className="eyebrow eyebrow--plain">{t.packsEyebrow}</span>
+              <h2 id="packs-title">{t.packsTitle}</h2>
+              <p className="muted">{t.packsIntro}</p>
             </div>
           </Reveal>
           <ul className="packs__grid">
             {packSizes.map((size, i) => {
               const n = packCount(size.label);
-              const copy = packCopy[n];
+              const copy = t.packCopy[n];
               return (
                 <Reveal as="li" key={size.id} delay={i * 90} className="pack">
                   <Link to="/cookies" className="pack__link">
@@ -163,7 +327,7 @@ export default function Home() {
                     <span className="pack__label">{size.label}</span>
                     {copy && <span className="pack__title serif">{copy.title}</span>}
                     {copy && <span className="pack__note">{copy.note}</span>}
-                    <span className="pack__price">From {formatPrice(packFrom(n) ?? size.price)}</span>
+                    <span className="pack__price">{t.from(formatPrice(packFrom(n) ?? size.price))}</span>
                   </Link>
                 </Reveal>
               );
@@ -173,11 +337,11 @@ export default function Home() {
                 <span className="pack__n" aria-hidden="true">
                   <DaisyMark className="pack__daisy" />
                 </span>
-                <span className="pack__label">Build your box</span>
-                <span className="pack__title serif">Mix any flavours</span>
-                <span className="pack__note">Choose exactly what goes in, cookie by cookie.</span>
+                <span className="pack__label">{t.buildYourBox}</span>
+                <span className="pack__title serif">{t.mixAny}</span>
+                <span className="pack__note">{t.mixNote}</span>
                 <span className="pack__price">
-                  Start building <Icon name="arrow" />
+                  {t.startBuilding} <Icon name="arrow" />
                 </span>
               </Link>
             </Reveal>
@@ -190,10 +354,10 @@ export default function Home() {
         <div className="container">
           <Reveal className="section-head">
             <div className="section-head__text">
-              <span className="eyebrow">The cookie menu</span>
-              <h2 id="bestsellers-title">Our sweetest favorites</h2>
+              <span className="eyebrow">{t.menuEyebrow}</span>
+              <h2 id="bestsellers-title">{t.menuTitle}</h2>
             </div>
-            <p className="muted section-head__aside">Baked fresh to order — order a day ahead for pickup or local delivery.</p>
+            <p className="muted section-head__aside">{t.menuAside}</p>
           </Reveal>
           <div className="product-grid product-grid--rail">
             {cookies.map((p) => (
@@ -202,7 +366,7 @@ export default function Home() {
           </div>
           <div className="center-cta">
             <Link to="/cookies" className="btn btn--outline">
-              See all cookies
+              {t.seeAllCookies}
             </Link>
           </div>
         </div>
@@ -212,48 +376,36 @@ export default function Home() {
       <section className="custom-feature" aria-labelledby="custom-title">
         <div className="container custom-feature__grid">
           <Reveal className="custom-feature__copy">
-            <span className="eyebrow">Also by Sweet Daisy · Custom cakes</span>
+            <span className="eyebrow">{t.customEyebrow}</span>
             <h2 id="custom-title">
-              Your cake. <em>Your story.</em>
+              {t.customTitle}
             </h2>
-            <p className="lead">Tell us what you’re celebrating and we’ll create something as special as the moment itself.</p>
+            <p className="lead">{t.customLead}</p>
             <ol className="custom-feature__steps">
-              <li>
-                <span className="serif">01</span>
-                <div>
-                  <strong>Share your idea</strong>
-                  <p>Size, flavours, colours and a few inspiration photos.</p>
-                </div>
-              </li>
-              <li>
-                <span className="serif">02</span>
-                <div>
-                  <strong>We design it together</strong>
-                  <p>A personal quote and sketch within 48 hours.</p>
-                </div>
-              </li>
-              <li>
-                <span className="serif">03</span>
-                <div>
-                  <strong>Celebrate</strong>
-                  <p>Collect from the studio or have it delivered with care.</p>
-                </div>
-              </li>
+              {t.steps.map((step, i) => (
+                <li key={i}>
+                  <span className="serif">{String(i + 1).padStart(2, '0')}</span>
+                  <div>
+                    <strong>{step.title}</strong>
+                    <p>{step.text}</p>
+                  </div>
+                </li>
+              ))}
             </ol>
             <Link to="/custom-cakes#builder" className="btn btn--light">
-              Request a Custom Cake
+              {t.requestCustom}
             </Link>
           </Reveal>
 
           <div className="custom-feature__gallery">
             <Reveal delay={0} className="cf-img cf-img--1">
-              <Img src="wedding" alt="Tiered custom wedding cake" ratio="3 / 4" width={900} sizes="(min-width: 900px) 26vw, 50vw" tint="#6d6a52" />
+              <Img src="wedding" alt={t.cfAlt1} ratio="3 / 4" width={900} sizes="(min-width: 900px) 26vw, 50vw" tint="#6d6a52" />
             </Reveal>
             <Reveal delay={120} className="cf-img cf-img--2">
-              <Img src="floral" alt="Custom floral birthday cake" ratio="1 / 1" width={700} sizes="(min-width: 900px) 20vw, 45vw" tint="#6d6a52" />
+              <Img src="floral" alt={t.cfAlt2} ratio="1 / 1" width={700} sizes="(min-width: 900px) 20vw, 45vw" tint="#6d6a52" />
             </Reveal>
             <Reveal delay={240} className="cf-img cf-img--3">
-              <Img src="pistachio" alt="Custom pistachio and rose cake" ratio="4 / 5" width={700} sizes="(min-width: 900px) 20vw, 45vw" tint="#6d6a52" />
+              <Img src="pistachio" alt={t.cfAlt3} ratio="4 / 5" width={700} sizes="(min-width: 900px) 20vw, 45vw" tint="#6d6a52" />
             </Reveal>
           </div>
         </div>
@@ -263,35 +415,30 @@ export default function Home() {
       <section className="section story" aria-labelledby="story-title">
         <div className="container story__grid">
           <Reveal className="story__media">
-            <Img src="studio" alt="Inside the Sweet Daisy cake studio" ratio="4 / 5" width={1100} sizes="(min-width: 900px) 45vw, 100vw" tint="#EFEEE6" />
-            <Seal text="Made by hand · Sweet Daisy · Austin · " />
+            <Img src="studio" alt={t.studioAlt} ratio="4 / 5" width={1100} sizes="(min-width: 900px) 45vw, 100vw" tint="#EFEEE6" />
+            <Seal text={t.seal} />
           </Reveal>
           <Reveal delay={120} className="story__copy">
-            <span className="eyebrow">Our story</span>
-            <h2 id="story-title">A little sweetness, made by hand.</h2>
-            <p className="lead">
-              Sweet Daisy is a small Austin bakery best known for big New York–style cookies — thick, golden at the edges and gooey in the middle.
-            </p>
-            <p className="muted">
-              Every batch is mixed and baked by hand with brown butter, real chocolate and plenty of patience, then boxed with a ribbon and a handwritten
-              note. And when a celebration calls for something bigger, we design custom cakes made just for the moment.
-            </p>
+            <span className="eyebrow">{t.storyEyebrow}</span>
+            <h2 id="story-title">{t.storyTitle}</h2>
+            <p className="lead">{t.storyLead}</p>
+            <p className="muted">{t.storyText}</p>
             <dl className="story__facts">
               <div>
                 <dt className="serif">2,400+</dt>
-                <dd>Boxes baked and boxed</dd>
+                <dd>{t.factBoxes}</dd>
               </div>
               <div>
                 <dt className="serif">100%</dt>
-                <dd>Made from scratch</dd>
+                <dd>{t.factScratch}</dd>
               </div>
               <div>
                 <dt className="serif">4.9</dt>
-                <dd>Average review</dd>
+                <dd>{t.factReview}</dd>
               </div>
             </dl>
             <Link to="/about" className="link">
-              Discover Our Story <Icon name="arrow" />
+              {t.discoverStory} <Icon name="arrow" />
             </Link>
           </Reveal>
         </div>
@@ -304,15 +451,15 @@ export default function Home() {
             <div className="section-head__text">
               <span className="eyebrow eyebrow--plain">Instagram</span>
               <h2 id="social-title">
-                Sweet moments <em>{site.handle}</em>
+                {t.sweetMoments} <em>{site.handle}</em>
               </h2>
             </div>
           </Reveal>
           <div className="masonry">
-            {gallery.map((g, i) => (
+            {galleryImages.map((g, i) => (
               <Reveal key={g.image + i} delay={(i % 4) * 80} className="masonry__item">
-                <a href={site.instagram} target="_blank" rel="noreferrer" aria-label={`${g.alt} — view on Instagram`}>
-                  <Img src={g.image} alt={g.alt} ratio={g.ratio} width={600} sizes="(min-width: 900px) 25vw, 50vw" />
+                <a href={site.instagram} target="_blank" rel="noreferrer" aria-label={t.viewOnInstagram(t.galleryAlts[i])}>
+                  <Img src={g.image} alt={t.galleryAlts[i]} ratio={g.ratio} width={600} sizes="(min-width: 900px) 25vw, 50vw" />
                   <span className="masonry__overlay" aria-hidden="true">
                     <Icon name="instagram" />
                   </span>
@@ -322,7 +469,7 @@ export default function Home() {
           </div>
           <div className="center-cta">
             <a href={site.instagram} target="_blank" rel="noreferrer" className="btn btn--outline">
-              <Icon name="instagram" /> Follow Us
+              <Icon name="instagram" /> {t.followUs}
             </a>
           </div>
         </div>
@@ -333,22 +480,22 @@ export default function Home() {
         <div className="container">
           <Reveal className="section-head section-head--center">
             <div className="section-head__text">
-              <span className="eyebrow eyebrow--plain">Reviews</span>
-              <h2 id="reviews-title">Loved by sweet tooths.</h2>
+              <span className="eyebrow eyebrow--plain">{t.reviewsEyebrow}</span>
+              <h2 id="reviews-title">{t.reviewsTitle}</h2>
             </div>
           </Reveal>
           <div className="testimonials__grid">
-            {testimonials.map((t, i) => (
-              <Reveal as="figure" key={t.name} delay={i * 90} className="quote">
-                <div className="quote__stars" aria-label="5 out of 5 stars">
+            {t.testimonials.map((r, i) => (
+              <Reveal as="figure" key={testimonialNames[i]} delay={i * 90} className="quote">
+                <div className="quote__stars" aria-label={t.stars}>
                   {Array.from({ length: 5 }, (_, s) => (
                     <Icon key={s} name="star" />
                   ))}
                 </div>
-                <blockquote>“{t.quote}”</blockquote>
+                <blockquote>“{r.quote}”</blockquote>
                 <figcaption>
-                  <span className="quote__name">{t.name}</span>
-                  <span className="quote__occasion">{t.occasion}</span>
+                  <span className="quote__name">{testimonialNames[i]}</span>
+                  <span className="quote__occasion">{r.occasion}</span>
                 </figcaption>
               </Reveal>
             ))}

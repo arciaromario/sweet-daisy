@@ -1,5 +1,6 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { Fragment, lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router';
+import { LanguageProvider, useLang } from './i18n';
 import { CartDrawer } from './components/CartDrawer';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
@@ -52,7 +53,7 @@ function StoreLayout() {
   return (
     <>
       <a href="#main" className="skip-link">
-        Skip to content
+        {useLang() === 'es' ? 'Saltar al contenido' : 'Skip to content'}
       </a>
       <Header />
       <main id="main">
@@ -74,47 +75,56 @@ function CheckoutLayout() {
   );
 }
 
+/** Re-renders the whole store when the language changes, so every string and date switches at once. */
+function LanguageKeyed({ children }: { children: ReactNode }) {
+  return <Fragment key={useLang()}>{children}</Fragment>;
+}
+
 export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "") || undefined}>
-      <CatalogProvider>
-        <CartProvider>
-          <ScrollToTop />
-          <Routes>
-            <Route element={<StoreLayout />}>
-              <Route index element={<Home />} />
-              <Route path="shop" element={<Shop />} />
-              <Route path="cookies" element={<Shop scope="cookies" />} />
-              {/* Earlier cake and treat pages now lead to the cookie menu. */}
-              <Route path="cakes" element={<Navigate to="/cookies" replace />} />
-              <Route path="treats" element={<Navigate to="/cookies" replace />} />
-              <Route path="products/:slug" element={<ProductPage />} />
-              <Route path="custom-cakes" element={<CustomCakes />} />
-              <Route path="availability" element={<Availability />} />
-              <Route path="cart" element={<Cart />} />
-              <Route path="about" element={<About />} />
-              <Route path="contact" element={<Contact />} />
-              <Route path="account" element={<Account />} />
-              <Route path="faq" element={<Faq />} />
-              <Route path="shipping-delivery" element={<ShippingDelivery />} />
-              <Route path="terms" element={<Terms />} />
-              <Route path="privacy" element={<Privacy />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-            <Route element={<CheckoutLayout />}>
-              <Route path="checkout" element={<Checkout />} />
-            </Route>
-            <Route
-              path="admin/*"
-              element={
-                <Suspense fallback={<div className="page-loading" aria-busy="true" />}>
-                  <AdminApp />
-                </Suspense>
-              }
-            />
-          </Routes>
-        </CartProvider>
-      </CatalogProvider>
+      <LanguageProvider>
+        <CatalogProvider>
+          <CartProvider>
+            <LanguageKeyed>
+              <ScrollToTop />
+              <Routes>
+                <Route element={<StoreLayout />}>
+                  <Route index element={<Home />} />
+                  <Route path="shop" element={<Shop />} />
+                  <Route path="cookies" element={<Shop scope="cookies" />} />
+                  {/* Earlier cake and treat pages now lead to the cookie menu. */}
+                  <Route path="cakes" element={<Navigate to="/cookies" replace />} />
+                  <Route path="treats" element={<Navigate to="/cookies" replace />} />
+                  <Route path="products/:slug" element={<ProductPage />} />
+                  <Route path="custom-cakes" element={<CustomCakes />} />
+                  <Route path="availability" element={<Availability />} />
+                  <Route path="cart" element={<Cart />} />
+                  <Route path="about" element={<About />} />
+                  <Route path="contact" element={<Contact />} />
+                  <Route path="account" element={<Account />} />
+                  <Route path="faq" element={<Faq />} />
+                  <Route path="shipping-delivery" element={<ShippingDelivery />} />
+                  <Route path="terms" element={<Terms />} />
+                  <Route path="privacy" element={<Privacy />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+                <Route element={<CheckoutLayout />}>
+                  <Route path="checkout" element={<Checkout />} />
+                </Route>
+                <Route
+                  path="admin/*"
+                  element={
+                    <Suspense fallback={<div className="page-loading" aria-busy="true" />}>
+                      <AdminApp />
+                    </Suspense>
+                  }
+                />
+              </Routes>
+            </LanguageKeyed>
+          </CartProvider>
+        </CatalogProvider>
+      </LanguageProvider>
     </BrowserRouter>
   );
 }
