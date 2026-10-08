@@ -59,7 +59,7 @@ export const defaultSettings: Settings = {
     facebook: 'https://facebook.com/sweetdaisy',
     tiktok: 'https://tiktok.com/@sweetdaisy',
     handle: '@sweetdaisy',
-    announcement: 'Order 48 hours ahead for celebration cakes',
+    announcement: 'Order a day ahead for fresh-baked cookies',
   },
   store: {
     closedWeekdays: [1],

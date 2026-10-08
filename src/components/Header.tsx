@@ -88,8 +88,8 @@ export function Header() {
                 </span>
               )}
             </button>
-            <Link to="/shop" className="btn btn--sm header__cta">
-              Order a Cake
+            <Link to="/cookies" className="btn btn--sm header__cta">
+              Order Cookies
             </Link>
           </div>
         </div>
@@ -114,8 +114,8 @@ export function Header() {
           </ul>
         </nav>
         <div className="container mobile-menu__foot">
-          <Link to="/shop" className="btn btn--block">
-            Order a Cake
+          <Link to="/cookies" className="btn btn--block">
+            Order Cookies
           </Link>
           <div className="mobile-menu__links">
             <Link to="/account">

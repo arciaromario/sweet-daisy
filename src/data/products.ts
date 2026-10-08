@@ -1,5 +1,5 @@
 
-/** Category ids are managed from /admin; these are the defaults: cakes, mini-cakes, cupcakes, treats, seasonal. */
+/** Category ids are managed from /admin; these are the defaults: cookies, then the (hidden) cake and treat lines. */
 export type CategoryId = string;
 
 export interface Category {
@@ -9,6 +9,7 @@ export interface Category {
 }
 
 export const categories: Category[] = [
+  { id: 'cookies', name: 'NY Cookies', blurb: 'Big, gooey New York–style cookies, boxed in 2s, 4s and 6s.' },
   { id: 'cakes', name: 'Cakes', blurb: 'Layered celebration cakes, finished by hand.' },
   { id: 'mini-cakes', name: 'Mini Cakes', blurb: 'Small cakes for intimate celebrations.' },
   { id: 'cupcakes', name: 'Cupcakes', blurb: 'Signature cupcakes, boxed to gift.' },
@@ -77,7 +78,114 @@ const cakeDetails = [
   { label: 'Best enjoyed', value: 'Within 3 days of collection.' },
 ];
 
-export const products: Product[] = [
+/** The mix-and-match box: customers choose how many of each cookie flavour go in. */
+export const MIX_BOX_SLUG = 'build-your-box';
+
+/** Number of cookies in a pack, read from its label ("Pack of 6" → 6). */
+export const packCount = (label: string) => Number(label.match(/\d+/)?.[0]) || 0;
+
+const cookieDetails = [
+  { label: 'Allergens', value: 'Contains wheat, eggs, dairy. Made in a kitchen that handles nuts.' },
+  { label: 'Size', value: 'Each cookie is about 5 oz — thick, crisp at the edges and soft in the middle.' },
+  { label: 'Storage', value: 'Keep in the box at room temperature for up to 3 days. Warm for 5 minutes at 350°F for that just-baked feel.' },
+];
+
+/** Example pack prices — edit them per cookie in /admin. */
+const packs = (two: number, four: number, six: number) => [
+  { id: 'pack2', label: 'Pack of 2', servings: '2 cookies', price: two },
+  { id: 'pack4', label: 'Pack of 4', servings: '4 cookies', price: four },
+  { id: 'pack6', label: 'Pack of 6', servings: '6 cookies', price: six },
+];
+
+const cookie = (p: Omit<Product, 'category' | 'sizes' | 'details' | 'leadDays' | 'prepHours'> & Partial<Product>): Product => ({
+  category: 'cookies',
+  sizes: packs(10, 19, 27),
+  details: cookieDetails,
+  leadDays: 1,
+  prepHours: 3,
+  ...p,
+});
+
+const cookieProducts: Product[] = [
+  cookie({
+    slug: 'classic-chocolate-chip',
+    name: 'Classic Chocolate Chip',
+    short: 'Brown butter dough, dark chocolate chunks and flaky sea salt.',
+    description:
+      'The one that started it all. A thick New York–style cookie made with nutty brown butter and loaded with puddles of dark and milk chocolate, finished with flaky sea salt.',
+    images: ['cookies', 'packaging'],
+    badge: 'Bestseller',
+    bestseller: true,
+    tint: '#F6E7E3',
+    sort: 1,
+  }),
+  cookie({
+    slug: 'double-chocolate-fudge',
+    name: 'Double Chocolate Fudge',
+    short: 'Dark cocoa dough with a molten fudge centre.',
+    description: 'For serious chocolate lovers: a deep cocoa cookie studded with white and dark chocolate, hiding a soft, molten fudge centre.',
+    images: ['cookies', 'packaging'],
+    bestseller: true,
+    tint: '#EFEEE6',
+    sort: 2,
+  }),
+  cookie({
+    slug: 'biscoff-crumble',
+    name: 'Biscoff Crumble',
+    short: 'Cookie-butter centre, white chocolate and Biscoff crumb.',
+    description: 'A brown sugar cookie stuffed with a gooey Biscoff cookie-butter centre, topped with white chocolate and crushed Lotus biscuits.',
+    images: ['cookies', 'packaging'],
+    badge: 'Fan favourite',
+    bestseller: true,
+    tint: '#F6E7E3',
+    sort: 3,
+  }),
+  cookie({
+    slug: 'red-velvet-cheesecake',
+    name: 'Red Velvet Cheesecake',
+    short: 'Cocoa red velvet with a cream cheese heart.',
+    description: 'Soft red velvet dough with white chocolate chips, wrapped around a tangy, creamy cheesecake centre.',
+    images: ['cookies', 'packaging'],
+    bestseller: true,
+    tint: '#EFEEE6',
+    sort: 4,
+  }),
+  cookie({
+    slug: 'smores',
+    name: 'S’mores',
+    short: 'Graham dough, milk chocolate and toasted marshmallow.',
+    description: 'Campfire in a cookie: graham cracker dough, milk chocolate chunks and a gooey marshmallow centre, toasted on top.',
+    images: ['cookies', 'packaging'],
+    tint: '#F6E7E3',
+    sort: 5,
+  }),
+  cookie({
+    slug: 'birthday-funfetti',
+    name: 'Birthday Funfetti',
+    short: 'Vanilla dough, rainbow sprinkles and white chocolate.',
+    description: 'Every day is a celebration: buttery vanilla dough packed with rainbow sprinkles and creamy white chocolate.',
+    images: ['cookies', 'packaging'],
+    tint: '#EFEEE6',
+    sort: 6,
+  }),
+];
+
+const mixBox: Product = cookie({
+  slug: MIX_BOX_SLUG,
+  name: 'Build Your Own Box',
+  short: 'Mix and match any flavours in a pack of 2, 4 or 6.',
+  description: 'Can’t choose just one? Pick your pack size, then fill it with any mix of our cookie flavours. Boxed and ribboned, ready to gift.',
+  images: ['packaging', 'cookies'],
+  sizes: packs(10, 19, 27),
+  flavors: cookieProducts.map((c) => ({ label: c.name, price: 0 })),
+  badge: 'Mix & match',
+  bestseller: true,
+  tint: '#EFEEE6',
+  sort: 0,
+});
+
+/** Earlier cake and treat lines, kept but hidden; switch them back on in /admin. */
+const legacyProducts: Product[] = [
   {
     slug: 'strawberry-dream-cake',
     name: 'Strawberry Dream Cake',
@@ -370,17 +478,14 @@ export const products: Product[] = [
   },
 ];
 
-export const bestsellerSlugs = [
-  'strawberry-dream-cake',
-  'vanilla-daisy-cake',
-  'chocolate-velvet-cake',
-  'lemon-cream-cake',
-  'mini-celebration-cake',
-  'signature-cupcake-box',
+export const products: Product[] = [
+  mixBox,
+  ...cookieProducts,
+  ...legacyProducts.map((p, i) => ({ ...p, active: false, bestseller: false, sort: 100 + i })),
 ];
 
-export const pickBestsellers = (list: Product[]) =>
-  bestsellerSlugs.map((s) => list.find((p) => p.slug === s)).filter((p): p is Product => Boolean(p));
+/** Products flagged as bestsellers in /admin, in shop order. */
+export const pickBestsellers = (list: Product[]) => list.filter((p) => p.bestseller && p.active !== false);
 
 export const fromPrice = (p: Product) => Math.min(...p.sizes.map((s) => s.price));
 

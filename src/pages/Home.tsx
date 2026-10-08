@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { Icon } from '../components/Icon';
+import { DaisyMark } from '../components/Logo';
 import { Img } from '../components/Img';
 import { Newsletter } from '../components/Newsletter';
 import { ProductCard } from '../components/ProductCard';
@@ -9,18 +10,15 @@ import { Reveal } from '../components/Reveal';
 import { Seal } from '../components/Seal';
 import { Seo } from '../components/Seo';
 import { useCatalog } from '../context/CatalogContext';
-import { pickBestsellers, type Product } from '../data/products';
+import { formatPrice, MIX_BOX_SLUG, packCount, type Product } from '../data/products';
 import { useSite } from '../context/CatalogContext';
 import { firstAvailable, formatDate } from '../lib/availability';
 
-const collections = [
-  { title: 'Celebration Cakes', note: 'Tiered & layered', image: 'celebration', href: '/shop?category=cakes', tint: '#F6E7E3' },
-  { title: 'Birthday Cakes', note: 'Made to be wished upon', image: 'birthday', href: '/shop?category=cakes', tint: '#EFEEE6' },
-  { title: 'Mini Cakes', note: 'Little & lovely', image: 'mini', href: '/shop?category=mini-cakes', tint: '#F6E7E3' },
-  { title: 'Cupcakes', note: 'Boxed to gift', image: 'cupcakes', href: '/shop?category=cupcakes', tint: '#EFEEE6' },
-  { title: 'Dessert Boxes', note: 'For sharing', image: 'dessertBox', href: '/shop?category=treats', tint: '#F6E7E3' },
-  { title: 'Seasonal Treats', note: 'Here for a moment', image: 'seasonal', href: '/shop?category=seasonal', tint: '#EFEEE6' },
-];
+const packCopy: Record<number, { title: string; note: string }> = {
+  2: { title: 'A treat for two', note: 'Or one, we won’t tell.' },
+  4: { title: 'Share with friends', note: 'The most-ordered pack.' },
+  6: { title: 'The party box', note: 'For birthdays, offices and cravings.' },
+};
 
 const gallery = [
   { image: 'floral', alt: 'Floral buttercream celebration cake', ratio: '4 / 5' },
@@ -35,9 +33,9 @@ const gallery = [
 
 const testimonials = [
   {
-    quote: 'The most beautiful cake I have ever ordered — and it tasted even better than it looked. Every guest asked where it was from.',
+    quote: 'The best cookies in Austin, no contest. The Biscoff one is gooey in the middle and still warm when you pick it up.',
     name: 'Isabella M.',
-    occasion: 'Birthday celebration',
+    occasion: 'Pack of 6',
   },
   {
     quote: 'Sweet Daisy turned a few Pinterest photos into the wedding cake of our dreams. Calm, thoughtful and so talented.',
@@ -45,23 +43,31 @@ const testimonials = [
     occasion: 'Wedding cake',
   },
   {
-    quote: 'Our go-to for every family moment. The Strawberry Dream Cake is perfection — light, fresh and not too sweet.',
+    quote: 'I built a box with every flavour for the office and it was gone in ten minutes. Already ordering the next one.',
     name: 'Natalia R.',
-    occasion: 'Regular customer',
+    occasion: 'Build your own box',
   },
   {
-    quote: 'Ordering was effortless and the cupcake box arrived looking like a gift from a Parisian boutique.',
+    quote: 'Ordering was effortless and the box arrived tied with a ribbon, like a gift from a little Parisian boutique.',
     name: 'Amara J.',
-    occasion: 'Office celebration',
+    occasion: 'Gift box',
   },
 ];
 
 export default function Home() {
-  const { products, overrides, settings } = useCatalog();
+  const { products, overrides, settings, getProduct } = useCatalog();
   const site = useSite();
   const [quick, setQuick] = useState<Product | null>(null);
-  const bestsellers = pickBestsellers(products);
-  const nextDate = firstAvailable(overrides, 2, settings.store.closedWeekdays);
+  const cookies = products.filter((p) => p.category === 'cookies' && p.slug !== MIX_BOX_SLUG);
+  const box = getProduct(MIX_BOX_SLUG);
+  const packSizes = (box ?? cookies[0])?.sizes ?? [];
+  const cookieLead = cookies.length ? Math.min(...cookies.map((p) => p.leadDays)) : 1;
+  const nextDate = firstAvailable(overrides, cookieLead, settings.store.closedWeekdays);
+  /** Cheapest price for a pack of n across the cookie menu. */
+  const packFrom = (n: number) => {
+    const prices = cookies.flatMap((p) => p.sizes.filter((x) => packCount(x.label) === n).map((x) => x.price));
+    return prices.length ? Math.min(...prices) : null;
+  };
 
   return (
     <>
@@ -91,24 +97,24 @@ export default function Home() {
       <section className="hero" aria-labelledby="hero-title">
         <div className="container hero__grid">
           <div className="hero__copy">
-            <span className="eyebrow hero__eyebrow">Boutique cake studio · Est. 2019</span>
+            <span className="eyebrow hero__eyebrow">New York–style cookies · Austin</span>
             <h1 id="hero-title" className="display hero__title">
-              Cakes made for your <em>sweetest</em> moments.
+              Big, gooey cookies baked <em>fresh</em> every day.
             </h1>
             <p className="lead hero__lead">
-              Handcrafted cakes and treats, made with love for birthdays, celebrations and every moment worth making sweeter.
+              Thick New York–style cookies with crisp edges and soft, melty centres — boxed in packs of 2, 4 and 6 for gifting, sharing or keeping.
             </p>
             <div className="hero__ctas">
-              <Link to="/shop" className="btn">
-                Shop Cakes
+              <Link to="/cookies" className="btn">
+                Shop Cookies
               </Link>
-              <Link to="/custom-cakes" className="btn btn--outline">
-                Create a Custom Cake
+              <Link to={`/products/${MIX_BOX_SLUG}`} className="btn btn--outline">
+                Build Your Box
               </Link>
             </div>
             <ul className="hero__trust">
               <li>
-                <Icon name="leaf" /> Real butter, seasonal fruit
+                <Icon name="leaf" /> Brown butter, real chocolate
               </li>
               <li>
                 <Icon name="store" /> Pickup & local delivery
@@ -117,13 +123,13 @@ export default function Home() {
           </div>
 
           <div className="hero__visual">
-            <Img src="hero" alt="A tall vanilla layer cake finished with fresh berries and flowers" ratio="4 / 5" width={1400} sizes="(min-width: 900px) 52vw, 100vw" priority className="hero__img" tint="#F6E7E3" />
+            <Img src="cookies" alt="A stack of thick New York–style chocolate chip cookies" ratio="4 / 5" width={1400} sizes="(min-width: 900px) 52vw, 100vw" priority className="hero__img" tint="#F6E7E3" />
             <div className="hero__inset" aria-hidden="true">
-              <Img src="mini" alt="" ratio="1 / 1" width={400} sizes="200px" tint="#EFEEE6" />
+              <Img src="packaging" alt="" ratio="1 / 1" width={400} sizes="200px" tint="#EFEEE6" />
             </div>
             <Link to="/availability" className="hero__card">
               <span className="hero__card-label">
-                <Icon name="calendar" /> Next available
+                <Icon name="calendar" /> Next pickup
               </span>
               <span className="hero__card-date serif">{formatDate(nextDate, { weekday: 'long', month: 'short', day: 'numeric' })}</span>
               <span className="hero__card-link">
@@ -134,37 +140,48 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FEATURED COLLECTION ------------------------------------------------- */}
-      <section className="section collections" aria-labelledby="collections-title">
+      {/* PACKS ------------------------------------------------------------ */}
+      <section className="section packs" aria-labelledby="packs-title">
         <div className="container">
-          <Reveal className="section-head">
+          <Reveal className="section-head section-head--center">
             <div className="section-head__text">
-              <span className="eyebrow">The collection</span>
-              <h2 id="collections-title">Made to be remembered.</h2>
+              <span className="eyebrow eyebrow--plain">Pick your pack</span>
+              <h2 id="packs-title">However many you’re craving.</h2>
+              <p className="muted">Every flavour comes in packs of 2, 4 and 6 — or mix them in a box you build yourself.</p>
             </div>
-            <Link to="/shop" className="link">
-              Shop all <Icon name="arrow" />
-            </Link>
           </Reveal>
-
-          <div className="collections__grid">
-            {collections.map((c, i) => (
-              <Reveal key={c.title} delay={(i % 3) * 90} className={`ctile ctile--${i + 1}`}>
-                <Link to={c.href} className="ctile__link">
-                  <Img src={c.image} alt="" ratio={i < 2 ? '4 / 5' : '1 / 1'} width={i < 2 ? 1000 : 700} sizes="(min-width: 900px) 33vw, 70vw" tint={c.tint} />
-                  <span className="ctile__caption">
-                    <span>
-                      <span className="ctile__title">{c.title}</span>
-                      <span className="ctile__note">{c.note}</span>
+          <ul className="packs__grid">
+            {packSizes.map((size, i) => {
+              const n = packCount(size.label);
+              const copy = packCopy[n];
+              return (
+                <Reveal as="li" key={size.id} delay={i * 90} className="pack">
+                  <Link to="/cookies" className="pack__link">
+                    <span className="pack__n serif" aria-hidden="true">
+                      {n}
                     </span>
-                    <span className="ctile__arrow" aria-hidden="true">
-                      <Icon name="arrow" />
-                    </span>
-                  </span>
-                </Link>
-              </Reveal>
-            ))}
-          </div>
+                    <span className="pack__label">{size.label}</span>
+                    {copy && <span className="pack__title serif">{copy.title}</span>}
+                    {copy && <span className="pack__note">{copy.note}</span>}
+                    <span className="pack__price">From {formatPrice(packFrom(n) ?? size.price)}</span>
+                  </Link>
+                </Reveal>
+              );
+            })}
+            <Reveal as="li" delay={packSizes.length * 90} className="pack pack--mix">
+              <Link to={`/products/${MIX_BOX_SLUG}`} className="pack__link">
+                <span className="pack__n" aria-hidden="true">
+                  <DaisyMark className="pack__daisy" />
+                </span>
+                <span className="pack__label">Build your box</span>
+                <span className="pack__title serif">Mix any flavours</span>
+                <span className="pack__note">Choose exactly what goes in, cookie by cookie.</span>
+                <span className="pack__price">
+                  Start building <Icon name="arrow" />
+                </span>
+              </Link>
+            </Reveal>
+          </ul>
         </div>
       </section>
 
@@ -173,19 +190,19 @@ export default function Home() {
         <div className="container">
           <Reveal className="section-head">
             <div className="section-head__text">
-              <span className="eyebrow">Bestsellers</span>
+              <span className="eyebrow">The cookie menu</span>
               <h2 id="bestsellers-title">Our sweetest favorites</h2>
             </div>
-            <p className="muted section-head__aside">Order from 24–48 hours ahead for pickup or local delivery.</p>
+            <p className="muted section-head__aside">Baked fresh to order — order a day ahead for pickup or local delivery.</p>
           </Reveal>
           <div className="product-grid product-grid--rail">
-            {bestsellers.map((p) => (
+            {cookies.map((p) => (
               <ProductCard key={p.slug} product={p} showOptions onQuickView={setQuick} />
             ))}
           </div>
           <div className="center-cta">
-            <Link to="/shop" className="btn btn--outline">
-              View all cakes & treats
+            <Link to="/cookies" className="btn btn--outline">
+              See all cookies
             </Link>
           </div>
         </div>
@@ -195,7 +212,7 @@ export default function Home() {
       <section className="custom-feature" aria-labelledby="custom-title">
         <div className="container custom-feature__grid">
           <Reveal className="custom-feature__copy">
-            <span className="eyebrow">Custom cakes</span>
+            <span className="eyebrow">Also by Sweet Daisy · Custom cakes</span>
             <h2 id="custom-title">
               Your cake. <em>Your story.</em>
             </h2>
@@ -253,18 +270,16 @@ export default function Home() {
             <span className="eyebrow">Our story</span>
             <h2 id="story-title">A little sweetness, made by hand.</h2>
             <p className="lead">
-              Sweet Daisy is a boutique cake studio where every cake is baked from scratch, layered by hand and finished with the kind of detail you
-              notice the moment the box opens.
+              Sweet Daisy is a small Austin bakery best known for big New York–style cookies — thick, golden at the edges and gooey in the middle.
             </p>
             <p className="muted">
-              We bake in small batches with real butter, free-range eggs and fruit from local growers — then take our time with the finishing touches: a
-              ribbon of buttercream, a scattering of petals, a handwritten note. Because the cake is never just a cake. It’s the centre of the table and
-              the start of a memory.
+              Every batch is mixed and baked by hand with brown butter, real chocolate and plenty of patience, then boxed with a ribbon and a handwritten
+              note. And when a celebration calls for something bigger, we design custom cakes made just for the moment.
             </p>
             <dl className="story__facts">
               <div>
                 <dt className="serif">2,400+</dt>
-                <dd>Celebrations baked for</dd>
+                <dd>Boxes baked and boxed</dd>
               </div>
               <div>
                 <dt className="serif">100%</dt>

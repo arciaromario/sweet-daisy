@@ -9,28 +9,21 @@ import { Seo } from '../components/Seo';
 import { useCatalog } from '../context/CatalogContext';
 import { formatPrice, fromPrice, type CategoryId, type Product } from '../data/products';
 
-type Scope = 'all' | 'cakes' | 'treats';
+type Scope = 'all' | 'cookies';
 
 const scopes: Record<Scope, { title: string; eyebrow: string; intro: string; categories?: CategoryId[]; path: string }> = {
   all: {
     title: 'The Shop',
-    eyebrow: 'Cakes & treats',
-    intro: 'Celebration cakes, mini cakes, cupcakes and treats — baked to order and finished by hand.',
+    eyebrow: 'Fresh from the oven',
+    intro: 'New York–style cookies in packs of 2, 4 and 6 — or build your own box with any mix of flavours.',
     path: '/shop',
   },
-  cakes: {
-    title: 'Cakes',
-    eyebrow: 'Celebration & mini cakes',
-    intro: 'Layered, textured and finished by hand. Choose your size, flavour and finishing touches.',
-    categories: ['cakes', 'mini-cakes', 'seasonal'],
-    path: '/cakes',
-  },
-  treats: {
-    title: 'Treats',
-    eyebrow: 'Cupcakes, macarons & dessert boxes',
-    intro: 'Little luxuries for gifting, sharing and keeping all to yourself.',
-    categories: ['cupcakes', 'treats', 'seasonal'],
-    path: '/treats',
+  cookies: {
+    title: 'NY Cookies',
+    eyebrow: 'Big, gooey, baked fresh',
+    intro: 'Thick New York–style cookies with crisp edges and soft, melty centres. Choose a pack of 2, 4 or 6 — or mix flavours in your own box.',
+    categories: ['cookies'],
+    path: '/cookies',
   },
 };
 
@@ -50,7 +43,7 @@ export default function Shop({ scope = 'all' }: { scope?: Scope }) {
   const conf = scopes[scope];
 
   const scoped = conf.categories ? products.filter((p) => conf.categories!.includes(p.category)) : products;
-  const visibleCategories = categories.filter((c) => !conf.categories || conf.categories.includes(c.id));
+  const visibleCategories = categories.filter((c) => (!conf.categories || conf.categories.includes(c.id)) && scoped.some((p) => p.category === c.id));
   const ceiling = Math.ceil(Math.max(...scoped.map(fromPrice), 0) / 10) * 10;
 
   const category = params.get('category') ?? 'all';
