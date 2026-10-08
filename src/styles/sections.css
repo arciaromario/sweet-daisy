@@ -429,7 +429,6 @@
 
 .custom-feature__steps .serif {
   font-size: 1.5rem;
-  font-style: italic;
   color: var(--blush);
   line-height: 1;
 }
@@ -495,24 +494,6 @@
   border-radius: 300px 300px var(--r-xl) var(--r-xl);
 }
 
-.story__stamp {
-  position: absolute;
-  right: 12px;
-  bottom: 32px;
-  display: grid;
-  place-items: center;
-  width: 124px;
-  height: 124px;
-  border-radius: 50%;
-  background: var(--blush);
-  color: var(--olive-deep);
-  font-size: 1.3rem;
-  font-style: italic;
-  line-height: 1;
-  text-align: center;
-  transform: rotate(-10deg);
-  box-shadow: var(--shadow-md);
-}
 
 .story__copy {
   display: grid;
@@ -550,9 +531,6 @@
   }
   .story__grid--reverse .story__copy {
     order: 0;
-  }
-  .story__stamp {
-    right: -40px;
   }
 }
 
@@ -859,7 +837,6 @@
 
 .process__n {
   font-size: 1.6rem;
-  font-style: italic;
   color: var(--rose);
   line-height: 1;
 }
