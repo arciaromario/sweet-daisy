@@ -11,17 +11,15 @@ body {
 }
 
 /* Scalloped edges --------------------------------------------------------------- */
-/* Tinted sections and the footer get a doily-style scalloped top edge. */
+/* Tinted sections get a doily-style scalloped top edge. */
 .section--cream,
-.section--sage,
-.footer {
+.section--sage {
   position: relative;
   --scallop: 22px;
 }
 
 .section--cream::before,
-.section--sage::before,
-.footer::before {
+.section--sage::before {
   content: '';
   position: absolute;
   left: 0;
