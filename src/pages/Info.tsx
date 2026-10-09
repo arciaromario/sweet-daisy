@@ -33,7 +33,7 @@ const faqEn = {
   eyebrow: 'Help',
   title: 'Frequently asked questions',
   crumb: 'FAQ',
-  more: <>Still curious? <Link to="/contact">Get in touch</Link> — we’re happy to help.</>,
+  more: <>Still curious? <Link to="/#contact">Get in touch</Link> — we’re happy to help.</>,
 };
 
 const faqEs: typeof faqEn = {
@@ -51,7 +51,7 @@ const faqEs: typeof faqEn = {
   eyebrow: 'Ayuda',
   title: 'Preguntas frecuentes',
   crumb: 'Preguntas frecuentes',
-  more: <>¿Te queda alguna duda? <Link to="/contact">Escríbenos</Link>: con gusto te ayudamos.</>,
+  more: <>¿Te queda alguna duda? <Link to="/#contact">Escríbenos</Link>: con gusto te ayudamos.</>,
 };
 
 function useFaqs(): { q: string; a: ReactNode }[] {

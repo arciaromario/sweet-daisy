@@ -12,12 +12,10 @@ import Home from './pages/Home';
 const Shop = lazy(() => import('./pages/Shop'));
 const ProductPage = lazy(() => import('./pages/ProductPage'));
 const CustomCakes = lazy(() => import('./pages/CustomCakes'));
-const Availability = lazy(() => import('./pages/Availability'));
 const Reviews = lazy(() => import('./pages/Reviews'));
 const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const About = lazy(() => import('./pages/About'));
-const Contact = lazy(() => import('./pages/Contact'));
 const Account = lazy(() => import('./pages/Account'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const AdminApp = lazy(() => import('./admin/AdminApp'));
@@ -106,11 +104,11 @@ export default function App() {
                   <Route path="treats" element={<Navigate to="/cookies" replace />} />
                   <Route path="products/:slug" element={<ProductPage />} />
                   <Route path="custom-cakes" element={<CustomCakes />} />
-                  <Route path="availability" element={<Availability />} />
+                  <Route path="availability" element={<Navigate to="/#availability" replace />} />
                   <Route path="reviews" element={<Reviews />} />
                   <Route path="cart" element={<Cart />} />
                   <Route path="about" element={<About />} />
-                  <Route path="contact" element={<Contact />} />
+                  <Route path="contact" element={<Navigate to="/#contact" replace />} />
                   <Route path="account" element={<Account />} />
                   <Route path="faq" element={<Faq />} />
                   <Route path="shipping-delivery" element={<ShippingDelivery />} />

@@ -117,7 +117,7 @@ export default function CustomCakes() {
               <a href="#builder" className="btn">
                 {t.request}
               </a>
-              <Link to="/availability" className="btn btn--outline">
+              <Link to="/#availability" className="btn btn--outline">
                 {t.viewAvailability}
               </Link>
             </div>
@@ -173,7 +173,7 @@ export default function CustomCakes() {
               <h2 id="builder-title">{t.builderTitle}</h2>
               <p className="muted">
                 {t.builderIntro(custom.leadDays)}{' '}
-                <Link to="/availability" className="link-inline">
+                <Link to="/#availability" className="link-inline">
                   {t.seeAvailability}
                 </Link>
               </p>

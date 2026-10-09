@@ -3,6 +3,8 @@ import { Link } from 'react-router';
 import { Icon } from '../components/Icon';
 import { DaisyMark } from '../components/Logo';
 import { Img } from '../components/Img';
+import { AvailabilitySection } from '../components/AvailabilitySection';
+import { ContactSection } from '../components/ContactSection';
 import { Newsletter } from '../components/Newsletter';
 import { ProductCard } from '../components/ProductCard';
 import { QuickView } from '../components/QuickView';
@@ -265,7 +267,7 @@ export default function Home() {
             <div className="hero__inset" aria-hidden="true">
               <Img src="packaging" alt="" ratio="1 / 1" width={400} sizes="200px" tint="#EFEEE6" />
             </div>
-            <Link to="/availability" className="hero__card">
+            <Link to="#availability" className="hero__card">
               <span className="hero__card-label">
                 <Icon name="calendar" /> {t.nextPickup}
               </span>
@@ -418,6 +420,8 @@ export default function Home() {
         </div>
       </section>
 
+      <AvailabilitySection />
+
       {/* TESTIMONIALS -------------------------------------------------------- */}
       <section className="section section--sage testimonials" aria-labelledby="reviews-title">
         <div className="container">
@@ -466,6 +470,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <ContactSection />
 
       <Newsletter />
 

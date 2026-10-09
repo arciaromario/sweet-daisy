@@ -1754,3 +1754,8 @@ details[open] .accordion__icon::after {
     top: calc(var(--header-h) + 24px);
   }
 }
+
+/* Home sections reached from the menu and footer links. */
+.anchor-section {
+  scroll-margin-top: var(--header-h);
+}
