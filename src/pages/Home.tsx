@@ -18,17 +18,6 @@ import { ratingSummary, useReviews } from '../hooks/useReviews';
 import { useCopy } from '../i18n';
 import { firstAvailable, formatDate } from '../lib/availability';
 
-const galleryImages = [
-  { image: 'floral', ratio: '4 / 5' },
-  { image: 'packaging', ratio: '1 / 1' },
-  { image: 'baking', ratio: '3 / 4' },
-  { image: 'sliced', ratio: '1 / 1' },
-  { image: 'wedding', ratio: '3 / 4' },
-  { image: 'macarons', ratio: '4 / 5' },
-  { image: 'celebrationTable', ratio: '1 / 1' },
-  { image: 'hands', ratio: '4 / 5' },
-];
-
 const testimonialNames = ['Isabella M.', 'Claire & Daniel', 'Natalia R.', 'Amara J.'];
 
 const en = {
@@ -37,16 +26,6 @@ const en = {
     4: { title: 'Share with friends', note: 'The most-ordered pack.' },
     6: { title: 'The party box', note: 'For birthdays, offices and cravings.' },
   } as Record<number, { title: string; note: string }>,
-  galleryAlts: [
-    'Floral buttercream celebration cake',
-    'Sweet Daisy gift box tied with ribbon',
-    'Behind the scenes in the Sweet Daisy studio',
-    'A slice of layered cake',
-    'Tiered wedding cake with fresh flowers',
-    'Pastel macarons',
-    'Birthday celebration with candles',
-    'Hands piping buttercream',
-  ],
   testimonials: [
     {
       quote: 'The best cookies in Omaha, no contest. The Biscoff one is gooey in the middle and still warm when you pick it up.',
@@ -118,9 +97,6 @@ const en = {
   factScratch: 'Made from scratch',
   factReview: 'Average review',
   discoverStory: 'Discover Our Story',
-  sweetMoments: 'Sweet moments',
-  viewOnInstagram: (alt: string) => `${alt} — view on Instagram`,
-  followUs: 'Follow Us',
   reviewsEyebrow: 'Reviews',
   reviewsTitle: 'Loved by sweet tooths.',
   stars: '5 out of 5 stars',
@@ -134,16 +110,6 @@ const es: typeof en = {
     4: { title: 'Para compartir con amigos', note: 'El paquete más pedido.' },
     6: { title: 'La caja de fiesta', note: 'Para cumpleaños, oficinas y antojos.' },
   },
-  galleryAlts: [
-    'Pastel de celebración con flores de buttercream',
-    'Caja de regalo Sweet Daisy atada con un listón',
-    'Detrás de escena en el estudio de Sweet Daisy',
-    'Una rebanada de pastel en capas',
-    'Pastel de bodas de varios pisos con flores frescas',
-    'Macarons en tonos pastel',
-    'Celebración de cumpleaños con velas',
-    'Manos decorando con buttercream',
-  ],
   testimonials: [
     {
       quote: 'Las mejores galletas de Omaha, sin duda. La de Biscoff es suave por dentro y todavía está tibia cuando la recoges.',
@@ -215,9 +181,6 @@ const es: typeof en = {
   factScratch: 'Hecho desde cero',
   factReview: 'Calificación promedio',
   discoverStory: 'Conoce nuestra historia',
-  sweetMoments: 'Momentos dulces',
-  viewOnInstagram: (alt) => `${alt} — ver en Instagram`,
-  followUs: 'Síguenos',
   reviewsEyebrow: 'Reseñas',
   reviewsTitle: 'Amadas por los golosos.',
   stars: '5 de 5 estrellas',
@@ -452,37 +415,6 @@ export default function Home() {
               {t.discoverStory} <Icon name="arrow" />
             </Link>
           </Reveal>
-        </div>
-      </section>
-
-      {/* SOCIAL GALLERY ------------------------------------------------------ */}
-      <section className="section section--tight social" aria-labelledby="social-title">
-        <div className="container">
-          <Reveal className="section-head section-head--center">
-            <div className="section-head__text">
-              <span className="eyebrow eyebrow--plain">Instagram</span>
-              <h2 id="social-title">
-                {t.sweetMoments} <em>{site.handle}</em>
-              </h2>
-            </div>
-          </Reveal>
-          <div className="masonry">
-            {galleryImages.map((g, i) => (
-              <Reveal key={g.image + i} delay={(i % 4) * 80} className="masonry__item">
-                <a href={site.instagram} target="_blank" rel="noreferrer" aria-label={t.viewOnInstagram(t.galleryAlts[i])}>
-                  <Img src={g.image} alt={t.galleryAlts[i]} ratio={g.ratio} width={600} sizes="(min-width: 900px) 25vw, 50vw" />
-                  <span className="masonry__overlay" aria-hidden="true">
-                    <Icon name="instagram" />
-                  </span>
-                </a>
-              </Reveal>
-            ))}
-          </div>
-          <div className="center-cta">
-            <a href={site.instagram} target="_blank" rel="noreferrer" className="btn btn--outline">
-              <Icon name="instagram" /> {t.followUs}
-            </a>
-          </div>
         </div>
       </section>
 
