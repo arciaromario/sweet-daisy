@@ -7,11 +7,14 @@ import { Newsletter } from '../components/Newsletter';
 import { ProductCard } from '../components/ProductCard';
 import { QuickView } from '../components/QuickView';
 import { Reveal } from '../components/Reveal';
+import { ReviewCard } from '../components/ReviewCard';
+import { Stars } from '../components/Stars';
 import { Seal } from '../components/Seal';
 import { Seo } from '../components/Seo';
 import { useCatalog } from '../context/CatalogContext';
 import { formatPrice, MIX_BOX_SLUG, packCount, type Product } from '../data/products';
 import { useSite } from '../context/CatalogContext';
+import { ratingSummary, useReviews } from '../hooks/useReviews';
 import { useCopy } from '../i18n';
 import { firstAvailable, formatDate } from '../lib/availability';
 
@@ -46,7 +49,7 @@ const en = {
   ],
   testimonials: [
     {
-      quote: 'The best cookies in Austin, no contest. The Biscoff one is gooey in the middle and still warm when you pick it up.',
+      quote: 'The best cookies in Omaha, no contest. The Biscoff one is gooey in the middle and still warm when you pick it up.',
       occasion: 'Pack of 6',
     },
     {
@@ -62,7 +65,7 @@ const en = {
       occasion: 'Gift box',
     },
   ],
-  heroEyebrow: 'New York–style cookies · Austin',
+  heroEyebrow: 'New York–style cookies · Omaha',
   heroTitle: (
     <>
       Big, gooey cookies baked <em>fresh</em> every day.
@@ -105,10 +108,10 @@ const en = {
   cfAlt2: 'Custom floral birthday cake',
   cfAlt3: 'Custom pistachio and rose cake',
   studioAlt: 'Inside the Sweet Daisy cake studio',
-  seal: 'Made by hand · Sweet Daisy · Austin · ',
+  seal: 'Made by hand · Sweet Daisy · Omaha · ',
   storyEyebrow: 'Our story',
   storyTitle: 'A little sweetness, made by hand.',
-  storyLead: 'Sweet Daisy is a small Austin bakery best known for big New York–style cookies — thick, golden at the edges and gooey in the middle.',
+  storyLead: 'Sweet Daisy is a small Omaha bakery best known for big New York–style cookies — thick, golden at the edges and gooey in the middle.',
   storyText:
     'Every batch is mixed and baked by hand with brown butter, real chocolate and plenty of patience, then boxed with a ribbon and a handwritten note. And when a celebration calls for something bigger, we design custom cakes made just for the moment.',
   factBoxes: 'Boxes baked and boxed',
@@ -121,6 +124,9 @@ const en = {
   reviewsEyebrow: 'Reviews',
   reviewsTitle: 'Loved by sweet tooths.',
   stars: '5 out of 5 stars',
+  ratingLine: (avg: string, n: number) => `${avg} average from ${n} ${n === 1 ? 'review' : 'reviews'}`,
+  allReviews: 'Read all reviews',
+  writeReview: 'Leave a review',
 };
 const es: typeof en = {
   packCopy: {
@@ -140,7 +146,7 @@ const es: typeof en = {
   ],
   testimonials: [
     {
-      quote: 'Las mejores galletas de Austin, sin duda. La de Biscoff es suave por dentro y todavía está tibia cuando la recoges.',
+      quote: 'Las mejores galletas de Omaha, sin duda. La de Biscoff es suave por dentro y todavía está tibia cuando la recoges.',
       occasion: 'Paquete de 6',
     },
     {
@@ -156,7 +162,7 @@ const es: typeof en = {
       occasion: 'Caja de regalo',
     },
   ],
-  heroEyebrow: 'Galletas estilo New York · Austin',
+  heroEyebrow: 'Galletas estilo New York · Omaha',
   heroTitle: (
     <>
       Galletas grandes y suaves, horneadas <em>frescas</em> cada día.
@@ -199,10 +205,10 @@ const es: typeof en = {
   cfAlt2: 'Pastel de cumpleaños personalizado con flores',
   cfAlt3: 'Pastel personalizado de pistacho y rosa',
   studioAlt: 'Dentro del estudio de pasteles de Sweet Daisy',
-  seal: 'Hecho a mano · Sweet Daisy · Austin · ',
+  seal: 'Hecho a mano · Sweet Daisy · Omaha · ',
   storyEyebrow: 'Nuestra historia',
   storyTitle: 'Un poco de dulzura, hecha a mano.',
-  storyLead: 'Sweet Daisy es una pequeña pastelería de Austin conocida por sus grandes galletas estilo New York: gruesas, doradas en los bordes y suaves por dentro.',
+  storyLead: 'Sweet Daisy es una pequeña pastelería de Omaha conocida por sus grandes galletas estilo New York: gruesas, doradas en los bordes y suaves por dentro.',
   storyText:
     'Cada tanda se mezcla y se hornea a mano con mantequilla dorada, chocolate de verdad y mucha paciencia, y luego se empaca con un listón y una nota escrita a mano. Y cuando una celebración pide algo más grande, diseñamos pasteles personalizados hechos para ese momento.',
   factBoxes: 'Cajas horneadas y empacadas',
@@ -215,10 +221,15 @@ const es: typeof en = {
   reviewsEyebrow: 'Reseñas',
   reviewsTitle: 'Amadas por los golosos.',
   stars: '5 de 5 estrellas',
+  ratingLine: (avg, n) => `${avg} de promedio en ${n} ${n === 1 ? 'opinión' : 'opiniones'}`,
+  allReviews: 'Ver todas las opiniones',
+  writeReview: 'Deja tu opinión',
 };
 
 export default function Home() {
   const t = useCopy({ en, es });
+  const real = useReviews() ?? [];
+  const summary = ratingSummary(real);
   const { products, overrides, settings, getProduct } = useCatalog();
   const site = useSite();
   const [quick, setQuick] = useState<Product | null>(null);
@@ -484,21 +495,42 @@ export default function Home() {
               <h2 id="reviews-title">{t.reviewsTitle}</h2>
             </div>
           </Reveal>
+          {real.length > 0 && (
+            <p className="testimonials__rating">
+              <Stars value={summary.average} className="quote__stars" /> <span className="small">{t.ratingLine(summary.average.toFixed(1), summary.count)}</span>
+            </p>
+          )}
           <div className="testimonials__grid">
-            {t.testimonials.map((r, i) => (
-              <Reveal as="figure" key={testimonialNames[i]} delay={i * 90} className="quote">
-                <div className="quote__stars" aria-label={t.stars}>
-                  {Array.from({ length: 5 }, (_, s) => (
-                    <Icon key={s} name="star" />
-                  ))}
-                </div>
-                <blockquote>“{r.quote}”</blockquote>
-                <figcaption>
-                  <span className="quote__name">{testimonialNames[i]}</span>
-                  <span className="quote__occasion">{r.occasion}</span>
-                </figcaption>
-              </Reveal>
-            ))}
+            {real.length > 0
+              ? real.slice(0, 4).map((r, i) => (
+                  <Reveal key={r.id} delay={i * 90}>
+                    <ReviewCard review={r} />
+                  </Reveal>
+                ))
+              : t.testimonials.map((r, i) => (
+                  <Reveal as="figure" key={testimonialNames[i]} delay={i * 90} className="quote">
+                    <div className="quote__stars" aria-label={t.stars}>
+                      {Array.from({ length: 5 }, (_, s) => (
+                        <Icon key={s} name="star" />
+                      ))}
+                    </div>
+                    <blockquote>“{r.quote}”</blockquote>
+                    <figcaption>
+                      <span className="quote__name">{testimonialNames[i]}</span>
+                      <span className="quote__occasion">{r.occasion}</span>
+                    </figcaption>
+                  </Reveal>
+                ))}
+          </div>
+          <div className="testimonials__ctas">
+            {real.length > 0 && (
+              <Link to="/reviews" className="btn btn--outline">
+                {t.allReviews}
+              </Link>
+            )}
+            <Link to="/reviews#write" className="link">
+              {t.writeReview} <Icon name="arrow" />
+            </Link>
           </div>
         </div>
       </section>

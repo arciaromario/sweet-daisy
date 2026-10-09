@@ -1613,3 +1613,7 @@
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr);
   gap: 8px;
 }
+
+.adm-stars {
+  margin-right: 6px;
+}

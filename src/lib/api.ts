@@ -5,7 +5,7 @@ import type { CartItem } from '../context/CartContext';
 import { readDb, uid, writeDb } from './localDb';
 import { toISO } from './availability';
 import { currentLang } from '../i18n';
-import type { DayOverride, DayStatus, OrderItemRecord } from './types';
+import type { DayOverride, DayStatus, OrderItemRecord, ReviewRecord } from './types';
 
 export type { DayStatus } from './types';
 
@@ -25,6 +25,11 @@ const ES_ERRORS: Record<string, string> = {
   'This order is already paid.': 'Este pedido ya está pagado.',
   'Something went wrong. Please try again.': 'Algo salió mal. Por favor, inténtalo de nuevo.',
   'Accounts are available once Supabase is connected.': 'Las cuentas estarán disponibles cuando se conecte Supabase.',
+  "We couldn't find an order with that number and email.": 'No encontramos un pedido con ese número y correo.',
+  'You can leave a review once your order has been picked up or delivered.': 'Podrás dejar tu opinión cuando hayas recogido o recibido tu pedido.',
+  'This order already has a review. Thank you!': 'Este pedido ya tiene una opinión. ¡Gracias!',
+  'Please choose a rating from 1 to 5 stars.': 'Por favor, elige una calificación de 1 a 5 estrellas.',
+  'Please write a few words about your order.': 'Por favor, escribe unas palabras sobre tu pedido.',
 };
 
 const ES_PATTERNS: [RegExp, (...m: string[]) => string][] = [
@@ -367,6 +372,67 @@ export async function sendContactMessage(msg: { name: string; email: string; top
   }
   const { error } = await supabase.from('contact_messages').insert(msg);
   if (error) throw new Error(error.message);
+}
+
+/* -------------------------------------------------------------------- reviews */
+
+/** What the storefront shows of an approved review. */
+export type Review = Pick<ReviewRecord, 'id' | 'name' | 'rating' | 'comment' | 'products' | 'lang' | 'created_at'>;
+
+export async function fetchReviews(): Promise<Review[]> {
+  if (!supabase) return readDb().reviews.filter((r) => r.status === 'approved');
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('id,name,rating,comment,products,lang,created_at')
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false })
+    .limit(200);
+  if (error) throw error;
+  return data as Review[];
+}
+
+export interface ReviewPayload {
+  orderNumber: string;
+  email: string;
+  name: string;
+  rating: number;
+  comment: string;
+}
+
+/** Saves a review for the owner to approve. The order number and email must match a real order. */
+export async function submitReview(r: ReviewPayload): Promise<void> {
+  const lang = currentLang();
+  if (!supabase) {
+    await wait(500);
+    const db = readDb();
+    const order = db.orders.find((o) => o.order_number.toUpperCase() === r.orderNumber.trim().toUpperCase() && o.email.toLowerCase() === r.email.trim().toLowerCase());
+    if (!order || order.status === 'cancelled') throw new Error(localizeError("We couldn't find an order with that number and email."));
+    if (db.reviews.some((x) => x.order_id === order.id)) throw new Error(localizeError('This order already has a review. Thank you!'));
+    writeDb((d) => {
+      d.reviews.unshift({
+        id: uid(),
+        order_id: order.id,
+        name: r.name.trim() || order.customer_name.split(' ')[0],
+        rating: r.rating,
+        comment: r.comment.trim(),
+        products: [...new Set(order.order_items.map((i) => i.product_slug).filter(Boolean) as string[])],
+        lang,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        orders: { order_number: order.order_number, customer_name: order.customer_name, email: order.email },
+      });
+    });
+    return;
+  }
+  const { error } = await supabase.rpc('submit_review', {
+    p_order_number: r.orderNumber,
+    p_email: r.email,
+    p_name: r.name,
+    p_rating: r.rating,
+    p_comment: r.comment,
+    p_lang: lang,
+  });
+  if (error) throw new Error(localizeError(error.message));
 }
 
 /* --------------------------------------------------------------------- auth */
