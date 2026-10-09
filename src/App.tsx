@@ -13,6 +13,7 @@ const Shop = lazy(() => import('./pages/Shop'));
 const ProductPage = lazy(() => import('./pages/ProductPage'));
 const CustomCakes = lazy(() => import('./pages/CustomCakes'));
 const Availability = lazy(() => import('./pages/Availability'));
+const Reviews = lazy(() => import('./pages/Reviews'));
 const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const About = lazy(() => import('./pages/About'));
@@ -28,11 +29,18 @@ const Privacy = lazy(() => import('./pages/Info').then((m) => ({ default: m.Priv
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
   useEffect(() => {
-    if (hash) {
-      const el = document.getElementById(hash.slice(1));
-      if (el) return void setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 80);
-    }
+    const target = hash && document.getElementById(hash.slice(1));
+    if (target) return void setTimeout(() => target.scrollIntoView({ behavior: 'smooth' }), 80);
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    if (!hash) return;
+    // The target may be on a page that is still loading, so look for it for a moment.
+    let tries = 0;
+    const timer = setInterval(() => {
+      const el = document.getElementById(hash.slice(1));
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      if (el || ++tries > 20) clearInterval(timer);
+    }, 80);
+    return () => clearInterval(timer);
   }, [pathname, hash]);
   return null;
 }
@@ -99,6 +107,7 @@ export default function App() {
                   <Route path="products/:slug" element={<ProductPage />} />
                   <Route path="custom-cakes" element={<CustomCakes />} />
                   <Route path="availability" element={<Availability />} />
+                  <Route path="reviews" element={<Reviews />} />
                   <Route path="cart" element={<Cart />} />
                   <Route path="about" element={<About />} />
                   <Route path="contact" element={<Contact />} />

@@ -11,6 +11,7 @@ import Categories from './pages/Categories';
 import CustomConfig from './pages/CustomConfig';
 import Dashboard from './pages/Dashboard';
 import Inbox from './pages/Inbox';
+import ReviewsAdmin from './pages/Reviews';
 import Orders from './pages/Orders';
 import ProductEditor from './pages/ProductEditor';
 import Products from './pages/Products';
@@ -27,6 +28,7 @@ const nav: { to: string; label: string; icon: IconName; end?: boolean }[] = [
   { to: 'categorias', label: 'Categorías', icon: 'filter' },
   { to: 'disponibilidad', label: 'Disponibilidad', icon: 'calendar' },
   { to: 'configuracion-pasteles', label: 'Opciones de pasteles', icon: 'heart' },
+  { to: 'opiniones', label: 'Opiniones', icon: 'star' },
   { to: 'mensajes', label: 'Mensajes y newsletter', icon: 'mail' },
   { to: 'ajustes', label: 'Ajustes de la tienda', icon: 'info' },
 ];
@@ -137,6 +139,7 @@ function Shell({ session }: { session: AdminSession }) {
             <Route path="categorias" element={<Categories />} />
             <Route path="disponibilidad" element={<AvailabilityAdmin />} />
             <Route path="configuracion-pasteles" element={<CustomConfig />} />
+            <Route path="opiniones" element={<ReviewsAdmin />} />
             <Route path="mensajes" element={<Inbox />} />
             <Route path="ajustes" element={<SettingsPage />} />
             <Route path="*" element={<Dashboard />} />

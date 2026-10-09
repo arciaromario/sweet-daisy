@@ -7,7 +7,7 @@ import { mergeSettings, type Settings, type SettingsKey } from '../data/settings
 import { fromRow, toRow, wait, type ProductRow } from './api';
 import { readDb, writeDb } from './localDb';
 import { supabase } from './supabase';
-import type { CustomRequestRecord, DayOverride, DayStatus, MessageRecord, OrderRecord, SubscriberRecord } from './types';
+import type { CustomRequestRecord, DayOverride, DayStatus, MessageRecord, OrderRecord, ReviewRecord, ReviewStatus, SubscriberRecord } from './types';
 
 const fail = (error: { message: string } | null) => {
   if (error) throw new Error(translate(error.message));
@@ -313,5 +313,37 @@ export async function deleteSubscriber(email: string) {
     return;
   }
   const { error } = await supabase.from('newsletter_subscribers').delete().eq('email', email);
+  fail(error);
+}
+
+/* ------------------------------------------------------------------------ reviews */
+
+export async function listReviews(): Promise<ReviewRecord[]> {
+  if (!supabase) return readDb().reviews;
+  const { data, error } = await supabase.from('reviews').select('*, orders(order_number,customer_name,email)').order('created_at', { ascending: false }).limit(500);
+  fail(error);
+  return data as ReviewRecord[];
+}
+
+export async function setReviewStatus(id: string, status: ReviewStatus) {
+  if (!supabase) {
+    writeDb((db) => {
+      const r = db.reviews.find((x) => x.id === id);
+      if (r) r.status = status;
+    });
+    return;
+  }
+  const { error } = await supabase.from('reviews').update({ status }).eq('id', id);
+  fail(error);
+}
+
+export async function deleteReview(id: string) {
+  if (!supabase) {
+    writeDb((db) => {
+      db.reviews = db.reviews.filter((r) => r.id !== id);
+    });
+    return;
+  }
+  const { error } = await supabase.from('reviews').delete().eq('id', id);
   fail(error);
 }

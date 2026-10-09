@@ -75,6 +75,8 @@ const en = {
   demoNote: 'Demo mode — this order was not saved. Connect Supabase to receive real orders.',
   continueShopping: 'Continue shopping',
   viewOrders: 'View my orders',
+  reviewLater: 'Once you’ve enjoyed your order, we’d love your review.',
+  reviewLink: 'Leave a review',
   // Empty bag
   seoCheckout: 'Checkout',
   empty: 'Your bag is empty.',
@@ -181,6 +183,8 @@ const es: typeof en = {
   demoNote: 'Modo demo: este pedido no se guardó. Conecta Supabase para recibir pedidos reales.',
   continueShopping: 'Seguir comprando',
   viewOrders: 'Ver mis pedidos',
+  reviewLater: 'Cuando hayas disfrutado tu pedido, nos encantaría conocer tu opinión.',
+  reviewLink: 'Deja tu opinión',
   seoCheckout: 'Finalizar compra',
   empty: 'Tu bolsa está vacía.',
   shop: 'Ver galletas',
@@ -493,6 +497,12 @@ export default function Checkout() {
             </div>
           )}
           {demo && <p className="small muted">{t.demoNote}</p>}
+          <p className="small muted confirm__review">
+            <Icon name="star" /> {t.reviewLater}{' '}
+            <Link to={`/reviews?order=${encodeURIComponent(placed.orderNumber)}&email=${encodeURIComponent(placed.email)}#write`} className="link-inline">
+              {t.reviewLink}
+            </Link>
+          </p>
           <div className="hero__ctas">
             <Link to="/shop" className="btn">
               {t.continueShopping}

@@ -6,7 +6,7 @@ import { PageHeader } from '../components/PageHeader';
 import { Seo } from '../components/Seo';
 import { formatPrice } from '../data/products';
 import { fetchMyOrders, sendMagicLink, type OrderSummary } from '../lib/api';
-import { formatDate } from '../lib/availability';
+import { formatDate, toISO } from '../lib/availability';
 import { supabase } from '../lib/supabase';
 import { useCopy } from '../i18n';
 
@@ -29,6 +29,7 @@ const en = {
   sending: 'Sending',
   send: 'Email me a link',
   error: 'Something went wrong.',
+  review: 'Leave a review',
 };
 const es: typeof en = {
   account: 'Cuenta',
@@ -56,6 +57,7 @@ const es: typeof en = {
   sending: 'Enviando',
   send: 'Envíame un enlace',
   error: 'Algo salió mal.',
+  review: 'Deja tu opinión',
 };
 
 export default function Account() {
@@ -128,6 +130,11 @@ export default function Account() {
                       {o.fulfillment === 'pickup' ? t.pickup : t.delivery} · {formatDate(o.fulfillment_date)} · {formatPrice(Number(o.total))}
                     </p>
                     <p className="small">{o.order_items.map((i) => `${i.quantity}× ${i.product_name} (${i.size_label})`).join(', ')}</p>
+                    {o.status !== 'cancelled' && o.fulfillment_date <= toISO(new Date()) && (
+                      <Link to={`/reviews?order=${encodeURIComponent(o.order_number)}&email=${encodeURIComponent(user.email ?? '')}#write`} className="link order__review">
+                        <Icon name="star" /> {t.review}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

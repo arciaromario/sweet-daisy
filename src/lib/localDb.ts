@@ -5,7 +5,7 @@
  */
 import { categories as seedCategories, products as seedProducts, type Category, type Product } from '../data/products';
 import type { Settings, SettingsKey } from '../data/settings';
-import type { CustomRequestRecord, DayOverride, MessageRecord, OrderRecord, SubscriberRecord } from './types';
+import type { CustomRequestRecord, DayOverride, MessageRecord, OrderRecord, ReviewRecord, SubscriberRecord } from './types';
 
 export interface LocalDb {
   products: Product[];
@@ -16,6 +16,7 @@ export interface LocalDb {
   requests: CustomRequestRecord[];
   messages: MessageRecord[];
   subscribers: SubscriberRecord[];
+  reviews: ReviewRecord[];
   nextOrderNumber: number;
 }
 
@@ -30,6 +31,7 @@ const seed = (): LocalDb => ({
   requests: [],
   messages: [],
   subscribers: [],
+  reviews: [],
   nextOrderNumber: 10001,
 });
 

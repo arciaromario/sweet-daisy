@@ -1575,3 +1575,245 @@ details[open] .accordion__icon::after {
 .center {
   text-align: center;
 }
+
+/* Reviews --------------------------------------------------------------- */
+.stars {
+  display: inline-flex;
+  gap: 2px;
+  color: var(--rose);
+  vertical-align: middle;
+}
+
+.stars__star {
+  display: inline-flex;
+  position: relative;
+  color: var(--line-strong);
+}
+
+.stars__star .icon {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  stroke: none;
+}
+
+.stars__star.is-on {
+  color: var(--rose);
+}
+
+/* Half star: a coloured copy of the star clipped to its left half. */
+.stars__half {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  color: var(--rose);
+  clip-path: inset(0 50% 0 0);
+}
+
+.testimonials__grid > div,
+.reviews-page__list > div {
+  display: flex;
+}
+
+.review-card {
+  flex: 1;
+  height: 100%;
+}
+
+.review-card blockquote {
+  font-size: 1.15rem;
+}
+
+.testimonials__rating {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: -12px 0 28px;
+}
+
+.testimonials__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px 28px;
+  margin-top: 36px;
+}
+
+.pdp__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: -4px 0 10px;
+  color: var(--muted);
+}
+
+.pdp__rating:hover {
+  color: var(--ink);
+}
+
+.order__review,
+.confirm__review {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.order__review {
+  margin-top: 6px;
+  font-size: 0.85rem;
+}
+
+.confirm__review .icon {
+  width: 14px;
+  height: 14px;
+  color: var(--rose);
+}
+
+.reviews-page {
+  display: grid;
+  gap: 40px;
+}
+
+.reviews-page__side {
+  display: grid;
+  gap: 28px;
+  align-content: start;
+}
+
+.reviews-page__list {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.reviews-page__list .quote {
+  background: var(--ivory);
+  border: 1px solid var(--line);
+}
+
+.reviews-page__empty {
+  padding: 32px;
+  border: 1px dashed var(--line);
+  border-radius: var(--r-lg);
+  text-align: center;
+}
+
+.rating-summary {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  padding: 28px;
+  border-radius: var(--r-lg);
+  background: var(--ivory);
+  border: 1px solid var(--line);
+}
+
+.rating-summary__avg {
+  margin: 0;
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--olive-deep);
+}
+
+.rating-summary__stars .stars__star .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.rating-summary__bars {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rating-summary__bars li {
+  display: grid;
+  grid-template-columns: 80px 1fr 28px;
+  align-items: center;
+  gap: 10px;
+}
+
+.rating-summary__bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.rating-summary__bar span {
+  display: block;
+  height: 100%;
+  background: var(--rose);
+}
+
+.review-form {
+  display: grid;
+  gap: 18px;
+  padding: clamp(22px, 3vw, 32px);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: var(--ivory);
+  scroll-margin-top: calc(var(--header-h) + 24px);
+}
+
+.star-input {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.star-input__row {
+  display: flex;
+  gap: 4px;
+}
+
+.star-input__star {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--line-strong);
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+
+.star-input__star .icon {
+  width: 28px;
+  height: 28px;
+  fill: currentColor;
+}
+
+.star-input__star.is-on {
+  color: var(--rose);
+}
+
+.star-input__star:hover {
+  transform: scale(1.1);
+}
+
+.star-input__star:has(input:focus-visible) {
+  outline: 2px solid var(--olive-deep);
+  outline-offset: 2px;
+}
+
+.star-input.is-invalid .star-input__row {
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px var(--rose);
+}
+
+@media (min-width: 900px) {
+  .reviews-page {
+    grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+    gap: 56px;
+  }
+  .reviews-page__side {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+  }
+}

@@ -7,11 +7,14 @@ import { OptionGroup } from '../components/OptionGroup';
 import { ProductCard, toCartItem } from '../components/ProductCard';
 import { QuantityStepper } from '../components/QuantityStepper';
 import { Reveal } from '../components/Reveal';
+import { ReviewCard } from '../components/ReviewCard';
+import { Stars } from '../components/Stars';
 import { Seo } from '../components/Seo';
 import { useCart } from '../context/CartContext';
 import { useCatalog, useSite } from '../context/CatalogContext';
 import { img } from '../data/images';
 import { categoryName, formatPrep, formatPrice, MIX_BOX_SLUG, packCount, relatedProducts } from '../data/products';
+import { ratingSummary, useReviews } from '../hooks/useReviews';
 import { useCopy } from '../i18n';
 import { firstAvailable, formatDate } from '../lib/availability';
 import NotFound from './NotFound';
@@ -55,6 +58,11 @@ const en = {
   ),
   moreToLove: 'More to love',
   youMightLike: 'You might also like',
+  reviewCount: (n: number) => `${n} ${n === 1 ? 'review' : 'reviews'}`,
+  reviewsEyebrow: 'Reviews',
+  reviewsTitle: 'What customers say',
+  allReviews: 'All reviews',
+  writeReview: 'Leave a review',
   chooseMoreShort: (n: number) => `Choose ${n} more`,
   added: 'Added',
 };
@@ -95,6 +103,11 @@ const es: typeof en = {
   ),
   moreToLove: 'Más para enamorarte',
   youMightLike: 'También te puede gustar',
+  reviewCount: (n) => `${n} ${n === 1 ? 'opinión' : 'opiniones'}`,
+  reviewsEyebrow: 'Opiniones',
+  reviewsTitle: 'Lo que dicen nuestros clientes',
+  allReviews: 'Todas las opiniones',
+  writeReview: 'Deja tu opinión',
   chooseMoreShort: (n) => `Elige ${n} más`,
   added: 'Añadido',
 };
@@ -106,6 +119,8 @@ export default function ProductPage() {
   const site = useSite();
   const { add } = useCart();
   const product = getProduct(slug);
+  const productReviews = (useReviews() ?? []).filter((r) => r.products.includes(slug));
+  const rating = ratingSummary(productReviews);
 
   const [active, setActive] = useState(0);
   const [sizeId, setSizeId] = useState('');
@@ -236,6 +251,11 @@ export default function ProductPage() {
           <div className="pdp__info">
             <span className="eyebrow">{categoryName(product.category)}</span>
             <h1 className="pdp__title">{product.name}</h1>
+            {rating.count > 0 && (
+              <a href="#product-reviews" className="pdp__rating">
+                <Stars value={rating.average} /> <span className="small">{rating.average.toFixed(1)} · {t.reviewCount(rating.count)}</span>
+              </a>
+            )}
             <p className="pdp__price price">
               {formatPrice(item.unitPrice)}
               <span className="muted small"> · {size.servings}</span>
@@ -396,6 +416,34 @@ export default function ProductPage() {
           </div>
         </div>
       </div>
+
+      {productReviews.length > 0 && (
+        <section id="product-reviews" className="section section--sage testimonials" aria-labelledby="product-reviews-title">
+          <div className="container">
+            <Reveal className="section-head">
+              <div className="section-head__text">
+                <span className="eyebrow">{t.reviewsEyebrow}</span>
+                <h2 id="product-reviews-title">{t.reviewsTitle}</h2>
+              </div>
+            </Reveal>
+            <div className="testimonials__grid">
+              {productReviews.slice(0, 4).map((r, i) => (
+                <Reveal key={r.id} delay={i * 90}>
+                  <ReviewCard review={r} showProducts={false} />
+                </Reveal>
+              ))}
+            </div>
+            <div className="testimonials__ctas">
+              <Link to="/reviews" className="btn btn--outline">
+                {t.allReviews}
+              </Link>
+              <Link to="/reviews#write" className="link">
+                {t.writeReview} <Icon name="arrow" />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {related.length > 0 && (
         <section className="section section--cream" aria-labelledby="related-title">

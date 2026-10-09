@@ -746,6 +746,117 @@ alter table public.products add column if not exists i18n jsonb not null default
 alter table public.categories add column if not exists i18n jsonb not null default '{}'::jsonb;
 
 
+-- ===== 20261008020000_i18n_es_content.sql =====
+
+-- Spanish copy for the cookie line and the storefront settings (only where none is set yet).
+update public.categories set i18n = '{"es":{"name":"Galletas NY","blurb":"Galletas grandes y suaves estilo New York, en cajas de 2, 4 y 6."}}'::jsonb where id = 'cookies' and i18n = '{}'::jsonb;
+update public.products set i18n = '{"es":{"name":"Arma tu caja","short":"Combina los sabores que quieras en un paquete de 2, 4 o 6.","description":"¿No puedes elegir solo una? Elige el tamaño de tu paquete y llénalo con la combinación de sabores que quieras. Va en caja y con lazo, lista para regalar.","badge":"Combina sabores","sizes":{"pack2":{"label":"Paquete de 2","servings":"2 galletas"},"pack4":{"label":"Paquete de 4","servings":"4 galletas"},"pack6":{"label":"Paquete de 6","servings":"6 galletas"}},"details":[{"label":"Alérgenos","value":"Contiene trigo, huevo y lácteos. Hecho en una cocina que maneja frutos secos."},{"label":"Tamaño","value":"Cada galleta pesa unas 5 oz — gruesa, crujiente por fuera y suave por dentro."},{"label":"Conservación","value":"Guárdalas en la caja a temperatura ambiente hasta 3 días. Caliéntalas 5 minutos a 350 °F para que sepan recién horneadas."}]}}'::jsonb where slug = 'build-your-box' and i18n = '{}'::jsonb;
+update public.products set i18n = '{"es":{"name":"Chispas de chocolate clásica","short":"Masa de mantequilla tostada, trozos de chocolate oscuro y sal en escamas.","description":"La que empezó todo. Una galleta gruesa estilo New York hecha con mantequilla tostada y llena de charcos de chocolate oscuro y con leche, terminada con sal en escamas.","badge":"La más vendida","sizes":{"pack2":{"label":"Paquete de 2","servings":"2 galletas"},"pack4":{"label":"Paquete de 4","servings":"4 galletas"},"pack6":{"label":"Paquete de 6","servings":"6 galletas"}},"details":[{"label":"Alérgenos","value":"Contiene trigo, huevo y lácteos. Hecho en una cocina que maneja frutos secos."},{"label":"Tamaño","value":"Cada galleta pesa unas 5 oz — gruesa, crujiente por fuera y suave por dentro."},{"label":"Conservación","value":"Guárdalas en la caja a temperatura ambiente hasta 3 días. Caliéntalas 5 minutos a 350 °F para que sepan recién horneadas."}]}}'::jsonb where slug = 'classic-chocolate-chip' and i18n = '{}'::jsonb;
+update public.products set i18n = '{"es":{"name":"Doble chocolate fudge","short":"Masa de cacao oscuro con centro de fudge fundido.","description":"Para los amantes del chocolate: una galleta de cacao intenso con chocolate blanco y oscuro, que esconde un centro suave de fudge fundido.","sizes":{"pack2":{"label":"Paquete de 2","servings":"2 galletas"},"pack4":{"label":"Paquete de 4","servings":"4 galletas"},"pack6":{"label":"Paquete de 6","servings":"6 galletas"}},"details":[{"label":"Alérgenos","value":"Contiene trigo, huevo y lácteos. Hecho en una cocina que maneja frutos secos."},{"label":"Tamaño","value":"Cada galleta pesa unas 5 oz — gruesa, crujiente por fuera y suave por dentro."},{"label":"Conservación","value":"Guárdalas en la caja a temperatura ambiente hasta 3 días. Caliéntalas 5 minutos a 350 °F para que sepan recién horneadas."}]}}'::jsonb where slug = 'double-chocolate-fudge' and i18n = '{}'::jsonb;
+update public.products set i18n = '{"es":{"name":"Biscoff crumble","short":"Centro de crema Biscoff, chocolate blanco y galleta Biscoff triturada.","description":"Una galleta de azúcar morena rellena de crema de galleta Biscoff, cubierta con chocolate blanco y galletas Lotus trituradas.","badge":"Favorita de los clientes","sizes":{"pack2":{"label":"Paquete de 2","servings":"2 galletas"},"pack4":{"label":"Paquete de 4","servings":"4 galletas"},"pack6":{"label":"Paquete de 6","servings":"6 galletas"}},"details":[{"label":"Alérgenos","value":"Contiene trigo, huevo y lácteos. Hecho en una cocina que maneja frutos secos."},{"label":"Tamaño","value":"Cada galleta pesa unas 5 oz — gruesa, crujiente por fuera y suave por dentro."},{"label":"Conservación","value":"Guárdalas en la caja a temperatura ambiente hasta 3 días. Caliéntalas 5 minutos a 350 °F para que sepan recién horneadas."}]}}'::jsonb where slug = 'biscoff-crumble' and i18n = '{}'::jsonb;
+update public.products set i18n = '{"es":{"name":"Red velvet con cheesecake","short":"Red velvet de cacao con corazón de queso crema.","description":"Masa suave de red velvet con chispas de chocolate blanco, envolviendo un centro cremoso de cheesecake.","sizes":{"pack2":{"label":"Paquete de 2","servings":"2 galletas"},"pack4":{"label":"Paquete de 4","servings":"4 galletas"},"pack6":{"label":"Paquete de 6","servings":"6 galletas"}},"details":[{"label":"Alérgenos","value":"Contiene trigo, huevo y lácteos. Hecho en una cocina que maneja frutos secos."},{"label":"Tamaño","value":"Cada galleta pesa unas 5 oz — gruesa, crujiente por fuera y suave por dentro."},{"label":"Conservación","value":"Guárdalas en la caja a temperatura ambiente hasta 3 días. Caliéntalas 5 minutos a 350 °F para que sepan recién horneadas."}]}}'::jsonb where slug = 'red-velvet-cheesecake' and i18n = '{}'::jsonb;
+update public.products set i18n = '{"es":{"name":"S’mores","short":"Masa de galleta graham, chocolate con leche y malvavisco tostado.","description":"Una fogata en una galleta: masa de galleta graham, trozos de chocolate con leche y un centro de malvavisco, tostado por encima.","sizes":{"pack2":{"label":"Paquete de 2","servings":"2 galletas"},"pack4":{"label":"Paquete de 4","servings":"4 galletas"},"pack6":{"label":"Paquete de 6","servings":"6 galletas"}},"details":[{"label":"Alérgenos","value":"Contiene trigo, huevo y lácteos. Hecho en una cocina que maneja frutos secos."},{"label":"Tamaño","value":"Cada galleta pesa unas 5 oz — gruesa, crujiente por fuera y suave por dentro."},{"label":"Conservación","value":"Guárdalas en la caja a temperatura ambiente hasta 3 días. Caliéntalas 5 minutos a 350 °F para que sepan recién horneadas."}]}}'::jsonb where slug = 'smores' and i18n = '{}'::jsonb;
+update public.products set i18n = '{"es":{"name":"Funfetti de cumpleaños","short":"Masa de vainilla, chispas de colores y chocolate blanco.","description":"Cada día es una celebración: masa de vainilla con mantequilla, llena de chispas de colores y chocolate blanco cremoso.","sizes":{"pack2":{"label":"Paquete de 2","servings":"2 galletas"},"pack4":{"label":"Paquete de 4","servings":"4 galletas"},"pack6":{"label":"Paquete de 6","servings":"6 galletas"}},"details":[{"label":"Alérgenos","value":"Contiene trigo, huevo y lácteos. Hecho en una cocina que maneja frutos secos."},{"label":"Tamaño","value":"Cada galleta pesa unas 5 oz — gruesa, crujiente por fuera y suave por dentro."},{"label":"Conservación","value":"Guárdalas en la caja a temperatura ambiente hasta 3 días. Caliéntalas 5 minutos a 350 °F para que sepan recién horneadas."}]}}'::jsonb where slug = 'birthday-funfetti' and i18n = '{}'::jsonb;
+
+update public.settings
+   set value = value || jsonb_build_object('announcementEs', 'Haz tu pedido con un día de anticipación para galletas recién horneadas')
+ where key = 'business' and coalesce(value->>'announcementEs', '') = '';
+
+update public.settings
+   set value = value || jsonb_build_object('deliveryRadiusEs', 'a menos de 15 millas del estudio')
+ where key = 'store' and coalesce(value->>'deliveryRadiusEs', '') = '';
+
+
+-- ===== 20261009000000_reviews.sql =====
+
+-- Customer reviews. One review per order, left with the order number and the email used to
+-- place it, and shown on the site only after the owner approves it in /admin.
+create table if not exists public.reviews (
+  id          uuid primary key default gen_random_uuid(),
+  order_id    uuid not null unique references public.orders (id) on delete cascade,
+  name        text not null check (char_length(name) between 1 and 60),
+  rating      int  not null check (rating between 1 and 5),
+  comment     text not null check (char_length(comment) between 10 and 1000),
+  products    text[] not null default '{}',
+  lang        text not null default 'en' check (lang in ('en', 'es')),
+  status      text not null default 'pending' check (status in ('pending', 'approved', 'hidden')),
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists reviews_status_created_idx on public.reviews (status, created_at desc);
+
+alter table public.reviews enable row level security;
+
+drop policy if exists "Approved reviews are public" on public.reviews;
+create policy "Approved reviews are public" on public.reviews
+  for select to anon, authenticated using (status = 'approved');
+
+drop policy if exists "Admins manage reviews" on public.reviews;
+create policy "Admins manage reviews" on public.reviews
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+-- Customers never insert directly: the order is checked here first.
+create or replace function public.submit_review(
+  p_order_number text,
+  p_email        text,
+  p_name         text,
+  p_rating       int,
+  p_comment      text,
+  p_lang         text default 'en'
+) returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_store jsonb := (select value from public.settings where key = 'store');
+  v_today date  := (now() at time zone coalesce(nullif(v_store ->> 'timezone', ''), 'America/Chicago'))::date;
+  v_order public.orders%rowtype;
+  v_name  text := btrim(coalesce(p_name, ''));
+  v_text  text := btrim(coalesce(p_comment, ''));
+begin
+  select * into v_order
+    from public.orders
+   where upper(order_number) = upper(btrim(coalesce(p_order_number, '')))
+     and lower(email) = lower(btrim(coalesce(p_email, '')))
+   limit 1;
+
+  if not found or v_order.status = 'cancelled' then
+    raise exception 'We couldn''t find an order with that number and email.';
+  end if;
+  if v_order.fulfillment_date > v_today then
+    raise exception 'You can leave a review once your order has been picked up or delivered.';
+  end if;
+  if exists (select 1 from public.reviews where order_id = v_order.id) then
+    raise exception 'This order already has a review. Thank you!';
+  end if;
+  if p_rating is null or p_rating < 1 or p_rating > 5 then
+    raise exception 'Please choose a rating from 1 to 5 stars.';
+  end if;
+  if char_length(v_text) < 10 then
+    raise exception 'Please write a few words about your order.';
+  end if;
+
+  if v_name = '' then
+    v_name := split_part(btrim(v_order.customer_name), ' ', 1);
+  end if;
+
+  insert into public.reviews (order_id, name, rating, comment, products, lang)
+  values (
+    v_order.id,
+    left(v_name, 60),
+    p_rating,
+    left(v_text, 1000),
+    coalesce((select array_agg(distinct product_slug) from public.order_items where order_id = v_order.id and product_slug is not null), '{}'),
+    case when p_lang = 'es' then 'es' else 'en' end
+  );
+end;
+$$;
+
+revoke all on function public.submit_review(text, text, text, int, text, text) from public;
+grant execute on function public.submit_review(text, text, text, int, text, text) to anon, authenticated;
+
+
 -- ===== seed.sql =====
 
 -- Generated by scripts/generate-seed.ts — do not edit by hand.
@@ -791,7 +902,7 @@ on conflict (slug) do update set name = excluded.name, category = excluded.categ
 -- active is only set for new rows, so re-seeding never undoes products switched on or off in /admin.
 
 insert into public.settings (key, value) values
-  ('business', '{"email":"hello@sweetdaisycakes.com","phone":"+1 (555) 014-2290","address":{"street":"214 Magnolia Street","city":"Austin","region":"TX","postal":"78704","country":"US"},"hours":[{"days":"Tuesday – Friday","time":"9:00 – 18:00"},{"days":"Saturday","time":"9:00 – 17:00"},{"days":"Sunday","time":"10:00 – 14:00"},{"days":"Monday","time":"Closed — baking day"}],"instagram":"https://instagram.com/sweetdaisy","facebook":"https://facebook.com/sweetdaisy","tiktok":"https://tiktok.com/@sweetdaisy","handle":"@sweetdaisy","announcement":"Order a day ahead for fresh-baked cookies","announcementEs":"Haz tu pedido con un día de anticipación para galletas recién horneadas"}'::jsonb),
+  ('business', '{"email":"hello@sweetdaisycakes.com","phone":"+1 (555) 014-2290","address":{"street":"214 Magnolia Street","city":"Omaha","region":"NE","postal":"","country":"US"},"hours":[{"days":"Tuesday – Friday","time":"9:00 – 18:00"},{"days":"Saturday","time":"9:00 – 17:00"},{"days":"Sunday","time":"10:00 – 14:00"},{"days":"Monday","time":"Closed — baking day"}],"instagram":"https://www.instagram.com/sweetdaisy_cakesandtreats","facebook":"https://www.facebook.com/share/1KHao8vkCE/","tiktok":"https://www.tiktok.com/@sweetdaisy_cakeandtreats","handle":"@sweetdaisy_cakesandtreats","announcement":"Order a day ahead for fresh-baked cookies","announcementEs":"Haz tu pedido con un día de anticipación para galletas recién horneadas"}'::jsonb),
   ('store', '{"closedWeekdays":[1],"deliveryFee":12,"freeDeliveryOver":120,"deliveryRadius":"within 15 miles of the studio","deliveryRadiusEs":"a menos de 15 millas del estudio","pickupSlots":["9:00 – 11:00","11:00 – 13:00","13:00 – 15:00","15:00 – 17:00"],"deliverySlots":["10:00 – 13:00","13:00 – 16:00","16:00 – 18:00"]}'::jsonb),
   ('custom', '{"leadDays":7,"depositPercent":30,"sizes":[{"label":"6\" round","servings":"8–10 servings","price":95},{"label":"8\" round","servings":"14–18 servings","price":135},{"label":"10\" round","servings":"24–30 servings","price":185},{"label":"Two tiers","servings":"30–45 servings","price":320},{"label":"Three tiers","servings":"60–90 servings","price":520}],"flavors":["Vanilla bean","Dark chocolate","Lemon chiffon","Red velvet","Pistachio","Spiced carrot","Almond & orange","Gluten-free vanilla"],"fillings":["Fresh strawberries & cream","Raspberry compote","Lemon curd","Salted caramel","Chocolate ganache","Passion fruit curd","Cream cheese","Buttercream only"],"frostings":[{"label":"Swiss meringue buttercream","note":"Silky, light, not too sweet"},{"label":"Cream cheese frosting","note":"Tangy and rich"},{"label":"Whipped mascarpone","note":"Soft and creamy"},{"label":"Chocolate ganache","note":"Glossy and decadent"},{"label":"Semi-naked","note":"Rustic, layers peek through"}],"styles":[{"label":"Minimal & textured","image":"vanilla","extra":0},{"label":"Fresh florals","image":"floral","extra":35},{"label":"Vintage piping","image":"birthday","extra":25},{"label":"Fruit crown","image":"strawberry","extra":20},{"label":"Gold & hand-painted","image":"wedding","extra":45},{"label":"Sculptural & modern","image":"pistachio","extra":40}],"occasions":["Birthday","Wedding","Anniversary","Baby shower","Engagement","Corporate event","Just because","Other"]}'::jsonb)
 on conflict (key) do nothing;

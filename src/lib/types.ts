@@ -80,3 +80,19 @@ export interface SubscriberRecord {
   email: string;
   created_at: string;
 }
+
+export type ReviewStatus = 'pending' | 'approved' | 'hidden';
+
+export interface ReviewRecord {
+  id: string;
+  order_id: string;
+  name: string;
+  rating: number;
+  comment: string;
+  products: string[];
+  lang: 'en' | 'es';
+  status: ReviewStatus;
+  created_at: string;
+  /** Joined from the order, for the admin only. */
+  orders?: { order_number: string; customer_name: string; email: string } | null;
+}
