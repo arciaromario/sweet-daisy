@@ -14,20 +14,18 @@ export const mainNav = [
   { label: 'Cookies', es: 'Galletas', href: '/cookies' },
   { label: 'Build a Box', es: 'Arma tu caja', href: '/products/build-your-box' },
   { label: 'Custom Cakes', es: 'Pasteles a medida', href: '/custom-cakes' },
-  { label: 'Availability', es: 'Disponibilidad', href: '/availability' },
   { label: 'About', es: 'Nosotros', href: '/about' },
-  { label: 'Contact', es: 'Contacto', href: '/contact' },
 ];
 
 export const footerNav = [
   { label: 'Cookies', es: 'Galletas', href: '/cookies' },
   { label: 'Build a Box', es: 'Arma tu caja', href: '/products/build-your-box' },
   { label: 'Custom Cakes', es: 'Pasteles a medida', href: '/custom-cakes' },
-  { label: 'Availability', es: 'Disponibilidad', href: '/availability' },
+  { label: 'Availability', es: 'Disponibilidad', href: '/#availability' },
   { label: 'About', es: 'Nosotros', href: '/about' },
   { label: 'Reviews', es: 'Opiniones', href: '/reviews' },
   { label: 'FAQ', es: 'Preguntas frecuentes', href: '/faq' },
-  { label: 'Contact', es: 'Contacto', href: '/contact' },
+  { label: 'Contact', es: 'Contacto', href: '/#contact' },
   { label: 'Shipping & Delivery', es: 'Recogida y entrega', href: '/shipping-delivery' },
   { label: 'Terms & Conditions', es: 'Términos y condiciones', href: '/terms' },
   { label: 'Privacy Policy', es: 'Política de privacidad', href: '/privacy' },
