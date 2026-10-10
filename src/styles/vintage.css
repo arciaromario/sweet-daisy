@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Vintage details: paper grain, scalloped edges (like a cake doily), daisy
+   Vintage details: paper grain, daisy
    ornaments, arched frames and double-line buttons. Layered on top of the
    base styles so the palette and layout stay as they are.
    ========================================================================== */
@@ -8,42 +8,6 @@
 /* A barely-there grain over the white, so pages feel printed rather than flat. */
 body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .38 0 0 0 0 .32 0 0 0 0 .26 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* Scalloped edges --------------------------------------------------------------- */
-/* Tinted sections get a doily-style scalloped top edge. */
-.section--cream,
-.section--sage {
-  position: relative;
-  --scallop: 22px;
-}
-
-.section--cream::before,
-.section--sage::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(var(--scallop) / -2 + 1px);
-  height: calc(var(--scallop) / 2);
-  background: inherit;
-  -webkit-mask: radial-gradient(circle at 50% 100%, #000 calc(var(--scallop) / 2 - 0.5px), transparent calc(var(--scallop) / 2)) 0 0 / var(--scallop) calc(var(--scallop) / 2) repeat-x;
-  mask: radial-gradient(circle at 50% 100%, #000 calc(var(--scallop) / 2 - 0.5px), transparent calc(var(--scallop) / 2)) 0 0 / var(--scallop) calc(var(--scallop) / 2) repeat-x;
-  pointer-events: none;
-}
-
-/* A dotted "piped" line just inside the scallops, like icing beads. */
-.section--cream::after,
-.section--sage::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 14px;
-  height: 4px;
-  background: radial-gradient(circle, var(--sand) 1.4px, transparent 1.8px) 0 0 / 14px 4px repeat-x;
-  opacity: 0.8;
-  pointer-events: none;
 }
 
 /* Daisy ornaments ------------------------------------------------------------------ */
